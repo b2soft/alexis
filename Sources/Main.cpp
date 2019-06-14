@@ -34,8 +34,12 @@ ID3D12PipelineState* pipelineStateObject;
 ID3D12RootSignature* rootSignature;
 D3D12_VIEWPORT viewport;
 D3D12_RECT scissorRect;
+
 ID3D12Resource* vertexBuffer;
 D3D12_VERTEX_BUFFER_VIEW vertexBufferView;
+
+ID3D12Resource* indexBuffer;
+D3D12_INDEX_BUFFER_VIEW indexBufferView;
 
 
 using namespace DirectX;
@@ -302,14 +306,15 @@ bool InitD3D()
 	// Triangle
 	Vertex vList[] =
 	{
-		{0.0f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f},
-		{0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
-		{-0.5f, -0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
+		{-0.5f, 0.5f, 0.5f, 1.0f, 0.0f, 0.0f, 1.0f},
+		{0.5f, -0.5f, 0.5f, 1.0f, 1.0f, 0.0f, 1.0f},
+		{-0.5f, -0.5f, 0.5f, 0.0f, 1.0f, 0.0f, 1.0f},
+		{0.5f, 0.5f, 0.5f, 0.0f, 0.0f, 1.0f, 1.0f},
 	};
 
 	int vBufferSize = sizeof(vList);
 
-	// Create Default Heap
+	// Create Default Heap or Vertex Buffer
 	device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 		D3D12_HEAP_FLAG_NONE,
@@ -340,9 +345,57 @@ bool InitD3D()
 	vertexData.RowPitch = vBufferSize;
 	vertexData.SlicePitch = vBufferSize;
 
+	// Upload to GPU
 	UpdateSubresources(commandList, vertexBuffer, vBufferUploadHeap, 0, 0, 1, &vertexData);
 
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(vertexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+
+
+	// Create Index Buffer
+	DWORD iList[] = {
+		0, 1, 2,
+		0, 3, 1
+	};
+
+	int iBufferSize = sizeof(iList);
+
+	// Create Default Heap for Index Buffer
+	device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(iBufferSize),
+		D3D12_RESOURCE_STATE_COPY_DEST,
+		nullptr,
+		IID_PPV_ARGS(&indexBuffer)
+	);
+
+	indexBuffer->SetName(L"Index Buffer Resource Heap");
+
+	// Create Upload Heap for Index Buffer
+	ID3D12Resource* iBufferUploadHeap;
+	device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(vBufferSize),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&iBufferUploadHeap)
+	);
+
+	iBufferUploadHeap->SetName(L"Index Buffer Upload Resource Heap");
+
+	// Store Index buffer in upload heap
+	D3D12_SUBRESOURCE_DATA indexData = {};
+	indexData.pData = reinterpret_cast<BYTE*>(iList);
+	indexData.RowPitch = iBufferSize;
+	indexData.SlicePitch = iBufferSize;
+
+	// Upload to GPU
+	UpdateSubresources(commandList, indexBuffer, iBufferUploadHeap, 0, 0, 1, &indexData);
+
+	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(indexBuffer, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER));
+
+
 
 	commandList->Close();
 	ID3D12CommandList* ppCommandLists[] = { commandList };
@@ -360,6 +413,11 @@ bool InitD3D()
 	vertexBufferView.BufferLocation = vertexBuffer->GetGPUVirtualAddress();
 	vertexBufferView.StrideInBytes = sizeof(Vertex);
 	vertexBufferView.SizeInBytes = vBufferSize;
+
+	// Create a Vertex Buffer View to get buffer location in GPU memory
+	indexBufferView.BufferLocation = indexBuffer->GetGPUVirtualAddress();
+	indexBufferView.Format = DXGI_FORMAT_R32_UINT;
+	indexBufferView.SizeInBytes = iBufferSize;
 
 	// Set up Viewport
 	viewport.TopLeftX = 0;
@@ -450,8 +508,8 @@ void UpdatePipeline() // Update D3D (command lists)
 	commandList->RSSetScissorRects(1, &scissorRect);
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
-	commandList->DrawInstanced(3, 1, 0, 0);
-
+	commandList->IASetIndexBuffer(&indexBufferView);
+	commandList->DrawIndexedInstanced(6, 1, 0, 0, 0);
 
 	// Transition from RT -> present state
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(renderTargets[frameIndex], D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
@@ -520,6 +578,7 @@ void Cleanup() // release COM objects and clean up memory
 	SAFE_RELEASE(pipelineStateObject);
 	SAFE_RELEASE(rootSignature);
 	SAFE_RELEASE(vertexBuffer);
+	SAFE_RELEASE(indexBuffer);
 }
 
 
