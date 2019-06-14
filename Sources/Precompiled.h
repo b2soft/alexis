@@ -9,7 +9,16 @@
 #include <dxgi1_4.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+#include <DirectXCollision.h>
+#include <DirectXPackedVector.h>
 #include "d3dx12.h"
+
+
+#include <array>
+#include <memory>
+#include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 #ifndef SAFE_RELEASE
 #define SAFE_RELEASE(x) \
