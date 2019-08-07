@@ -22,10 +22,12 @@
     <ClCompile Include="..\Sources\Main.cpp" />
     <ClCompile Include="..\Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Sources\d3dx12.h" />
+    <ClInclude Include="..\Sources\Helpers.h" />
     <ClInclude Include="..\Sources\Precompiled.h" />
   </ItemGroup>
   <ItemGroup>

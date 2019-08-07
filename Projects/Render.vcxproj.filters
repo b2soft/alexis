@@ -24,6 +24,9 @@
     <ClInclude Include="..\Sources\d3dx12.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\Helpers.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Sources\VertexShader.hlsl">
