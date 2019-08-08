@@ -40,9 +40,11 @@ using namespace Microsoft::WRL;
 #include <algorithm>
 #include <cassert>
 #include <chrono>
-#include <array>
 #include <memory>
+
+#include <array>
 #include <vector>
+#include <map>
 #include <unordered_map>
 #include <unordered_set>
 

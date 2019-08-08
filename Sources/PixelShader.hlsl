@@ -1,11 +1,9 @@
-struct VS_OUTPUT
+struct PixelShaderInput
 {
-	float4 pos : SV_POSITION;
 	float4 color : COLOR;
 };
 
-float4 main( VS_OUTPUT input) : SV_TARGET
+float4 main(PixelShaderInput input) : SV_Target
 {
-
 	return input.color;
 }

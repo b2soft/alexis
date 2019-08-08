@@ -1,25 +1,28 @@
-struct VS_INPUT
+struct VertexPosColor
 {
-	float3 pos : POSITION;
-	float4 color : COLOR;
+	float3 position : POSITION;
+	float3 color : COLOR;
 };
 
-struct VS_OUTPUT
+struct ModelViewProjection
 {
-	float4 pos : SV_POSITION;
-	float4 color : COLOR;
+	matrix MVP;
 };
 
-cbuffer ConstantBuffer : register(b0)
-{
-	float4 testMultiplier;
-}
+ConstantBuffer<ModelViewProjection> ModelViewProjectionCB : register(b0);
 
-VS_OUTPUT main(VS_INPUT input)
+struct VertexShaderOutput
 {
-	VS_OUTPUT output;
-	output.pos = float4(input.pos, 1.0f);
-	output.color = input.color * testMultiplier;
+	float4 color: COLOR;
+	float4 position : SV_Position;
+};
+
+VertexShaderOutput main(VertexPosColor input)
+{
+	VertexShaderOutput output;
+
+	output.position = mul(ModelViewProjectionCB.MVP, float4(input.position, 1.0f));
+	output.color = float4(input.color, 1.0f);
 
 	return output;
 }

@@ -19,16 +19,28 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Sources\Application.cpp" />
+    <ClCompile Include="..\Sources\CommandQueue.cpp" />
+    <ClCompile Include="..\Sources\Game.cpp" />
+    <ClCompile Include="..\Sources\HighResolutionClock.cpp" />
     <ClCompile Include="..\Sources\Main.cpp" />
     <ClCompile Include="..\Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Sources\Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Sources\Application.h" />
+    <ClInclude Include="..\Sources\CommandQueue.h" />
     <ClInclude Include="..\Sources\d3dx12.h" />
+    <ClInclude Include="..\Sources\Events.h" />
+    <ClInclude Include="..\Sources\Game.h" />
     <ClInclude Include="..\Sources\Helpers.h" />
+    <ClInclude Include="..\Sources\HighResolutionClock.h" />
+    <ClInclude Include="..\Sources\KeyCodes.h" />
     <ClInclude Include="..\Sources\Precompiled.h" />
+    <ClInclude Include="..\Sources\Window.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Sources\PixelShader.hlsl">
