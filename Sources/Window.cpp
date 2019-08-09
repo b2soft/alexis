@@ -46,11 +46,11 @@ void Window::OnUpdate(UpdateEventArgs& e)
 		m_frameCounter++;
 
 		UpdateEventArgs updateEventArgs(m_updateClock.GetDeltaSeconds(), m_updateClock.GetTotalSeconds());
-		game->OnRender(updateEventArgs);
+		game->OnUpdate(updateEventArgs);
 	}
 }
 
-void Window::OnRender(UpdateEventArgs& e)
+void Window::OnRender(RenderEventArgs& e)
 {
 	m_renderClock.Tick();
 
@@ -169,8 +169,7 @@ Microsoft::WRL::ComPtr<IDXGISwapChain4> Window::CreateSwapChain()
 	ComPtr<IDXGISwapChain1> swapChain1;
 	ThrowIfFailed(dxgiFactory4->CreateSwapChainForHwnd(commandQueue, m_hWnd, &swapChainDesc, nullptr, nullptr, &swapChain1));
 
-	// Disable the Alt+Enter fullscreen toggle feature. Switching to fullscreen
-   // will be handled manually.
+	// Disable the Alt+Enter fullscreen toggle feature. Switching to fullscreen will be handled manually
 	ThrowIfFailed(dxgiFactory4->MakeWindowAssociation(m_hWnd, DXGI_MWA_NO_ALT_ENTER));
 
 	ThrowIfFailed(swapChain1.As(&dxgiSwapChain4));

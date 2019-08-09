@@ -168,7 +168,7 @@ public:
 	{}
 
 	double ElapsedTime;
-	double TotalTime
+	double TotalTime;
 };
 
 class UserEventArgs : public EventArgs

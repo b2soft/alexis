@@ -69,7 +69,7 @@ protected:
 
 	// Update and Draw
 	virtual void OnUpdate(UpdateEventArgs& e);
-	virtual void OnRender(UpdateEventArgs& e);
+	virtual void OnRender(RenderEventArgs& e);
 
 	// Keyboard
 	virtual void OnKeyPressed(KeyEventArgs& e);

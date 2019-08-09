@@ -51,6 +51,159 @@ b2Game::b2Game(const std::wstring& name, int width, int height, bool vSync /*= f
 {
 }
 
+void b2Game::OnUpdate(UpdateEventArgs& e)
+{
+	static uint64_t frameCount = 0;
+	static double totalTime = 0.0;
+
+	Game::OnUpdate(e);
+
+	totalTime += e.ElapsedTime;
+	frameCount++;
+
+	if (totalTime > 0.0)
+	{
+		double fps = frameCount / totalTime;
+
+		char buffer[512];
+		sprintf_s(buffer, "FPS: %f\n", fps);
+		OutputDebugStringA(buffer);
+
+		frameCount = 0;
+		totalTime = 0.0;
+	}
+
+	// Update the model matrix
+	float angle = static_cast<float>(e.TotalTime * 90.0);
+	const XMVECTOR rotationAxis = XMVectorSet(0.0f, 1.0f, 1.0f, 0.0f);
+	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
+
+	// Update view matrix
+	const XMVECTOR eyePosition = XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f);
+	const XMVECTOR focusPoint = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+	m_viewMatrix = XMMatrixLookAtLH(eyePosition, focusPoint, upDirection);
+
+	// Update proj matrix
+	float aspectRatio = m_window->GetClientWidth() / static_cast<float>(m_window->GetClientHeight());
+	m_projectionMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(m_fov), aspectRatio, 0.1f, 100.0f);
+}
+
+void b2Game::OnRender(RenderEventArgs& e)
+{
+	Game::OnRender(e);
+
+	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandList = commandQueue->GetCommandList();
+
+	UINT currentBackBufferIndex = m_window->GetCurrentBackBufferIndex();
+	auto backBuffer = m_window->GetCurrentBackBuffer();
+	auto rtv = m_window->GetCurrentRenderTargetView();
+	auto dsv = m_dsvHeap->GetCPUDescriptorHandleForHeapStart();
+
+	// Cleat the render targets
+	{
+		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
+		FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
+
+		ClearRTV(commandList, rtv, clearColor);
+		ClearDepth(commandList, dsv);
+	}
+
+	commandList->SetPipelineState(m_pipelineState.Get());
+	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+
+	commandList->RSSetViewports(1, &m_viewport);
+	commandList->RSSetScissorRects(1, &m_scissorRect);
+
+	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
+	
+	// Update the MVP matrix
+	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
+	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
+	commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
+
+	// Draw
+	commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
+
+	// Present
+	{
+		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+
+		m_fenceValues[currentBackBufferIndex] = commandQueue->ExecuteCommandList(commandList);
+
+		currentBackBufferIndex = m_window->Present();
+
+		commandQueue->WaitForFenceValue(m_fenceValues[currentBackBufferIndex]);
+	}
+}
+
+void b2Game::OnKeyPressed(KeyEventArgs& e)
+{
+	Game::OnKeyPressed(e);
+
+	switch (e.Key)
+	{
+	case KeyCode::Escape:
+		Application::Get().Destroy();
+		break;
+	case KeyCode::Enter:
+		if (e.Alt)
+		{
+	case KeyCode::F11:
+		m_window->ToggleFullscreen();
+		break;
+		}
+	case KeyCode::V:
+		m_window->ToggleVSync();
+		break;
+	}
+}
+
+void b2Game::OnMouseWheel(MouseWheelEventArgs& e)
+{
+	m_fov -= e.WheelDelta;
+	m_fov = std::clamp(m_fov, 12.0f, 90.0f);
+
+	char buffer[256];
+	sprintf_s(buffer, "FOV: %f\n", m_fov);
+	OutputDebugStringA(buffer);
+}
+
+void b2Game::OnResize(ResizeEventArgs& e)
+{
+	if (e.Width != m_window->GetClientWidth() || e.Height != m_window->GetClientHeight())
+	{
+		Game::OnResize(e);
+
+		m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(e.Width), static_cast<float>(e.Height));
+
+		ResizeDepthBuffer(e.Width, e.Height);
+	}
+}
+
+void b2Game::TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
+	Microsoft::WRL::ComPtr<ID3D12Resource> resource,
+	D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState)
+{
+	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(), beforeState, afterState);
+
+	commandList->ResourceBarrier(1, &barrier);
+}
+
+void b2Game::ClearRTV(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
+	D3D12_CPU_DESCRIPTOR_HANDLE rtv, FLOAT* clearColor)
+{
+	commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+}
+
+void b2Game::ClearDepth(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
+	D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth /*= 1.0f*/)
+{
+	commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
+}
+
 void b2Game::UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
 	ID3D12Resource** destinationResource, ID3D12Resource** intermediateResource,
 	size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags /*= D3D12_RESOURCE_FLAG_NONE*/)
@@ -194,7 +347,7 @@ bool b2Game::LoadContent()
 
 	D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 	{
-		sizeof(PipelineStateStream), &pipelineStateStreamDesc
+		sizeof(PipelineStateStream), &pipelineStateStream
 	};
 	ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pipelineState)));
 
@@ -204,6 +357,49 @@ bool b2Game::LoadContent()
 	m_contentLoaded = true;
 
 	// Resize or create the depth buffer
-	ResizeDepthBuffer(GetClientWidth(), ::GetClientHeight());
+	ResizeDepthBuffer(m_window->GetClientWidth(), m_window->GetClientHeight());
+
+	return true;
 }
 
+void b2Game::UnloadContent()
+{
+	m_contentLoaded = false;
+}
+
+void b2Game::ResizeDepthBuffer(int width, int height)
+{
+	if (m_contentLoaded)
+	{
+		// Flush GPU commands first
+		Application::Get().Flush();
+
+		width = std::max(1, width);
+		height = std::max(1, height);
+
+		auto device = Application::Get().GetDevice();
+
+		// Create depth buffer
+		D3D12_CLEAR_VALUE optimizedClearValue = {};
+		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
+		optimizedClearValue.DepthStencil = { 1.0f, 0 };
+
+		ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width, height, 1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
+			D3D12_RESOURCE_STATE_DEPTH_WRITE,
+			&optimizedClearValue,
+			IID_PPV_ARGS(&m_depthBuffer)
+		));
+
+		// Update the depth-stencil view
+		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
+		dsv.Format = DXGI_FORMAT_D32_FLOAT;
+		dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+		dsv.Texture2D.MipSlice = 0;
+		dsv.Flags = D3D12_DSV_FLAG_NONE;
+
+		device->CreateDepthStencilView(m_depthBuffer.Get(), &dsv, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
+	}
+}

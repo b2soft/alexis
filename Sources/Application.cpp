@@ -2,11 +2,11 @@
 
 #include "Application.h"
 
-//#include "Game.h"
-//#include "CommandQueue.h"
-//#include "Window.h"
+#include "Game.h"
+#include "CommandQueue.h"
+#include "Window.h"
 
-static constexpr wchar_t k_windowClassName = L"b2nder Window Class";
+static constexpr wchar_t k_windowClassName[] = L"b2nder Window Class";
 
 using WindowPtr = std::shared_ptr<Window>;
 using WindowMap = std::map<HWND, WindowPtr>;
@@ -196,7 +196,7 @@ bool Application::CheckTearingSupport()
 		}
 	}
 
-	return allowTearing;
+	return allowTearing == TRUE;
 }
 
 void Application::Create(HINSTANCE hInst)
@@ -598,7 +598,7 @@ static LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			int height = ((int)(short)HIWORD(lParam));
 
 			ResizeEventArgs resizeEventArgs(width, height);
-			window->Resize(resizeEventArgs);
+			window->OnResize(resizeEventArgs);
 		}
 		break;
 

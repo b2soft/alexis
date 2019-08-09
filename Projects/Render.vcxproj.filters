@@ -31,6 +31,9 @@
     <ClCompile Include="..\Sources\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Sources\b2Game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Sources\Precompiled.h">
@@ -63,6 +66,7 @@
     <ClInclude Include="..\Sources\Game.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\b2Game.h" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Sources\VertexShader.hlsl">

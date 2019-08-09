@@ -5,8 +5,9 @@
 
 #include <DirectXMath.h>
 
-class b2Game :public Game
+class b2Game : public Game
 {
+public:
 	b2Game(const std::wstring& name, int width, int height, bool vSync = false);
 
 	virtual bool LoadContent() override;
@@ -28,13 +29,13 @@ private:
 	void TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource,
 		D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
-	
+
 	// Clear a RTV
 	void ClearRTV(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE rtv, FLOAT* clearColor);
 
 	// Clear Depth in DSV
-	void ClearDepth(Microsoft::WRL::ComPtr< ID3D12GraphicsCommandList2> commandList,
+	void ClearDepth(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
 		D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 1.0f);
 
 	// Create a GPU buffer

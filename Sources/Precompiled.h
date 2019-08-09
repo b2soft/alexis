@@ -4,6 +4,10 @@
 #define WIN32_LEAN_AND_MEAN
 #endif
 
+#define _ENABLE_EXTENDED_ALIGNED_STORAGE
+
+#undef _DEBUG
+
 #include <windows.h>
 #include <shellapi.h> // For CommandLineToArgvW
 
