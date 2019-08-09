@@ -13,6 +13,22 @@ public:
 	Game(const std::wstring& name, int width, int height, bool vSync);
 	virtual ~Game();
 
+	// Warning! Has to be refined!
+	// Name clashing with Window::GetClientWidth
+	// Window size is changed immediately
+	// This sizes represent render rect size
+	int GetClientWidth() const
+	{
+		return m_width;
+	}
+
+	int GetClientHeight() const
+	{
+		return m_height;
+	}
+
+	// End of warning
+
 	virtual bool Initialize();
 	virtual void Destroy();
 

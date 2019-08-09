@@ -112,7 +112,7 @@ void CommandQueue::WaitForFenceValue(uint64_t fenceValue)
 
 void CommandQueue::Flush()
 {
-	WaitForFenceValue(m_fenceValue);
+	WaitForFenceValue(Signal());
 }
 
 Microsoft::WRL::ComPtr<ID3D12CommandQueue> CommandQueue::GetD3D12CommandQueue() const

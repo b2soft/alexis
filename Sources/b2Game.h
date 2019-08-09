@@ -45,7 +45,6 @@ private:
 
 	void ResizeDepthBuffer(int width, int height);
 
-
 	uint64_t m_fenceValues[Window::k_bufferCount] = {};
 
 	// Vertex Buffer for the cube

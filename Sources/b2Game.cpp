@@ -67,7 +67,7 @@ void b2Game::OnUpdate(UpdateEventArgs& e)
 
 		char buffer[512];
 		sprintf_s(buffer, "FPS: %f\n", fps);
-		OutputDebugStringA(buffer);
+		//OutputDebugStringA(buffer);
 
 		frameCount = 0;
 		totalTime = 0.0;
@@ -114,11 +114,15 @@ void b2Game::OnRender(RenderEventArgs& e)
 	commandList->SetPipelineState(m_pipelineState.Get());
 	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	commandList->IASetIndexBuffer(&m_indexBufferView);
+
 	commandList->RSSetViewports(1, &m_viewport);
 	commandList->RSSetScissorRects(1, &m_scissorRect);
 
 	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-	
+
 	// Update the MVP matrix
 	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
 	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
@@ -146,7 +150,7 @@ void b2Game::OnKeyPressed(KeyEventArgs& e)
 	switch (e.Key)
 	{
 	case KeyCode::Escape:
-		Application::Get().Destroy();
+		Application::Get().Quit(0);
 		break;
 	case KeyCode::Enter:
 		if (e.Alt)
@@ -173,7 +177,7 @@ void b2Game::OnMouseWheel(MouseWheelEventArgs& e)
 
 void b2Game::OnResize(ResizeEventArgs& e)
 {
-	if (e.Width != m_window->GetClientWidth() || e.Height != m_window->GetClientHeight())
+	if (e.Width != GetClientWidth() || e.Height != GetClientHeight())
 	{
 		Game::OnResize(e);
 
@@ -357,7 +361,7 @@ bool b2Game::LoadContent()
 	m_contentLoaded = true;
 
 	// Resize or create the depth buffer
-	ResizeDepthBuffer(m_window->GetClientWidth(), m_window->GetClientHeight());
+	ResizeDepthBuffer(GetClientWidth(), GetClientHeight());
 
 	return true;
 }
