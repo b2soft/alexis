@@ -6,6 +6,8 @@
 #include "CommandQueue.h"
 #include "Window.h"
 
+#include "Render/DescriptorAllocator.h"
+
 static constexpr wchar_t k_windowClassName[] = L"b2nder Window Class";
 
 using WindowPtr = std::shared_ptr<Window>;
@@ -17,6 +19,8 @@ static WindowMap s_windows;
 static WindowNameMap s_windowsByName;
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+
+uint64_t Application::s_frameCount = 0;
 
 // Wrapper to allow shared pointers for Window
 struct MakeWindow : public Window
@@ -365,6 +369,19 @@ void Application::Flush()
 	m_directCommandQueue->Flush();
 	m_computeCommandQueue->Flush();
 	m_copyCommandQueue->Flush();
+}
+
+DescriptorAllocation Application::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
+{
+	return m_descriptorAllocators[type]->Allocate(numDescriptors);
+}
+
+void Application::ReleaseStaleDescriptors(uint64_t finishedFrame)
+{
+	for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+	{
+		m_descriptorAllocators[i]->ReleaseStaleDescriptors(finishedFrame);
+	}
 }
 
 Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> Application::CreateDescriptorHeap(UINT numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type)

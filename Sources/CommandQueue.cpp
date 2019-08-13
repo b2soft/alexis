@@ -1,90 +1,132 @@
 #include "Precompiled.h"
 
 #include "CommandQueue.h"
+#include "Render/CommandList.h"
+#include "Render/ResourceStateTracker.h"
 
-CommandQueue::CommandQueue(Microsoft::WRL::ComPtr<ID3D12Device2> device, D3D12_COMMAND_LIST_TYPE type)
+#include "Application.h"
+
+CommandQueue::CommandQueue(D3D12_COMMAND_LIST_TYPE type)
 	: m_fenceValue(0)
 	, m_commandListType(type)
-	, m_d3d12Device(device)
+	, m_processInFlightCommandLists(true)
 {
+	auto device = Application::Get().GetDevice();
+
 	D3D12_COMMAND_QUEUE_DESC desc = {};
 	desc.Type = type;
 	desc.Priority = D3D12_COMMAND_QUEUE_PRIORITY_NORMAL;
 	desc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	desc.NodeMask = 0;
 
-	ThrowIfFailed(m_d3d12Device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_d3d12CommandQueue)));
-	ThrowIfFailed(m_d3d12Device->CreateFence(m_fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_d3d12Fence)));
+	ThrowIfFailed(device->CreateCommandQueue(&desc, IID_PPV_ARGS(&m_d3d12CommandQueue)));
+	ThrowIfFailed(device->CreateFence(m_fenceValue, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_d3d12Fence)));
 
-	m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
-	assert(m_fenceEvent && "Failed to create fence event handle");
+	switch (type)
+	{
+	case D3D12_COMMAND_LIST_TYPE_DIRECT:
+		m_d3d12CommandQueue->SetName(L"Direct Command List");
+		break;
+	case D3D12_COMMAND_LIST_TYPE_COMPUTE:
+		m_d3d12CommandQueue->SetName(L"Compute Command List");
+		break;
+	case D3D12_COMMAND_LIST_TYPE_COPY:
+		m_d3d12CommandQueue->SetName(L"Copy Command List");
+		break;
+	}
+
+	m_processInFlightCommandListsThread = std::thread(&CommandQueue::ProcessInFlightCommandLists, this);
 }
 
 CommandQueue::~CommandQueue()
 {
+	m_processInFlightCommandLists = false;
+	m_processInFlightCommandListsThread.join();
 }
 
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> CommandQueue::GetCommandList()
+std::shared_ptr<CommandList> CommandQueue::GetCommandList()
 {
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList;
+	std::shared_ptr<CommandList> commandList;
 
-	// Before the command list can be reset, an unused command allocator is required
-	// The Command allocator can be reused as long as it is not currently "in-flight" on the command queue
-
-	if (!m_commandAllocatorQueue.empty() && IsFenceCompleted(m_commandAllocatorQueue.front().fenceVlaue))
+	// If there is a comm list on the queue
+	if (!m_availableCommandLists.Empty())
 	{
-		commandAllocator = m_commandAllocatorQueue.front().commandAllocator;
-		m_commandAllocatorQueue.pop();
-
-		ThrowIfFailed(commandAllocator->Reset());
+		m_availableCommandLists.TryPop(commandList);
 	}
 	else
 	{
-		commandAllocator = CreateCommandAllocator();
+		commandList = std::make_shared<CommandList>(m_commandListType);
 	}
-
-	if (!m_commandListQueue.empty())
-	{
-		commandList = m_commandListQueue.front();
-		m_commandListQueue.pop();
-
-		ThrowIfFailed(commandList->Reset(commandAllocator.Get(), nullptr));
-	}
-	else
-	{
-		commandList = CreateCommandList(commandAllocator);
-	}
-
-	// Associate the command allocator with the command list so that it can be retrieved when the command list is executed
-	ThrowIfFailed(commandList->SetPrivateDataInterface(__uuidof(ID3D12CommandAllocator), commandAllocator.Get()));
 
 	return commandList;
 }
 
-uint64_t CommandQueue::ExecuteCommandList(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList)
+uint64_t CommandQueue::ExecuteCommandList(std::shared_ptr<CommandList> commandList)
 {
-	commandList->Close();
+	return ExecuteCommandLists(std::vector<std::shared_ptr<CommandList>>({ commandList }));
+}
 
-	ID3D12CommandAllocator* commandAllocator;
-	UINT dataSize = sizeof(commandAllocator);
-	ThrowIfFailed(commandList->GetPrivateData(__uuidof(ID3D12CommandAllocator), &dataSize, &commandAllocator));
+uint64_t CommandQueue::ExecuteCommandLists(const std::vector<std::shared_ptr<CommandList>>& commandLists)
+{
+	ResourceStateTracker::Lock();
 
-	ID3D12CommandList* const commandLists[] =
+	// Command lists that need to put back on the command list queue
+	std::vector<std::shared_ptr<CommandList>> listsToBeQueued;
+
+	// 2x size because of list will have a pending command list
+	listsToBeQueued.reserve(commandLists.size() * 2);
+
+	// Generate mips command lists
+	// std::vector<std::shared_ptr<CommandList> > generateMipsCommandLists;
+	// generateMipsCommandLists.reserve(commandLists.size());
+
+	// Command lists to be executed
+	std::vector<ID3D12CommandList*> d3d12CommandLists;
+	d3d12CommandLists.reserve(commandLists.size() * 2);
+
+	for (auto commandList : commandLists)
 	{
-		commandList.Get()
-	};
+		auto pendingCommandList = GetCommandList();
+		bool hasPendingBarriers = commandList->Close(*pendingCommandList);
+		pendingCommandList->Close();
 
-	m_d3d12CommandQueue->ExecuteCommandLists(1, commandLists);
+		// If there are no pending barriers on the pending command list, there is no reason to execute an empty command list on the command queue
+		if (hasPendingBarriers)
+		{
+			d3d12CommandLists.push_back(pendingCommandList->GetGraphicsCommandList().Get());
+		}
+		d3d12CommandLists.push_back(commandList->GetGraphicsCommandList().Get());
+
+		listsToBeQueued.push_back(pendingCommandList);
+		listsToBeQueued.push_back(commandList);
+
+		// auto generateMipsCommandList = commandList->GetGenerateMipsCommandList();
+		// if (generateMipsCommandList)
+		// {
+		// 	generateMipsCommandLists.push_back(generateMipsCommandList);
+		// }
+	}
+
+	UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
+	m_d3d12CommandQueue->ExecuteCommandLists(numCommandLists, d3d12CommandLists.data());
 	uint64_t fenceValue = Signal();
 
-	m_commandAllocatorQueue.emplace(CommandAllocatorEntry{ fenceValue, commandAllocator });
-	m_commandListQueue.push(commandList);
+	ResourceStateTracker::Unlock();
 
-	// The ownership of the command allocator has been transferred to the ComPtr
-	// in the command allocator queue. It is safe to release the reference 
-	// in this temporary COM pointer here.
-	commandAllocator->Release();
+	// Queue command lists for reuse
+	for (auto commandList : listsToBeQueued)
+	{
+		m_inFlightCommandLists.Push({ fenceValue, commandList });
+	}
+
+	// If there are any command lists that generate mips then execute those
+	// after the initial resource command lists have finished.
+	// if (generateMipsCommandLists.size() > 0)
+	// {
+	// 	auto computeQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
+	// 	computeQueue->Wait(*this);
+	// 	computeQueue->ExecuteCommandLists(generateMipsCommandLists);
+	// }
 
 	return fenceValue;
 }
@@ -105,14 +147,33 @@ void CommandQueue::WaitForFenceValue(uint64_t fenceValue)
 {
 	if (!IsFenceCompleted(fenceValue))
 	{
-		m_d3d12Fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
-		::WaitForSingleObject(m_fenceEvent, DWORD_MAX);
+		auto event = ::CreateEvent(NULL, FALSE, FALSE, NULL);
+		assert(event && "Failed to create fence event handle");
+
+		// TODO: Is it thread-safe?
+		m_d3d12Fence->SetEventOnCompletion(fenceValue, event);
+		::WaitForSingleObject(event, DWORD_MAX);
+
+		::CloseHandle(event);
 	}
 }
 
 void CommandQueue::Flush()
 {
+	std::unique_lock<std::mutex> lock(m_processInFlightCommandListsThreadMutex);
+	m_processInFlightCommandListsThreadCV.wait(lock, [this]
+		{
+			return m_inFlightCommandLists.Empty();
+		});
+
+	// In case the command queue was signaled directly using the CommandQueue::Signal method
+	//then the fence value of the command queue might be higher than the fence value of any of the executed command lists
 	WaitForFenceValue(m_fenceValue);
+}
+
+void CommandQueue::Wait(const CommandQueue& other)
+{
+	m_d3d12CommandQueue->Wait(other.m_d3d12Fence.Get(), other.m_fenceValue);
 }
 
 Microsoft::WRL::ComPtr<ID3D12CommandQueue> CommandQueue::GetD3D12CommandQueue() const
@@ -120,19 +181,30 @@ Microsoft::WRL::ComPtr<ID3D12CommandQueue> CommandQueue::GetD3D12CommandQueue() 
 	return m_d3d12CommandQueue;
 }
 
-Microsoft::WRL::ComPtr<ID3D12CommandAllocator> CommandQueue::CreateCommandAllocator()
+void CommandQueue::ProcessInFlightCommandLists()
 {
-	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator;
-	ThrowIfFailed(m_d3d12Device->CreateCommandAllocator(m_commandListType, IID_PPV_ARGS(&commandAllocator)));
+	std::unique_lock<std::mutex> lock(m_processInFlightCommandListsThreadMutex, std::defer_lock);
 
-	return commandAllocator;
+	while (m_processInFlightCommandLists)
+	{
+		CommandListEntry commandListEntry;
+
+		lock.lock();
+		while (m_inFlightCommandLists.TryPop(commandListEntry))
+		{
+			auto fenceValue = std::get<0>(commandListEntry);
+			auto commandList = std::get<1>(commandListEntry);
+
+			WaitForFenceValue(fenceValue);
+
+			commandList->Reset();
+
+			m_availableCommandLists.Push(commandList);
+		}
+
+		lock.unlock();
+		m_processInFlightCommandListsThreadCV.notify_one();
+
+		std::this_thread::yield();
+	}
 }
-
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> CommandQueue::CreateCommandList(Microsoft::WRL::ComPtr<ID3D12CommandAllocator> allocator)
-{
-	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList;
-	ThrowIfFailed(m_d3d12Device->CreateCommandList(0, m_commandListType, allocator.Get(), nullptr, IID_PPV_ARGS(&commandList)));
-
-	return commandList;
-}
-

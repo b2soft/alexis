@@ -12,6 +12,9 @@
 #include "Events.h"
 #include "HighResolutionClock.h"
 
+#include "Render/Texture.h"
+#include "Render/RenderTarget.h"
+
 class Game;
 
 class Window
@@ -20,6 +23,8 @@ public:
 	static const UINT k_bufferCount = 2;
 
 	HWND GetWindowHandle() const;
+
+	void Initialize();
 	void Destroy();
 
 	const std::wstring& GetWindowName() const;
@@ -38,18 +43,13 @@ public:
 	void Show();
 	void Hide();
 
-	// Return the current back buffer index
-	UINT GetCurrentBackBufferIndex() const;
+	const RenderTarget& GetRenderTarget() const;
 
 	// Present the swapchain's back buffer to the screen
 	// Returns the current back buffer index after the present
-	UINT Present();
-
-	// Get the render target view for the current back buffer
-	D3D12_CPU_DESCRIPTOR_HANDLE GetCurrentRenderTargetView() const;
-
-	// Get the back buffer resource for the current back buffer
-	Microsoft::WRL::ComPtr<ID3D12Resource> GetCurrentBackBuffer() const;
+	// By default, this is an empty texture. In this case, no copy will be performed
+	// Use the Window::GetRenderTarget method to get a render target for the window's color buffer
+	UINT Present(const Texture& texture = Texture());
 
 protected:
 	friend LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -102,17 +102,25 @@ private:
 
 	HighResolutionClock m_updateClock;
 	HighResolutionClock m_renderClock;
-	uint64_t m_frameCounter;
+	
+	UINT64 m_fenceValues[k_bufferCount];
+	uint64_t m_frameValues[k_bufferCount];
 
 	std::weak_ptr<Game> m_game;
 
 	Microsoft::WRL::ComPtr<IDXGISwapChain4> m_dxgiSwapChain;
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_d3d12RTVDescriptorHeap;
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_d3d12BackBuffers[k_bufferCount];
+	Texture m_backBufferTextures[k_bufferCount];
 
-	UINT m_rtvDescriptorSize;
+	mutable RenderTarget m_renderTarget;
+
 	UINT m_currentBackBufferIndex;
 
 	RECT m_windowRect;
 	bool m_isTearingSupported;
+
+	// TODO: Further imGUI impl
+	// int m_PreviousMouseX;
+	// int m_PreviousMouseY;
+	// 
+	// GUI m_GUI;
 };

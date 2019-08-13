@@ -3,6 +3,10 @@
 #include "Game.h"
 #include "Window.h"
 
+#include "Render/RenderTarget.h"
+#include "Render/RootSignature.h"
+
+
 #include <DirectXMath.h>
 
 class b2Game : public Game
@@ -30,23 +34,12 @@ private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> resource,
 		D3D12_RESOURCE_STATES beforeState, D3D12_RESOURCE_STATES afterState);
 
-	// Clear a RTV
-	void ClearRTV(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE rtv, FLOAT* clearColor);
-
-	// Clear Depth in DSV
-	void ClearDepth(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
-		D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth = 1.0f);
 
 	// Create a GPU buffer
 	void UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
 		ID3D12Resource** destinationResource, ID3D12Resource** intermediateResource,
 		size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
 
-	void ResizeDepthBuffer(int width, int height);
-
-
-	uint64_t m_fenceValues[Window::k_bufferCount] = {};
 
 	// Vertex Buffer for the cube
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_vertexBuffer;
@@ -56,14 +49,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_indexBuffer;
 	D3D12_INDEX_BUFFER_VIEW m_indexBufferView;
 
-	// Depth buffer
-	Microsoft::WRL::ComPtr<ID3D12Resource> m_depthBuffer;
+	RenderTarget m_renderTarget;
 
-	// Descriptor heap for depth buffer
-	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
-
-	// Root signature
-	Microsoft::WRL::ComPtr<ID3D12RootSignature> m_rootSignature;
+	RootSignature m_rootSignature;
 
 	// Pipeline State Object
 	Microsoft::WRL::ComPtr<ID3D12PipelineState> m_pipelineState;
@@ -76,6 +64,9 @@ private:
 	DirectX::XMMATRIX m_modelMatrix;
 	DirectX::XMMATRIX m_viewMatrix;
 	DirectX::XMMATRIX m_projectionMatrix;
+
+	int m_width;
+	int m_height;
 
 	bool m_contentLoaded;
 };

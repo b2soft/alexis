@@ -6,8 +6,6 @@
 
 #define _ENABLE_EXTENDED_ALIGNED_STORAGE
 
-#undef _DEBUG
-
 #include <windows.h>
 #include <shellapi.h> // For CommandLineToArgvW
 

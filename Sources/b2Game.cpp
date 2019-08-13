@@ -8,6 +8,8 @@
 #include "Helpers.h"
 #include "Window.h"
 
+#include "Render/CommandList.h"
+
 #include "b2Game.h"
 
 using namespace Microsoft::WRL;
@@ -18,6 +20,19 @@ struct VertexPosColor
 {
 	XMFLOAT3 position;
 	XMFLOAT3 color;
+};
+
+struct Mat
+{
+	XMMATRIX ModelMatrix;
+	XMMATRIX ModelViewMatrix;
+	XMMATRIX ModelViewProjectionMatrix;
+};
+
+enum RootParameters
+{
+	MatricesCB, //ConstantBuffer<Mat> MatCB: register(b0);
+	NumRootParameters
 };
 
 static VertexPosColor g_vertices[8] =
@@ -48,6 +63,8 @@ b2Game::b2Game(const std::wstring& name, int width, int height, bool vSync /*= f
 	, m_viewport(CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)))
 	, m_fov(45.0f)
 	, m_contentLoaded(false)
+	, m_width(width)
+	, m_height(height)
 {
 }
 
@@ -67,7 +84,7 @@ void b2Game::OnUpdate(UpdateEventArgs& e)
 
 		char buffer[512];
 		sprintf_s(buffer, "FPS: %f\n", fps);
-		OutputDebugStringA(buffer);
+		//OutputDebugStringA(buffer);
 
 		frameCount = 0;
 		totalTime = 0.0;
@@ -96,47 +113,37 @@ void b2Game::OnRender(RenderEventArgs& e)
 	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
 
-	UINT currentBackBufferIndex = m_window->GetCurrentBackBufferIndex();
-	auto backBuffer = m_window->GetCurrentBackBuffer();
-	auto rtv = m_window->GetCurrentRenderTargetView();
-	auto dsv = m_dsvHeap->GetCPUDescriptorHandleForHeapStart();
-
 	// Cleat the render targets
 	{
-		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
 		FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
 
-		ClearRTV(commandList, rtv, clearColor);
-		ClearDepth(commandList, dsv);
+		commandList->ClearTexture(m_renderTarget.GetTexture(AttachmentPoint::Color0), clearColor);
+		commandList->ClearDepthStencilTexture(m_renderTarget.GetTexture(AttachmentPoint::DepthStencil), D3D12_CLEAR_FLAG_DEPTH);
 	}
 
 	commandList->SetPipelineState(m_pipelineState.Get());
-	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+	commandList->SetGraphicsRootSignature(m_rootSignature);
 
-	commandList->RSSetViewports(1, &m_viewport);
-	commandList->RSSetScissorRects(1, &m_scissorRect);
+	commandList->SetViewport(m_viewport);
+	commandList->SetScissorRect(m_scissorRect);
 
-	commandList->OMSetRenderTargets(1, &rtv, FALSE, &dsv);
-	
-	// Update the MVP matrix
-	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
-	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
-	commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
+	commandList->SetRenderTarget(m_renderTarget);
+
+	//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	//commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	//commandList->IASetIndexBuffer(&m_indexBufferView);
+	//
+	//// Update the MVP matrix
+	//XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
+	//mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
+	//commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
 
 	// Draw
-	commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
+	//commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
 
-	// Present
-	{
-		TransitionResource(commandList, backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	commandQueue->ExecuteCommandList(commandList);
 
-		m_fenceValues[currentBackBufferIndex] = commandQueue->ExecuteCommandList(commandList);
-
-		currentBackBufferIndex = m_window->Present();
-
-		commandQueue->WaitForFenceValue(m_fenceValues[currentBackBufferIndex]);
-	}
+	m_window->Present(m_renderTarget.GetTexture(AttachmentPoint::Color0));
 }
 
 void b2Game::OnKeyPressed(KeyEventArgs& e)
@@ -146,7 +153,7 @@ void b2Game::OnKeyPressed(KeyEventArgs& e)
 	switch (e.Key)
 	{
 	case KeyCode::Escape:
-		Application::Get().Destroy();
+		Application::Get().Quit(0);
 		break;
 	case KeyCode::Enter:
 		if (e.Alt)
@@ -173,13 +180,18 @@ void b2Game::OnMouseWheel(MouseWheelEventArgs& e)
 
 void b2Game::OnResize(ResizeEventArgs& e)
 {
-	if (e.Width != m_window->GetClientWidth() || e.Height != m_window->GetClientHeight())
-	{
-		Game::OnResize(e);
+	Game::OnResize(e);
 
+	if (e.Width != GetClientWidth() || e.Height != GetClientHeight())
+	{
+		m_width = std::max(1, e.Width);
+		m_height = std::max(1, e.Height);
+
+		//float aspectRatio = m_width / static_cast<float>(m_height);
+		// camera change here
 		m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(e.Width), static_cast<float>(e.Height));
 
-		ResizeDepthBuffer(e.Width, e.Height);
+		m_renderTarget.Resize(m_width, m_height);
 	}
 }
 
@@ -190,18 +202,6 @@ void b2Game::TransitionResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList
 	CD3DX12_RESOURCE_BARRIER barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(), beforeState, afterState);
 
 	commandList->ResourceBarrier(1, &barrier);
-}
-
-void b2Game::ClearRTV(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
-	D3D12_CPU_DESCRIPTOR_HANDLE rtv, FLOAT* clearColor)
-{
-	commandList->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
-}
-
-void b2Game::ClearDepth(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
-	D3D12_CPU_DESCRIPTOR_HANDLE dsv, FLOAT depth /*= 1.0f*/)
-{
-	commandList->ClearDepthStencilView(dsv, D3D12_CLEAR_FLAG_DEPTH, depth, 0, 0, nullptr);
 }
 
 void b2Game::UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> commandList,
@@ -245,34 +245,34 @@ void b2Game::UpdateBufferResource(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandLi
 bool b2Game::LoadContent()
 {
 	auto device = Application::Get().GetDevice();
-	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
 	// Upload vertex buffer data
-	ComPtr<ID3D12Resource> intermediateVertexBuffer;
-	UpdateBufferResource(commandList.Get(), &m_vertexBuffer, &intermediateVertexBuffer, _countof(g_vertices), sizeof(VertexPosColor), g_vertices);
-
-	// Create the vertex buffer view
-	m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-	m_vertexBufferView.SizeInBytes = sizeof(g_vertices);
-	m_vertexBufferView.StrideInBytes = sizeof(VertexPosColor);
-
-	// Upload index buffer data
-	ComPtr<ID3D12Resource> intermediateIndexBuffer;
-	UpdateBufferResource(commandList.Get(), &m_indexBuffer, &intermediateIndexBuffer, _countof(g_Indicies), sizeof(WORD), g_Indicies);
-
-	// Create the index buffer view
-	m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-	m_indexBufferView.SizeInBytes = sizeof(g_Indicies);
-	m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-
-	// Create descriptor heap for DSV
-	D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	dsvHeapDesc.NumDescriptors = 1;
-	dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-
-	ThrowIfFailed(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
+	//ComPtr<ID3D12Resource> intermediateVertexBuffer;
+	//UpdateBufferResource(commandList.Get(), &m_vertexBuffer, &intermediateVertexBuffer, _countof(g_vertices), sizeof(VertexPosColor), g_vertices);
+	//
+	//// Create the vertex buffer view
+	//m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+	//m_vertexBufferView.SizeInBytes = sizeof(g_vertices);
+	//m_vertexBufferView.StrideInBytes = sizeof(VertexPosColor);
+	//
+	//// Upload index buffer data
+	//ComPtr<ID3D12Resource> intermediateIndexBuffer;
+	//UpdateBufferResource(commandList.Get(), &m_indexBuffer, &intermediateIndexBuffer, _countof(g_Indicies), sizeof(WORD), g_Indicies);
+	//
+	//// Create the index buffer view
+	//m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
+	//m_indexBufferView.SizeInBytes = sizeof(g_Indicies);
+	//m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
+	//
+	//// Create descriptor heap for DSV
+	//D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
+	//dsvHeapDesc.NumDescriptors = 1;
+	//dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+	//dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+	//
+	//ThrowIfFailed(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
 
 	// Load the vertex shader
 	ComPtr<ID3DBlob> vertexShaderBlob;
@@ -308,19 +308,13 @@ bool b2Game::LoadContent()
 		D3D12_ROOT_SIGNATURE_FLAG_DENY_PIXEL_SHADER_ROOT_ACCESS;
 
 	// A single 32-bit constant root parameter that is used by the vertex shader
-	CD3DX12_ROOT_PARAMETER1 rootParameters[1];
-	rootParameters[0].InitAsConstants(sizeof(XMMATRIX) / 4, 0, 0, D3D12_SHADER_VISIBILITY_VERTEX);
+	CD3DX12_ROOT_PARAMETER1 rootParameters[RootParameters::NumRootParameters];
+	rootParameters[RootParameters::MatricesCB].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 	rootSignatureDescription.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, rootSignatureFlags);
 
-	// Serialize the root signature
-	ComPtr<ID3DBlob> rootSignatureBlob;
-	ComPtr<ID3DBlob> errorBlob;
-	ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDescription, featureData.HighestVersion, &rootSignatureBlob, &errorBlob));
-
-	// Create the root signature
-	ThrowIfFailed(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));
+	m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, featureData.HighestVersion);
 
 	struct PipelineStateStream
 	{
@@ -333,17 +327,21 @@ bool b2Game::LoadContent()
 		CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
 	} pipelineStateStream;
 
+	DXGI_FORMAT backBufferFormat = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB;
+	DXGI_FORMAT depthBufferFormat = DXGI_FORMAT_D32_FLOAT;
+
 	D3D12_RT_FORMAT_ARRAY rtvFormats = {};
 	rtvFormats.NumRenderTargets = 1;
-	rtvFormats.RTFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+	rtvFormats.RTFormats[0] = backBufferFormat;
 
-	pipelineStateStream.rootSignature = m_rootSignature.Get();
+	pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
 	pipelineStateStream.inputLayout = { inputLayout, _countof(inputLayout) };
 	pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 	pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
-	pipelineStateStream.dsvFormat = DXGI_FORMAT_D32_FLOAT;
+	pipelineStateStream.dsvFormat = depthBufferFormat;
 	pipelineStateStream.rtvFormats = rtvFormats;
+	//pipelineStateStream.SampleDesc = sampleDesc;
 
 	D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 	{
@@ -351,55 +349,38 @@ bool b2Game::LoadContent()
 	};
 	ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pipelineState)));
 
+
+	// Create an off-screen render target with a single color buffer and a depth buffer TODO: 0,0 ->sampleDesc
+	auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(backBufferFormat, m_width, m_height, 1, 1, 0, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+
+	D3D12_CLEAR_VALUE colorClearValue;
+	colorClearValue.Format = colorDesc.Format;
+	colorClearValue.Color[0] = 0.4f;
+	colorClearValue.Color[1] = 0.6f;
+	colorClearValue.Color[2] = 0.9f;
+	colorClearValue.Color[3] = 1.0f;
+
+	Texture colorTexture = Texture(colorDesc, &colorClearValue, TextureUsage::RenderTarget, L"Color Render Target");
+
+	// Create a Depth Buffer TODO: 0,0 ->sampleDesc
+	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthBufferFormat, m_width, m_height, 1, 1, 0, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+
+	D3D12_CLEAR_VALUE depthClearValue;
+	depthClearValue.Format = depthBufferFormat;
+	depthClearValue.DepthStencil = { 1.0f, 0 };
+
+	Texture depthTexture = Texture(depthDesc, &depthClearValue, TextureUsage::Depth, L"Depth Render Target");
+
+	// Attach the textures to a RT
+	m_renderTarget.AttachTexture(AttachmentPoint::Color0, colorTexture);
+	m_renderTarget.AttachTexture(AttachmentPoint::DepthStencil, depthTexture);
+
 	auto fenceValue = commandQueue->ExecuteCommandList(commandList);
 	commandQueue->WaitForFenceValue(fenceValue);
-
-	m_contentLoaded = true;
-
-	// Resize or create the depth buffer
-	ResizeDepthBuffer(m_window->GetClientWidth(), m_window->GetClientHeight());
 
 	return true;
 }
 
 void b2Game::UnloadContent()
 {
-	m_contentLoaded = false;
-}
-
-void b2Game::ResizeDepthBuffer(int width, int height)
-{
-	if (m_contentLoaded)
-	{
-		// Flush GPU commands first
-		Application::Get().Flush();
-
-		width = std::max(1, width);
-		height = std::max(1, height);
-
-		auto device = Application::Get().GetDevice();
-
-		// Create depth buffer
-		D3D12_CLEAR_VALUE optimizedClearValue = {};
-		optimizedClearValue.Format = DXGI_FORMAT_D32_FLOAT;
-		optimizedClearValue.DepthStencil = { 1.0f, 0 };
-
-		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Tex2D(DXGI_FORMAT_D32_FLOAT, width, height, 1, 0, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL),
-			D3D12_RESOURCE_STATE_DEPTH_WRITE,
-			&optimizedClearValue,
-			IID_PPV_ARGS(&m_depthBuffer)
-		));
-
-		// Update the depth-stencil view
-		D3D12_DEPTH_STENCIL_VIEW_DESC dsv = {};
-		dsv.Format = DXGI_FORMAT_D32_FLOAT;
-		dsv.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-		dsv.Texture2D.MipSlice = 0;
-		dsv.Flags = D3D12_DSV_FLAG_NONE;
-
-		device->CreateDepthStencilView(m_depthBuffer.Get(), &dsv, m_dsvHeap->GetCPUDescriptorHandleForHeapStart());
-	}
 }

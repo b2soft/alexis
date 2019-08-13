@@ -7,9 +7,12 @@
 #include <memory>
 #include <string>
 
+#include "Render/DescriptorAllocation.h"
+
 class Window;
 class Game;
 class CommandQueue;
+class DescriptorAllocator;
 
 class Application
 {
@@ -54,8 +57,16 @@ public:
 	// Flush all command queues
 	void Flush();
 
+	DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
+	void ReleaseStaleDescriptors(uint64_t finishedFrame);
+
 	Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> CreateDescriptorHeap(UINT numDescriptors, D3D12_DESCRIPTOR_HEAP_TYPE type);
 	UINT GetDescriptorHeapIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE type) const;
+
+	static uint64_t GetFrameCount()
+	{
+		return s_frameCount;
+	}
 
 protected:
 	// Create app instance
@@ -82,5 +93,9 @@ private:
 	std::shared_ptr<CommandQueue> m_computeCommandQueue;
 	std::shared_ptr<CommandQueue> m_copyCommandQueue;
 
+	std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+
 	bool m_tearingSupported{ false };
+
+	static uint64_t s_frameCount;
 };
