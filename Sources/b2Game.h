@@ -9,6 +9,8 @@
 
 #include <DirectXMath.h>
 
+class Mesh;
+
 class b2Game : public Game
 {
 public:
@@ -69,4 +71,6 @@ private:
 	int m_height;
 
 	bool m_contentLoaded;
+
+	std::unique_ptr<Mesh> m_cubeMesh;
 };

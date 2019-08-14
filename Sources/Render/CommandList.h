@@ -17,6 +17,12 @@ class RootSignature;
 class Texture;
 class RenderTarget;
 
+class Buffer;
+class IndexBuffer;
+class VertexBuffer;
+class RawBuffer;
+class StructuredBuffer;
+
 class CommandList
 {
 public:
@@ -41,6 +47,40 @@ public:
 
 	void ResolveSubresource(Resource& dstRes, const Resource& srcRes, uint32_t dstSubresource = 0, uint32_t srcSubresource = 0);
 
+	// Buffer copy
+	void CopyBuffer(Buffer& buffer, size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags = D3D12_RESOURCE_FLAG_NONE);
+
+	void CopyVertexBuffer(VertexBuffer& vertexBuffer, size_t numVertices, size_t vertexStride, const void* vertexBufferData);
+	template<class T>
+	void CopyVertexBuffer(VertexBuffer& vertexBuffer, const std::vector<T>& vertexBufferData)
+	{
+		CopyVertexBuffer(vertexBuffer, vertexBufferData.size(), sizeof(T), vertexBufferData.data());
+	}
+
+	void CopyIndexBuffer(IndexBuffer& indexBuffer, size_t numIndices, DXGI_FORMAT indexFormat, const void* indexBufferData);
+	template<class T>
+	void CopyIndexBuffer(IndexBuffer& indexBuffer, const std::vector<T>& indexBufferData)
+	{
+		assert(sizeof(T) == 2 || sizeof(T) == 4);
+		DXGI_FORMAT indexFormat = (sizeof(T) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+
+		CopyIndexBuffer(indexBuffer, indexBufferData.size(), indexFormat, indexBufferData.data());
+	}
+
+	void CopyRawBuffer(RawBuffer& rawBuffer, size_t bufferSize, const void* bufferData);
+	template<class T>
+	void CopyRawBuffer(RawBuffer& rawBuffer, const T& data)
+	{
+		CopyRawBuffer(rawBuffer, sizeof(T), &data);
+	}
+
+	void CopyStructuredBuffer(StructuredBuffer& structuredBuffer, size_t numElements, size_t elementSize, const void* bufferData);
+	template<class T>
+	void CopyStructuredBuffer(StructuredBuffer& structuredBuffer, const std::vector<T>& bufferData)
+	{
+		CopyStructuredBuffer(structuredBuffer, bufferData.size(), sizeof(T), bufferData.data());
+	}
+
 	void SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitiveTopology);
 
 	void SetViewport(const D3D12_VIEWPORT& viewport);
@@ -58,6 +98,54 @@ public:
 	void ClearDepthStencilTexture(const Texture& texture, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);
 
 	void SetGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex, size_t sizeInBytes, const void* bufferData);
+	template<class T>
+	void SetGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex, const T& data)
+	{
+		SetGraphicsDynamicConstantBuffer(rootParameterIndex, sizeof(T), &data);
+	}
+
+	void SetGraphics32BitConstants(uint32_t rootParameterIndex, uint32_t numConstants, const void* constants);
+	template<class T>
+	void SetGraphics32BitConstants(uint32_t rootParameterIndex, const T& constants)
+	{
+		static_assert(sizeof(T) % sizeof(uint32_t) == 0, "Size of type must be 4 bytes multiple!");
+		SetGraphics32BitConstants(rootParameterIndex, sizeof(T) / sizeof(uint32_t), &constants);
+	}
+
+	void SetCompute32BitConstants(uint32_t rootParameterIndex, uint32_t numConstants, const void* constants);
+	template<class T>
+	void SetCompute32BitConstants(uint32_t rootParameterIndex, const T& constants)
+	{
+		static_assert(sizeof(T) % sizeof(uint32_t) == 0, "Size of type must be 4 bytes multiple!");
+		SetCompute32BitConstants(rootParameterIndex, sizeof(T) / sizeof(uint32_t), &constants);
+	}
+
+	void SetVertexBuffer(uint32_t slot, const VertexBuffer& vertexBuffer);
+	void SetDynamicVertexBuffer(uint32_t slot, size_t numVertices, size_t vertexSize, const void* vertexBufferData);
+	template<class T>
+	void SetDynamicVertexBuffer(uint32_t slot, const std::vector<T>& vertexBufferData)
+	{
+		SetDynamicVertexBuffer(slot, vertexBufferData.size(), sizeof(T), vertexBufferData.data());
+	}
+
+	void SetIndexBuffer(const IndexBuffer& indexBuffer);
+	void SetDynamicIndexBuffer(size_t numIndicies, DXGI_FORMAT indexFormat, const void* indexBufferData);
+	template<class T>
+	void SetDynamicIndexBuffer(const std::vector<T>& indexBufferData)
+	{
+		static_assert(sizeof(T) == 2 || sizeof(T) == 4, "Size of type must be 16 or 32 bit multiple!");
+
+		DXGI_FORMAT indexFormat = (sizeof(T) == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+		SetDynamicIndexBuffer(indexBufferData.size(), indexFormat, indexBufferData.data());
+	}
+
+	void SetGraphicsDynamicStructuredBuffer(uint32_t slot, size_t numElements, size_t elementSize, const void* bufferData);
+	template<class T>
+	void SetGraphicsDynamicStructuredBuffer(uint32_t slot, const std::vector<T>& bufferData)
+	{
+		SetGraphicsDynamicStructuredBuffer(slot, bufferData.size(), sizeof(T), bufferData.data());
+	}
+
 	void SetShaderResourceView(
 		uint32_t rootParameterIndex,
 		uint32_t descriptorOffset,

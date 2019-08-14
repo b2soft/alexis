@@ -9,6 +9,7 @@
 #include "Window.h"
 
 #include "Render/CommandList.h"
+#include "Render/Mesh.h"
 
 #include "b2Game.h"
 
@@ -128,15 +129,23 @@ void b2Game::OnRender(RenderEventArgs& e)
 	commandList->SetScissorRect(m_scissorRect);
 
 	commandList->SetRenderTarget(m_renderTarget);
+	
+	// Update the MVP matrix
+	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
+	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
+
+	Mat matrices;
+	matrices.ModelViewProjectionMatrix = mvpMatrix;
+
+	commandList->SetGraphicsDynamicConstantBuffer(RootParameters::MatricesCB, matrices);
+	m_cubeMesh->Draw(*commandList);
+
 
 	//commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	//commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
 	//commandList->IASetIndexBuffer(&m_indexBufferView);
 	//
-	//// Update the MVP matrix
-	//XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
-	//mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
-	//commandList->SetGraphicsRoot32BitConstants(0, sizeof(XMMATRIX) / 4, &mvpMatrix, 0);
+	
 
 	// Draw
 	//commandList->DrawIndexedInstanced(_countof(g_Indicies), 1, 0, 0, 0);
@@ -182,14 +191,14 @@ void b2Game::OnResize(ResizeEventArgs& e)
 {
 	Game::OnResize(e);
 
-	if (e.Width != GetClientWidth() || e.Height != GetClientHeight())
+	if (m_width != e.Width || m_height != e.Height)
 	{
 		m_width = std::max(1, e.Width);
 		m_height = std::max(1, e.Height);
 
 		//float aspectRatio = m_width / static_cast<float>(m_height);
 		// camera change here
-		m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(e.Width), static_cast<float>(e.Height));
+		m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(m_width), static_cast<float>(m_height));
 
 		m_renderTarget.Resize(m_width, m_height);
 	}
@@ -248,31 +257,7 @@ bool b2Game::LoadContent()
 	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
-	// Upload vertex buffer data
-	//ComPtr<ID3D12Resource> intermediateVertexBuffer;
-	//UpdateBufferResource(commandList.Get(), &m_vertexBuffer, &intermediateVertexBuffer, _countof(g_vertices), sizeof(VertexPosColor), g_vertices);
-	//
-	//// Create the vertex buffer view
-	//m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
-	//m_vertexBufferView.SizeInBytes = sizeof(g_vertices);
-	//m_vertexBufferView.StrideInBytes = sizeof(VertexPosColor);
-	//
-	//// Upload index buffer data
-	//ComPtr<ID3D12Resource> intermediateIndexBuffer;
-	//UpdateBufferResource(commandList.Get(), &m_indexBuffer, &intermediateIndexBuffer, _countof(g_Indicies), sizeof(WORD), g_Indicies);
-	//
-	//// Create the index buffer view
-	//m_indexBufferView.BufferLocation = m_indexBuffer->GetGPUVirtualAddress();
-	//m_indexBufferView.SizeInBytes = sizeof(g_Indicies);
-	//m_indexBufferView.Format = DXGI_FORMAT_R16_UINT;
-	//
-	//// Create descriptor heap for DSV
-	//D3D12_DESCRIPTOR_HEAP_DESC dsvHeapDesc = {};
-	//dsvHeapDesc.NumDescriptors = 1;
-	//dsvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
-	//dsvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-	//
-	//ThrowIfFailed(device->CreateDescriptorHeap(&dsvHeapDesc, IID_PPV_ARGS(&m_dsvHeap)));
+	m_cubeMesh = Mesh::CreateCube(*commandList);
 
 	// Load the vertex shader
 	ComPtr<ID3DBlob> vertexShaderBlob;
@@ -351,7 +336,7 @@ bool b2Game::LoadContent()
 
 
 	// Create an off-screen render target with a single color buffer and a depth buffer TODO: 0,0 ->sampleDesc
-	auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(backBufferFormat, m_width, m_height, 1, 1, 0, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
+	auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(backBufferFormat, m_width, m_height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 
 	D3D12_CLEAR_VALUE colorClearValue;
 	colorClearValue.Format = colorDesc.Format;
@@ -363,7 +348,7 @@ bool b2Game::LoadContent()
 	Texture colorTexture = Texture(colorDesc, &colorClearValue, TextureUsage::RenderTarget, L"Color Render Target");
 
 	// Create a Depth Buffer TODO: 0,0 ->sampleDesc
-	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthBufferFormat, m_width, m_height, 1, 1, 0, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
+	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthBufferFormat, m_width, m_height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
 	D3D12_CLEAR_VALUE depthClearValue;
 	depthClearValue.Format = depthBufferFormat;

@@ -124,6 +124,7 @@ void Window::OnResize(ResizeEventArgs& e)
 		Application::Get().Flush();
 
 		// Release all refs to back buffer textures first
+		m_renderTarget.AttachTexture(AttachmentPoint::Color0, Texture());
 		for (int i = 0; i < k_bufferCount; ++i)
 		{
 			ResourceStateTracker::RemoveGlobalResourceState(m_backBufferTextures[i].GetD3D12Resource().Get());

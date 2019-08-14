@@ -29,11 +29,17 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="..\Sources\Render\Buffers\Buffer.cpp" />
+    <ClCompile Include="..\Sources\Render\Buffers\IndexBuffer.cpp" />
+    <ClCompile Include="..\Sources\Render\Buffers\RawBuffer.cpp" />
+    <ClCompile Include="..\Sources\Render\Buffers\StructuredBuffer.cpp" />
+    <ClCompile Include="..\Sources\Render\Buffers\VertexBuffer.cpp" />
     <ClCompile Include="..\Sources\Render\CommandList.cpp" />
     <ClCompile Include="..\Sources\Render\DescriptorAllocation.cpp" />
     <ClCompile Include="..\Sources\Render\DescriptorAllocator.cpp" />
     <ClCompile Include="..\Sources\Render\DescriptorAllocatorPage.cpp" />
     <ClCompile Include="..\Sources\Render\DynamicDescriptorHeap.cpp" />
+    <ClCompile Include="..\Sources\Render\Mesh.cpp" />
     <ClCompile Include="..\Sources\Render\RenderTarget.cpp" />
     <ClCompile Include="..\Sources\Render\Resource.cpp" />
     <ClCompile Include="..\Sources\Render\ResourceStateTracker.cpp" />
@@ -55,11 +61,17 @@
     <ClInclude Include="..\Sources\HighResolutionClock.h" />
     <ClInclude Include="..\Sources\KeyCodes.h" />
     <ClInclude Include="..\Sources\Precompiled.h" />
+    <ClInclude Include="..\Sources\Render\Buffers\Buffer.h" />
+    <ClInclude Include="..\Sources\Render\Buffers\IndexBuffer.h" />
+    <ClInclude Include="..\Sources\Render\Buffers\RawBuffer.h" />
+    <ClInclude Include="..\Sources\Render\Buffers\StructuredBuffer.h" />
+    <ClInclude Include="..\Sources\Render\Buffers\VertexBuffer.h" />
     <ClInclude Include="..\Sources\Render\CommandList.h" />
     <ClInclude Include="..\Sources\Render\DescriptorAllocation.h" />
     <ClInclude Include="..\Sources\Render\DescriptorAllocator.h" />
     <ClInclude Include="..\Sources\Render\DescriptorAllocatorPage.h" />
     <ClInclude Include="..\Sources\Render\DynamicDescriptorHeap.h" />
+    <ClInclude Include="..\Sources\Render\Mesh.h" />
     <ClInclude Include="..\Sources\Render\RenderTarget.h" />
     <ClInclude Include="..\Sources\Render\Resource.h" />
     <ClInclude Include="..\Sources\Render\ResourceStateTracker.h" />

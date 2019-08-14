@@ -34,20 +34,13 @@ struct MakeWindow : public Window
 
 Application::Application(HINSTANCE hInst)
 	: m_hInstance(hInst)
+	, m_tearingSupported(false)
 {
 	// Windows 10 Creators update adds Per Monitor V2 DPI awareness context.
 	// Using this awareness context allows the client area of the window 
 	// to achieve 100% scaling while still allowing non-client window content to 
 	// be rendered in a DPI sensitive fashion.
 	SetThreadDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
-	// Before doing anything using either the DXGI or the Direct3D API, the debug layer should be enabled in debug builds.
-	// Enabling the debug layer after creating the ID3D12Device will cause the runtime to remove the device.
-#if defined(_DEBUG)
-	ComPtr<ID3D12Debug> debugInterface;
-	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
-	debugInterface->EnableDebugLayer();
-#endif
 
 	// Register a window class for rendering
 	WNDCLASSEX windowClass = {};
@@ -69,26 +62,56 @@ Application::Application(HINSTANCE hInst)
 	{
 		MessageBoxA(NULL, "Unable to register window class!", "Error", MB_OK | MB_ICONERROR);
 	}
-
-	m_dxgiAdapter = GetAdapter(false);
-	if (m_dxgiAdapter)
-	{
-		m_d3d12Device = CreateDevice(m_dxgiAdapter);
-	}
-
-	if (m_d3d12Device)
-	{
-		m_directCommandQueue = std::make_shared<CommandQueue>(m_d3d12Device, D3D12_COMMAND_LIST_TYPE_DIRECT);
-		m_computeCommandQueue = std::make_shared<CommandQueue>(m_d3d12Device, D3D12_COMMAND_LIST_TYPE_COMPUTE);
-		m_copyCommandQueue = std::make_shared<CommandQueue>(m_d3d12Device, D3D12_COMMAND_LIST_TYPE_COPY);
-
-		m_tearingSupported = CheckTearingSupport();
-	}
 }
 
 Application::~Application()
 {
 	Flush();
+}
+
+void Application::Initialize()
+{
+	// Before doing anything using either the DXGI or the Direct3D API, the debug layer should be enabled in debug builds.
+// Enabling the debug layer after creating the ID3D12Device will cause the runtime to remove the device.
+#if defined(_DEBUG)
+	ComPtr<ID3D12Debug> debugInterface;
+	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
+	debugInterface->EnableDebugLayer();
+
+	// Enable these if you want full validation (will slow down rendering a lot)
+	// debugInterface->SetEnableGPUBasedValidation(TRUE);
+	// debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
+#endif
+
+	auto dxgiAdapter = GetAdapter(false);
+	if (!dxgiAdapter)
+	{
+		// If no DX12 adapter exist - fall back to WARP
+		dxgiAdapter = GetAdapter(true);
+	}
+
+	if (dxgiAdapter)
+	{
+		m_d3d12Device = CreateDevice(dxgiAdapter);
+	}
+	else
+	{
+		throw std::exception("DXGI adapter enumeration failed");
+	}
+
+	m_directCommandQueue = std::make_shared<CommandQueue>(D3D12_COMMAND_LIST_TYPE_DIRECT);
+	m_computeCommandQueue = std::make_shared<CommandQueue>(D3D12_COMMAND_LIST_TYPE_COMPUTE);
+	m_copyCommandQueue = std::make_shared<CommandQueue>(D3D12_COMMAND_LIST_TYPE_COPY);
+
+	m_tearingSupported = CheckTearingSupport();
+
+	// Create descriptor allocators
+	for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+	{
+		m_descriptorAllocators[i] = std::make_unique<DescriptorAllocator>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+	}
+
+	s_frameCount = 0;
 }
 
 Microsoft::WRL::ComPtr<IDXGIAdapter4> Application::GetAdapter(bool useWarp) const
@@ -208,6 +231,7 @@ void Application::Create(HINSTANCE hInst)
 	if (!s_singleton)
 	{
 		s_singleton = new Application(hInst);
+		s_singleton->Initialize();
 	}
 }
 
@@ -245,17 +269,10 @@ std::shared_ptr<Window> Application::CreateRenderWindow(const std::wstring& wind
 	RECT windowRect = { 0, 0, static_cast<LONG>(clientWidth), static_cast<LONG>(clientHeight) };
 	AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
-	const int windowWidth = windowRect.right - windowRect.left;
-	const int windowHeight = windowRect.bottom - windowRect.top;
-
-	// Center the window within the screen. Clamp to 0, 0 for the top-left corner.
-	//int windowX = std::max<int>(0, (screenWidth - windowWidth) / 2);
-	//int windowY = std::max<int>(0, (screenHeight - windowHeight) / 2);
-
 	HWND hWnd = ::CreateWindowW(k_windowClassName, windowName.c_str(),
 		WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, // windowX windowY maybe?
-		windowWidth,
-		windowHeight,
+		windowRect.right - windowRect.left,
+		windowRect.bottom - windowRect.top,
 		nullptr, nullptr, m_hInstance, nullptr);
 
 	if (!hWnd)
@@ -312,7 +329,6 @@ int Application::Run(std::shared_ptr<Game> game)
 	{
 		return 2;
 	}
-
 
 	MSG msg = { 0 };
 	while (msg.message != WM_QUIT)

@@ -75,18 +75,21 @@ protected:
 	// Destroy the app instance
 	virtual ~Application();
 
+	void Initialize();
+
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> GetAdapter(bool useWarp) const;
 	Microsoft::WRL::ComPtr<ID3D12Device2> CreateDevice(Microsoft::WRL::ComPtr<IDXGIAdapter4> adapter);
 	bool CheckTearingSupport();
 
 private:
+	friend LRESULT CALLBACK WndProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+
 	Application(const Application&) = delete;
 	Application& operator=(const Application&) = delete;
 
 	// App instance
 	HINSTANCE m_hInstance;
 
-	Microsoft::WRL::ComPtr<IDXGIAdapter4> m_dxgiAdapter;
 	Microsoft::WRL::ComPtr<ID3D12Device2> m_d3d12Device;
 
 	std::shared_ptr<CommandQueue> m_directCommandQueue;

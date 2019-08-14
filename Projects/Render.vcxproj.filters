@@ -11,6 +11,9 @@
     <Filter Include="Source Files\Render">
       <UniqueIdentifier>{b977beb9-cdbe-4184-b7e5-5757086789cb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Render\Buffers">
+      <UniqueIdentifier>{0ea5b580-89d2-40f7-ae9d-a037670d2133}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\Precompiled.cpp">
@@ -69,6 +72,24 @@
     </ClCompile>
     <ClCompile Include="..\Sources\Render\Texture.cpp">
       <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Render\Mesh.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Render\Buffers\VertexBuffer.cpp">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Render\Buffers\IndexBuffer.cpp">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Render\Buffers\RawBuffer.cpp">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Render\Buffers\StructuredBuffer.cpp">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Render\Buffers\Buffer.cpp">
+      <Filter>Source Files\Render\Buffers</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -141,6 +162,24 @@
     </ClInclude>
     <ClInclude Include="..\Sources\ThreadSafeQueue.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Render\Mesh.h">
+      <Filter>Source Files\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Render\Buffers\Buffer.h">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Render\Buffers\VertexBuffer.h">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Render\Buffers\IndexBuffer.h">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Render\Buffers\RawBuffer.h">
+      <Filter>Source Files\Render\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Render\Buffers\StructuredBuffer.h">
+      <Filter>Source Files\Render\Buffers</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

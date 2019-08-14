@@ -87,7 +87,7 @@ void Texture::CreateViews()
 
 		D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport;
 		formatSupport.Format = desc.Format;
-		ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(D3D12_FEATURE_FORMAT_SUPPORT)));
+		ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
 
 		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 &&
 			CheckRTVSupport(formatSupport.Support1))

@@ -15,6 +15,11 @@
 #include "Texture.h"
 #include "RenderTarget.h"
 
+#include "Buffers/IndexBuffer.h"
+#include "Buffers/VertexBuffer.h"
+#include "Buffers/StructuredBuffer.h"
+#include "Buffers/RawBuffer.h"
+
 CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type)
 	: m_d3d12CommandListType(type)
 {
@@ -84,6 +89,84 @@ void CommandList::ResolveSubresource(Resource& dstRes, const Resource& srcRes, u
 
 	TrackResource(srcRes);
 	TrackResource(dstRes);
+}
+
+void CommandList::CopyBuffer(Buffer& buffer, size_t numElements, size_t elementSize, const void* bufferData, D3D12_RESOURCE_FLAGS flags)
+{
+	auto device = Application::Get().GetDevice();
+
+	size_t bufferSize = numElements * elementSize;
+
+	Microsoft::WRL::ComPtr<ID3D12Resource> d3d12Resource;
+	if (bufferSize == 0)
+	{
+		// Null resource
+	}
+	else
+	{
+		ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(bufferSize, flags),
+			D3D12_RESOURCE_STATE_COMMON,
+			nullptr,
+			IID_PPV_ARGS(&d3d12Resource)
+		));
+
+		// Add to global tracker
+		ResourceStateTracker::AddGlobalResourceState(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COMMON);
+
+		if (bufferData)
+		{
+			Microsoft::WRL::ComPtr<ID3D12Resource> uploadResource;
+			ThrowIfFailed(device->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+				D3D12_HEAP_FLAG_NONE,
+				&CD3DX12_RESOURCE_DESC::Buffer(bufferSize),
+				D3D12_RESOURCE_STATE_GENERIC_READ,
+				nullptr,
+				IID_PPV_ARGS(&uploadResource)
+			));
+
+			D3D12_SUBRESOURCE_DATA subresourceData = {};
+			subresourceData.pData = bufferData;
+			subresourceData.RowPitch = bufferSize;
+			subresourceData.SlicePitch = subresourceData.RowPitch;
+
+			m_resourceStateTracker->TransitionResource(d3d12Resource.Get(), D3D12_RESOURCE_STATE_COPY_DEST);
+			FlushResourceBarriers();
+
+			UpdateSubresources(m_d3d12CommandList.Get(), d3d12Resource.Get(), uploadResource.Get(), 0, 0, 1, &subresourceData);
+
+			TrackObject(uploadResource);
+		}
+
+		TrackObject(d3d12Resource);
+	}
+
+	buffer.SetD3D12Resource(d3d12Resource);
+	buffer.CreateViews(numElements, elementSize);
+}
+
+void CommandList::CopyVertexBuffer(VertexBuffer& vertexBuffer, size_t numVertices, size_t vertexStride, const void* vertexBufferData)
+{
+	CopyBuffer(vertexBuffer, numVertices, vertexStride, vertexBufferData);
+}
+
+void CommandList::CopyIndexBuffer(IndexBuffer& indexBuffer, size_t numIndices, DXGI_FORMAT indexFormat, const void* indexBufferData)
+{
+	size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
+	CopyBuffer(indexBuffer, numIndices, indexSizeInBytes, indexBufferData);
+}
+
+void CommandList::CopyRawBuffer(RawBuffer& rawBuffer, size_t bufferSize, const void* bufferData)
+{
+	CopyBuffer(rawBuffer, 1, bufferSize, bufferData, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+}
+
+void CommandList::CopyStructuredBuffer(StructuredBuffer& structuredBuffer, size_t numElements, size_t elementSize, const void* bufferData)
+{
+	CopyBuffer(structuredBuffer, numElements, elementSize, bufferData, D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
 }
 
 void CommandList::SetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY primitiveTopology)
@@ -183,6 +266,80 @@ void CommandList::SetGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex, 
 	m_d3d12CommandList->SetGraphicsRootConstantBufferView(rootParameterIndex, heapAllococation.gpu);
 }
 
+void CommandList::SetGraphics32BitConstants(uint32_t rootParameterIndex, uint32_t numConstants, const void* constants)
+{
+	m_d3d12CommandList->SetGraphicsRoot32BitConstants(rootParameterIndex, numConstants, constants, 0);
+}
+
+void CommandList::SetCompute32BitConstants(uint32_t rootParameterIndex, uint32_t numConstants, const void* constants)
+{
+	m_d3d12CommandList->SetComputeRoot32BitConstants(rootParameterIndex, numConstants, constants, 0);
+}
+
+void CommandList::SetVertexBuffer(uint32_t slot, const VertexBuffer& vertexBuffer)
+{
+	TransitionBarrier(vertexBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+
+	auto vertexBufferView = vertexBuffer.GetVertexBufferView();
+
+	m_d3d12CommandList->IASetVertexBuffers(slot, 1, &vertexBufferView);
+
+	TrackResource(vertexBuffer);
+}
+
+void CommandList::SetDynamicVertexBuffer(uint32_t slot, size_t numVertices, size_t vertexSize, const void* vertexBufferData)
+{
+	size_t bufferSize = numVertices * vertexSize;
+
+	auto heapAllocation = m_uploadBuffer->Allocate(bufferSize, vertexSize);
+	memcpy(heapAllocation.cpu, vertexBufferData, bufferSize);
+
+	D3D12_VERTEX_BUFFER_VIEW vertexBufferView = {};
+	vertexBufferView.BufferLocation = heapAllocation.gpu;
+	vertexBufferView.SizeInBytes = static_cast<UINT>(bufferSize);
+	vertexBufferView.StrideInBytes = static_cast<UINT>(vertexSize);
+
+	m_d3d12CommandList->IASetVertexBuffers(slot, 1, &vertexBufferView);
+}
+
+void CommandList::SetIndexBuffer(const IndexBuffer& indexBuffer)
+{
+	TransitionBarrier(indexBuffer, D3D12_RESOURCE_STATE_INDEX_BUFFER);
+
+	auto indexBufferView = indexBuffer.GetIndexBufferView();
+
+	m_d3d12CommandList->IASetIndexBuffer(&indexBufferView);
+
+	TrackResource(indexBuffer);
+}
+
+void CommandList::SetDynamicIndexBuffer(size_t numIndicies, DXGI_FORMAT indexFormat, const void* indexBufferData)
+{
+	size_t indexSizeInBytes = indexFormat == DXGI_FORMAT_R16_UINT ? 2 : 4;
+	size_t bufferSize = numIndicies * indexSizeInBytes;
+
+	auto heapAllocation = m_uploadBuffer->Allocate(bufferSize, indexSizeInBytes);
+	memcpy(heapAllocation.cpu, indexBufferData, bufferSize);
+
+	D3D12_INDEX_BUFFER_VIEW indexBufferView = {};
+	indexBufferView.BufferLocation = heapAllocation.gpu;
+	indexBufferView.SizeInBytes = static_cast<UINT>(bufferSize);
+	indexBufferView.Format = indexFormat;
+
+	m_d3d12CommandList->IASetIndexBuffer(&indexBufferView);
+}
+
+void CommandList::SetGraphicsDynamicStructuredBuffer(uint32_t slot, size_t numElements, size_t elementSize, const void* bufferData)
+{
+	size_t bufferSize = numElements * elementSize;
+
+	auto heapAllocation = m_uploadBuffer->Allocate(bufferSize, elementSize);
+
+	memcpy(heapAllocation.cpu, bufferData, bufferSize);
+
+	m_d3d12CommandList->SetGraphicsRootShaderResourceView(slot, heapAllocation.gpu);
+}
+
 void CommandList::SetShaderResourceView(uint32_t rootParameterIndex,
 	uint32_t descriptorOffset,
 	const Resource& resource,
@@ -217,7 +374,7 @@ void CommandList::SetRenderTarget(const RenderTarget& renderTarget)
 	// Bind color targets
 	const auto& textures = renderTarget.GetTextures();
 
-	for (int i = 0; i < 8; ++i)
+	for (int i = 0; i < AttachmentPoint::DepthStencil; ++i)
 	{
 		auto& texture = textures[i];
 
