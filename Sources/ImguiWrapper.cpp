@@ -127,7 +127,7 @@ void GetSurfaceInfo(_In_ size_t width, _In_ size_t height, _In_ DXGI_FORMAT fmt,
 	{
 		//TODO: DirectXTex
 		//size_t bpp = BitsPerPixel(fmt);
-		size_t bpp = 8;
+		size_t bpp = 32;
 		rowBytes = (width * bpp + 7) / 8; // round up to nearest byte
 		numRows = height;
 		numBytes = rowBytes * height;

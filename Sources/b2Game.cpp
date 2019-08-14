@@ -309,8 +309,6 @@ bool b2Game::LoadContent()
 	};
 	ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pipelineState)));
 
-
-	// Create an off-screen render target with a single color buffer and a depth buffer TODO: 0,0 ->sampleDesc
 	auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(backBufferFormat, m_width, m_height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
 
 	D3D12_CLEAR_VALUE colorClearValue;
@@ -322,7 +320,6 @@ bool b2Game::LoadContent()
 
 	Texture colorTexture = Texture(colorDesc, &colorClearValue, TextureUsage::RenderTarget, L"Color Render Target");
 
-	// Create a Depth Buffer TODO: 0,0 ->sampleDesc
 	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthBufferFormat, m_width, m_height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL);
 
 	D3D12_CLEAR_VALUE depthClearValue;
