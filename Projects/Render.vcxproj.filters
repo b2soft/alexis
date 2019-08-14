@@ -14,6 +14,12 @@
     <Filter Include="Source Files\Render\Buffers">
       <UniqueIdentifier>{0ea5b580-89d2-40f7-ae9d-a037670d2133}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Libs">
+      <UniqueIdentifier>{8f29c8f3-9c51-497a-aa08-7af3c8850af6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Libs\imgui">
+      <UniqueIdentifier>{894392b7-3aa4-4a58-8d1a-5e1806668e72}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\Precompiled.cpp">
@@ -90,6 +96,24 @@
     </ClCompile>
     <ClCompile Include="..\Sources\Render\Buffers\Buffer.cpp">
       <Filter>Source Files\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Libs\imgui\imgui_widgets.cpp">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Libs\imgui\imgui.cpp">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Libs\imgui\imgui_demo.cpp">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Libs\imgui\imgui_draw.cpp">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\ImguiWrapper.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Libs\imgui\imgui_impl_win32.cpp">
+      <Filter>Source Files\Libs\imgui</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -181,12 +205,42 @@
     <ClInclude Include="..\Sources\Render\Buffers\StructuredBuffer.h">
       <Filter>Source Files\Render\Buffers</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imgui_internal.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imstb_rectpack.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imstb_textedit.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imstb_truetype.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imconfig.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imgui.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\ImguiWrapper.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Libs\imgui\imgui_impl_win32.h">
+      <Filter>Source Files\Libs\imgui</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Sources\VertexShader.hlsl">
       <Filter>Resources</Filter>
     </FxCompile>
     <FxCompile Include="..\Sources\PixelShader.hlsl">
+      <Filter>Resources</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Sources\ImGui_vs.hlsl">
+      <Filter>Resources</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Sources\ImGui_ps.hlsl">
       <Filter>Resources</Filter>
     </FxCompile>
   </ItemGroup>

@@ -45,6 +45,8 @@ void Window::RegisterCallbacks(std::shared_ptr<Game> game)
 
 void Window::OnUpdate(UpdateEventArgs& e)
 {
+	m_gui.NewFrame();
+
 	m_updateClock.Tick();
 
 	if (auto game = m_game.lock())
@@ -208,11 +210,13 @@ HWND Window::GetWindowHandle() const
 
 void Window::Initialize()
 {
-	// TODO: imgui init
+	m_gui.Initialize(shared_from_this());
 }
 
 void Window::Destroy()
 {
+	m_gui.Destroy();
+
 	if (auto game = m_game.lock())
 	{
 		// Notify Game about window destroying
@@ -355,7 +359,7 @@ UINT Window::Present(const Texture& texture /*= Texture()*/)
 	RenderTarget renderTarget;
 	renderTarget.AttachTexture(AttachmentPoint::Color0, backBuffer);
 
-	// TODO: imgui render
+	m_gui.Render(commandList, renderTarget);
 
 	commandList->TransitionBarrier(backBuffer, D3D12_RESOURCE_STATE_PRESENT);
 	commandQueue->ExecuteCommandList(commandList);

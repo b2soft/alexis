@@ -15,9 +15,12 @@
 #include "Render/Texture.h"
 #include "Render/RenderTarget.h"
 
+// ImGui
+#include "ImguiWrapper.h"
+
 class Game;
 
-class Window
+class Window : public std::enable_shared_from_this<Window>
 {
 public:
 	static const UINT k_bufferCount = 2;
@@ -118,9 +121,5 @@ private:
 	RECT m_windowRect;
 	bool m_isTearingSupported;
 
-	// TODO: Further imGUI impl
-	// int m_PreviousMouseX;
-	// int m_PreviousMouseY;
-	// 
-	// GUI m_GUI;
+	ImguiWrapper m_gui;
 };

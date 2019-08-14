@@ -257,6 +257,36 @@ void CommandList::ClearDepthStencilTexture(const Texture& texture, D3D12_CLEAR_F
 	TrackResource(texture);
 }
 
+void CommandList::CopyTextureSubresource(Texture& texture, uint32_t firstSubresource, uint32_t numSubresources, D3D12_SUBRESOURCE_DATA* subresourceData)
+{
+	auto device = Application::Get().GetDevice();
+	auto destinationResource = texture.GetD3D12Resource();
+	if (destinationResource)
+	{
+		// Resource must be in the copy-destination state.
+		TransitionBarrier(texture, D3D12_RESOURCE_STATE_COPY_DEST);
+		FlushResourceBarriers();
+
+		UINT64 requiredSize = GetRequiredIntermediateSize(destinationResource.Get(), firstSubresource, numSubresources);
+
+		// Create a temporary (intermediate) resource for uploading the subresources
+		ComPtr<ID3D12Resource> intermediateResource;
+		ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(requiredSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&intermediateResource)
+		));
+
+		UpdateSubresources(m_d3d12CommandList.Get(), destinationResource.Get(), intermediateResource.Get(), 0, firstSubresource, numSubresources, subresourceData);
+
+		TrackObject(intermediateResource);
+		TrackObject(destinationResource);
+	}
+}
+
 void CommandList::SetGraphicsDynamicConstantBuffer(uint32_t rootParameterIndex, size_t sizeInBytes, const void* bufferData)
 {
 	// Constant buffers must be 256-byte aligned

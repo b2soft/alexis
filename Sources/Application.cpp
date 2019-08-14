@@ -19,6 +19,7 @@ static WindowMap s_windows;
 static WindowNameMap s_windowsByName;
 
 static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 uint64_t Application::s_frameCount = 0;
 
@@ -282,6 +283,7 @@ std::shared_ptr<Window> Application::CreateRenderWindow(const std::wstring& wind
 	}
 
 	WindowPtr window = std::make_shared<MakeWindow>(hWnd, windowName, clientWidth, clientHeight, vSync);
+	window->Initialize();
 
 	s_windows.insert(WindowMap::value_type(hWnd, window));
 	s_windowsByName.insert(WindowNameMap::value_type(windowName, window));
@@ -465,6 +467,11 @@ MouseButtonEventArgs::MouseButton DecodeMouseButton(UINT messageID)
 
 static LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
+	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+	{
+		return true;
+	}
+
 	WindowPtr window;
 	{
 		auto windowIt = s_windows.find(hWnd);
