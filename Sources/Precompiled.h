@@ -34,6 +34,7 @@ using namespace Microsoft::WRL;
 #include <dxgi1_6.h>
 #include <d3dcompiler.h>
 #include <DirectXMath.h>
+#include <DirectXTex.h>
 
 // D3D12 extension library.
 #include "d3dx12.h"
@@ -49,5 +50,9 @@ using namespace Microsoft::WRL;
 #include <map>
 #include <unordered_map>
 #include <unordered_set>
+#include <filesystem>
 
 #include "Helpers.h"
+
+namespace fs = std::filesystem;
+using namespace DirectX;

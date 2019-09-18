@@ -9,13 +9,15 @@
 #include <mutex>
 #include <vector>
 
+#include "Texture.h"
+
 class Resource;
 class UploadBuffer;
 class DynamicDescriptorHeap;
 class ResourceStateTracker;
 class RootSignature;
-class Texture;
 class RenderTarget;
+class GenerateMipsPSO;
 
 class Buffer;
 class IndexBuffer;
@@ -39,10 +41,18 @@ public:
 		return m_d3d12CommandList;
 	}
 
+	void TransitionBarrier(Microsoft::WRL::ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES stateAfter, UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, bool flushBarriers = false);
 	void TransitionBarrier(const Resource& resource, D3D12_RESOURCE_STATES stateAfter, UINT subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES, bool flushBarriers = false);
+	
+	void AliasingBarrier(Microsoft::WRL::ComPtr<ID3D12Resource> srcResource, Microsoft::WRL::ComPtr<ID3D12Resource> dstResource, bool flushBarriers = false);
+	void AliasingBarrier(const Resource& srcResource, const Resource& dstResource, bool flushBarriers = false);
+
+	void UAVBarrier(Microsoft::WRL::ComPtr<ID3D12Resource> resource, bool flushBarriers = false);
+	void UAVBarrier(const Resource& resource, bool flushBarriers = false);
 
 	void FlushResourceBarriers();
 
+	void CopyResource(Microsoft::WRL::ComPtr<ID3D12Resource> dstRes, Microsoft::WRL::ComPtr<ID3D12Resource> srcRes);
 	void CopyResource(Resource& dstRes, const Resource& srcRes);
 
 	void ResolveSubresource(Resource& dstRes, const Resource& srcRes, uint32_t dstSubresource = 0, uint32_t srcSubresource = 0);
@@ -159,6 +169,15 @@ public:
 		const D3D12_SHADER_RESOURCE_VIEW_DESC * srv = nullptr
 	);
 
+	void SetUnorderedAccessView(
+		uint32_t rootParameterIndex,
+		uint32_t descrptorOffset,
+		const Resource& resource,
+		D3D12_RESOURCE_STATES stateAfter = D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+		UINT firstSubresource = 0,
+		UINT numSubresources = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES,
+		const D3D12_UNORDERED_ACCESS_VIEW_DESC* uav = nullptr);
+
 	void SetRenderTarget(const RenderTarget& renderTarget);
 
 	void DrawIndexed(uint32_t indexCount, uint32_t instanceCount = 1, uint32_t startIndex = 0, int32_t baseVertex = 0, uint32_t startInstance = 0);
@@ -173,18 +192,28 @@ public:
 
 	void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 
+	void LoadFromTextureFile(Texture& texture, const std::wstring& fileName, TextureUsage textureUsage);
+
+	void GenerateMips(Texture& texture);
+
+	void GenerateMips_UAV(Texture& texture, DXGI_FORMAT format);
+
 private:
-	void TrackObject(Microsoft::WRL::ComPtr<ID3D12Object> object);
+	void TrackResource(Microsoft::WRL::ComPtr<ID3D12Object> object);
 	void TrackResource(const Resource& res);
 
 	// Binds the current descriptor heaps to the command list.
 	void BindDescriptorHeaps();
 
-	using TrackedObjects = std::vector<Microsoft::WRL::ComPtr<ID3D12Object>>;
-
 	D3D12_COMMAND_LIST_TYPE m_d3d12CommandListType;
 	Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList2> m_d3d12CommandList;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> m_d3d12CommandAllocator;
+
+	// For copy queues, it may be necessary to generate mips while loading textures.
+	// Mips can't be generated on copy queues but must be generated on compute or
+	// direct queues. In this case, a Compute command list is generated and executed 
+	// after the copy queue is finished uploading the first sub resource.
+	std::shared_ptr<CommandList> m_computeCommandList;
 
 	// Keep track of the currently bound root signatures to minimize root
 	// signature changes.
@@ -208,10 +237,16 @@ private:
 	// heaps if they are different than the currently bound descriptor heaps.
 	ID3D12DescriptorHeap* m_descriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 
+	std::unique_ptr<GenerateMipsPSO> m_generateMipsPSO;
+
 	// Objects that are being tracked by a command list that is "in-flight" on 
 	// the command-queue and cannot be deleted. To ensure objects are not deleted 
 	// until the command list is finished executing, a reference to the object
 	// is stored. The referenced objects are released when the command list is 
 	// reset.
+	using TrackedObjects = std::vector<Microsoft::WRL::ComPtr<ID3D12Object>>;
 	TrackedObjects m_trackedObjects;
+
+	static std::mutex s_textureCacheMutex;
+	static std::map<std::wstring, ID3D12Resource*> s_textureCache;
 };

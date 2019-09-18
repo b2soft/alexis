@@ -90,14 +90,14 @@ void Texture::CreateViews()
 		ThrowIfFailed(device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT)));
 
 		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 &&
-			CheckRTVSupport(formatSupport.Support1))
+			CheckRTVSupport())
 		{
 			m_rtv = app.AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 			device->CreateRenderTargetView(m_d3d12Resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
 		}
 
 		if ((desc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 &&
-			CheckDSVSupport(formatSupport.Support1))
+			CheckDSVSupport())
 		{
 			m_dsv = app.AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
 			device->CreateDepthStencilView(m_d3d12Resource.Get(), nullptr, m_dsv.GetDescriptorHandle());
@@ -318,6 +318,31 @@ DXGI_FORMAT Texture::GetTypelessFormat(DXGI_FORMAT format)
 
 }
 
+DXGI_FORMAT Texture::GetUAVCompatibleFormat(DXGI_FORMAT format)
+{
+	DXGI_FORMAT uavFormat = format;
+
+	switch (format)
+	{
+	case DXGI_FORMAT_R8G8B8A8_TYPELESS:
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+	case DXGI_FORMAT_B8G8R8A8_UNORM:
+	case DXGI_FORMAT_B8G8R8X8_UNORM:
+	case DXGI_FORMAT_B8G8R8A8_TYPELESS:
+	case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+	case DXGI_FORMAT_B8G8R8X8_TYPELESS:
+	case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+		uavFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		break;
+	case DXGI_FORMAT_R32_TYPELESS:
+	case DXGI_FORMAT_D32_FLOAT:
+		uavFormat = DXGI_FORMAT_R32_FLOAT;
+		break;
+	}
+
+	return uavFormat;
+}
+
 DescriptorAllocation Texture::CreateSRV(const D3D12_SHADER_RESOURCE_VIEW_DESC* srvDesc) const
 {
 	auto& app = Application::Get();
@@ -338,6 +363,23 @@ DescriptorAllocation Texture::CreateUAV(const D3D12_UNORDERED_ACCESS_VIEW_DESC* 
 	device->CreateUnorderedAccessView(m_d3d12Resource.Get(), nullptr, uavDesc, uav.GetDescriptorHandle());
 
 	return uav;
+}
+
+bool Texture::IsSRGBFormat(DXGI_FORMAT format)
+{
+	switch (format)
+	{
+	case DXGI_FORMAT_R8G8B8A8_UNORM_SRGB:
+	case DXGI_FORMAT_BC1_UNORM_SRGB:
+	case DXGI_FORMAT_BC2_UNORM_SRGB:
+	case DXGI_FORMAT_BC3_UNORM_SRGB:
+	case DXGI_FORMAT_B8G8R8A8_UNORM_SRGB:
+	case DXGI_FORMAT_B8G8R8X8_UNORM_SRGB:
+	case DXGI_FORMAT_BC7_UNORM_SRGB:
+		return true;
+	default:
+		return false;
+	}
 }
 
 Texture& Texture::operator=(Texture&& copy)

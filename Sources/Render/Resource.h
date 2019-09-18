@@ -9,11 +9,11 @@
 class Resource
 {
 public:
-	Resource(const std::wstring& name = L"");
-	Resource(const D3D12_RESOURCE_DESC& resourceDesc,
+	explicit Resource(const std::wstring& name = L"");
+	explicit Resource(const D3D12_RESOURCE_DESC& resourceDesc,
 		const D3D12_CLEAR_VALUE* clearValue = nullptr,
 		const std::wstring& name = L"");
-	Resource(Microsoft::WRL::ComPtr<ID3D12Resource> resource, const std::wstring& name = L"");
+	explicit Resource(Microsoft::WRL::ComPtr<ID3D12Resource> resource, const std::wstring& name = L"");
 	Resource(const Resource& copy);
 	Resource(Resource&& copy);
 
@@ -58,9 +58,16 @@ public:
 
 	virtual void Reset();
 
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT1 formatSupport) const;
+	bool CheckFormatSupport(D3D12_FORMAT_SUPPORT2 formatSupport) const;
+
 protected:
 	// The underlying D3D12 resource.
 	Microsoft::WRL::ComPtr<ID3D12Resource> m_d3d12Resource;
+	D3D12_FEATURE_DATA_FORMAT_SUPPORT m_formatSupport;
 	std::unique_ptr<D3D12_CLEAR_VALUE> m_d3d12ClearValue;
 	std::wstring m_resourceName;
+
+private:
+	void CheckFeatureSupport();
 };

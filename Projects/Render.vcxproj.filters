@@ -115,6 +115,9 @@
     <ClCompile Include="..\Sources\Libs\imgui\imgui_impl_win32.cpp">
       <Filter>Source Files\Libs\imgui</Filter>
     </ClCompile>
+    <ClCompile Include="..\Sources\Render\GenerateMipsPSO.cpp">
+      <Filter>Source Files\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Sources\Precompiled.h">
@@ -229,6 +232,9 @@
     <ClInclude Include="..\Sources\Libs\imgui\imgui_impl_win32.h">
       <Filter>Source Files\Libs\imgui</Filter>
     </ClInclude>
+    <ClInclude Include="..\Sources\Render\GenerateMipsPSO.h">
+      <Filter>Source Files\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="..\Sources\VertexShader.hlsl">
@@ -241,6 +247,9 @@
       <Filter>Resources</Filter>
     </FxCompile>
     <FxCompile Include="..\Sources\ImGui_ps.hlsl">
+      <Filter>Resources</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Sources\GenerateMips_CS.hlsl">
       <Filter>Resources</Filter>
     </FxCompile>
   </ItemGroup>
