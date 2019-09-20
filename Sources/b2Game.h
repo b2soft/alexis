@@ -1,11 +1,10 @@
 #pragma once
 
-#include "Game.h"
-#include "Window.h"
+#include <Game.h>
+#include <Window.h>
 
-#include "Render/RenderTarget.h"
-#include "Render/RootSignature.h"
-
+#include <Render/RenderTarget.h>
+#include <Render/RootSignature.h>
 
 #include <DirectXMath.h>
 

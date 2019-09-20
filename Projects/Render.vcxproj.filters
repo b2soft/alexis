@@ -8,249 +8,37 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{572f5975-786a-4cda-98c9-510f64438459}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Source Files\Render">
-      <UniqueIdentifier>{b977beb9-cdbe-4184-b7e5-5757086789cb}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Render\Buffers">
-      <UniqueIdentifier>{0ea5b580-89d2-40f7-ae9d-a037670d2133}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Libs">
-      <UniqueIdentifier>{8f29c8f3-9c51-497a-aa08-7af3c8850af6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Libs\imgui">
-      <UniqueIdentifier>{894392b7-3aa4-4a58-8d1a-5e1806668e72}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Sources\Precompiled.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Sources\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Application.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Window.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\HighResolutionClock.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\CommandQueue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="..\Sources\b2Game.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Sources\Render\UploadBuffer.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\DescriptorAllocation.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\DescriptorAllocator.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\DescriptorAllocatorPage.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\DynamicDescriptorHeap.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\RootSignature.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\ResourceStateTracker.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\CommandList.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Resource.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\RenderTarget.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Texture.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Mesh.cpp">
-      <Filter>Source Files\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Buffers\VertexBuffer.cpp">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Buffers\IndexBuffer.cpp">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Buffers\RawBuffer.cpp">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Buffers\StructuredBuffer.cpp">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\Buffers\Buffer.cpp">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_widgets.cpp">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Libs\imgui\imgui.cpp">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_demo.cpp">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_draw.cpp">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\ImguiWrapper.cpp">
+    <ClCompile Include="..\Sources\Precompiled.cpp">
       <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_impl_win32.cpp">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Render\GenerateMipsPSO.cpp">
-      <Filter>Source Files\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sources\Precompiled.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\d3dx12.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Helpers.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Application.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Events.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\KeyCodes.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Window.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\HighResolutionClock.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\CommandQueue.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Game.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Sources\b2Game.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Sources\Utils\Defines.h" />
-    <ClInclude Include="..\Sources\Render\UploadBuffer.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\DescriptorAllocation.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\DescriptorAllocator.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\DescriptorAllocatorPage.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\DynamicDescriptorHeap.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\RootSignature.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\ResourceStateTracker.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\CommandList.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Resource.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\RenderTarget.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Texture.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\ThreadSafeQueue.h">
+    <ClInclude Include="..\Sources\Precompiled.h">
       <Filter>Source Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\Sources\Render\Mesh.h">
-      <Filter>Source Files\Render</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Buffers\Buffer.h">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Buffers\VertexBuffer.h">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Buffers\IndexBuffer.h">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Buffers\RawBuffer.h">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\Buffers\StructuredBuffer.h">
-      <Filter>Source Files\Render\Buffers</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imgui_internal.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imstb_rectpack.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imstb_textedit.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imstb_truetype.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imconfig.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imgui.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\ImguiWrapper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Libs\imgui\imgui_impl_win32.h">
-      <Filter>Source Files\Libs\imgui</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Sources\Render\GenerateMipsPSO.h">
-      <Filter>Source Files\Render</Filter>
+    <ClInclude Include="..\Resources\resource.h">
+      <Filter>Resources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Sources\VertexShader.hlsl">
+    <Image Include="..\Resources\b2nder.ico">
       <Filter>Resources</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Sources\PixelShader.hlsl">
+    </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\Resources\Render.rc">
       <Filter>Resources</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Sources\ImGui_vs.hlsl">
-      <Filter>Resources</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Sources\ImGui_ps.hlsl">
-      <Filter>Resources</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Sources\GenerateMips_CS.hlsl">
-      <Filter>Resources</Filter>
-    </FxCompile>
+    </ResourceCompile>
   </ItemGroup>
 </Project>

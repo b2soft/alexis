@@ -13,6 +13,8 @@
 
 #include "b2Game.h"
 
+#include <imgui.h>
+
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
@@ -108,7 +110,7 @@ void b2Game::OnRender(RenderEventArgs& e)
 	commandList->SetScissorRect(m_scissorRect);
 
 	commandList->SetRenderTarget(m_renderTarget);
-	
+
 	// Update the MVP matrix
 	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
 	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
@@ -146,9 +148,12 @@ void b2Game::OnKeyPressed(KeyEventArgs& e)
 		m_window->ToggleFullscreen();
 		break;
 		}
-	case KeyCode::V:
-		m_window->ToggleVSync();
 		break;
+	case KeyCode::V:
+	{
+		m_window->ToggleVSync();
+	}
+	break;
 	}
 }
 

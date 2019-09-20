@@ -2,7 +2,7 @@
 
 #include "GenerateMipsPSO.h"
 
-#include "../GenerateMips_CS.h"
+#include <GenerateMips_CS.h>
 
 #include "Application.h"
 #include "Helpers.h"
@@ -48,7 +48,7 @@ GenerateMipsPSO::GenerateMipsPSO()
 	} pipelineStateStream;
 
 	pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
-	pipelineStateStream.cs = { g_generateMips_CS, sizeof(g_generateMips_CS) };
+	pipelineStateStream.cs = { g_GenerateMips_CS, sizeof(g_GenerateMips_CS) };
 
 	D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc = {
 		sizeof(pipelineStateStream), &pipelineStateStream

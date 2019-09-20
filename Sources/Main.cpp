@@ -3,7 +3,7 @@
 #include <Shlwapi.h>
 #include <dxgidebug.h>
 
-#include "Application.h"
+#include <Application.h>
 #include "b2Game.h"
 
 void ReportLiveObjects()
