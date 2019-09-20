@@ -23,18 +23,21 @@ Texture::Texture(const D3D12_RESOURCE_DESC& resourceDesc, const D3D12_CLEAR_VALU
 
 Texture::Texture(Microsoft::WRL::ComPtr<ID3D12Resource> resource, TextureUsage textureUsage /*= TextureUsage::Albedo*/, const std::wstring& name /*= L""*/)
 	: Resource(resource, name)
+	, m_textureUsage(textureUsage)
 {
 	CreateViews();
 }
 
 Texture::Texture(const Texture& copy)
 	: Resource(copy)
+	, m_textureUsage(copy.m_textureUsage)
 {
 	CreateViews();
 }
 
 Texture::Texture(Texture&& other)
 	: Resource(other)
+	, m_textureUsage(other.m_textureUsage)
 {
 	CreateViews();
 }
@@ -271,6 +274,7 @@ DXGI_FORMAT Texture::GetTypelessFormat(DXGI_FORMAT format)
 	case DXGI_FORMAT_R16_SNORM:
 	case DXGI_FORMAT_R16_SINT:
 		typelessFormat = DXGI_FORMAT_R16_TYPELESS;
+		break;
 	case DXGI_FORMAT_R8_UNORM:
 	case DXGI_FORMAT_R8_UINT:
 	case DXGI_FORMAT_R8_SNORM:

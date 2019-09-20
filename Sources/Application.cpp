@@ -537,7 +537,7 @@ static LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			unsigned char keyboardState[256];
 			GetKeyboardState(keyboardState);
 			wchar_t translatedCharacters[4];
-			if (int result = ToUnicodeEx(static_cast<UINT>(wParam), scanCode, keyboardState, translatedCharacters, 4, 0, NULL) > 0)
+			if (ToUnicodeEx(static_cast<UINT>(wParam), scanCode, keyboardState, translatedCharacters, 4, 0, NULL) > 0)
 			{
 				c = translatedCharacters[0];
 			}
