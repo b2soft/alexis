@@ -13,6 +13,8 @@
 
 #include "b2Game.h"
 
+#include <imgui.h>
+
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
@@ -108,7 +110,7 @@ void b2Game::OnRender(RenderEventArgs& e)
 	commandList->SetScissorRect(m_scissorRect);
 
 	commandList->SetRenderTarget(m_renderTarget);
-	
+
 	// Update the MVP matrix
 	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
 	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
@@ -119,7 +121,7 @@ void b2Game::OnRender(RenderEventArgs& e)
 	commandList->SetGraphicsDynamicConstantBuffer(RootParameters::MatricesCB, matrices);
 	m_cubeMesh->Draw(*commandList);
 
-	static bool showDemoWindow = true;
+	static bool showDemoWindow = false;
 	if (showDemoWindow)
 	{
 		ImGui::ShowDemoWindow(&showDemoWindow);
@@ -146,9 +148,12 @@ void b2Game::OnKeyPressed(KeyEventArgs& e)
 		m_window->ToggleFullscreen();
 		break;
 		}
-	case KeyCode::V:
-		m_window->ToggleVSync();
 		break;
+	case KeyCode::V:
+	{
+		m_window->ToggleVSync();
+	}
+	break;
 	}
 }
 
@@ -236,11 +241,11 @@ bool b2Game::LoadContent()
 
 	// Load the vertex shader
 	ComPtr<ID3DBlob> vertexShaderBlob;
-	ThrowIfFailed(D3DReadFileToBlob(L"VertexShader.cso", &vertexShaderBlob));
+	ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/VertexShader.cso", &vertexShaderBlob));
 
 	// Load the pixel shader
 	ComPtr<ID3DBlob> pixelShaderBlob;
-	ThrowIfFailed(D3DReadFileToBlob(L"PixelShader.cso", &pixelShaderBlob));
+	ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader.cso", &pixelShaderBlob));
 
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{
