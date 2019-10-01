@@ -209,12 +209,6 @@
     <FxCompile Include="Resources\ImGui_vs.hlsl">
       <Filter>Resources</Filter>
     </FxCompile>
-    <FxCompile Include="Resources\PixelShader.hlsl">
-      <Filter>Resources</Filter>
-    </FxCompile>
-    <FxCompile Include="Resources\VertexShader.hlsl">
-      <Filter>Resources</Filter>
-    </FxCompile>
     <FxCompile Include="Resources\GenerateMips_CS.hlsl">
       <Filter>Resources</Filter>
     </FxCompile>

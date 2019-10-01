@@ -121,7 +121,7 @@ void b2Game::OnRender(RenderEventArgs& e)
 	commandList->SetGraphicsDynamicConstantBuffer(RootParameters::MatricesCB, matrices);
 	m_cubeMesh->Draw(*commandList);
 
-	static bool showDemoWindow = true;
+	static bool showDemoWindow = false;
 	if (showDemoWindow)
 	{
 		ImGui::ShowDemoWindow(&showDemoWindow);
@@ -241,11 +241,11 @@ bool b2Game::LoadContent()
 
 	// Load the vertex shader
 	ComPtr<ID3DBlob> vertexShaderBlob;
-	ThrowIfFailed(D3DReadFileToBlob(L"VertexShader.cso", &vertexShaderBlob));
+	ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/VertexShader.cso", &vertexShaderBlob));
 
 	// Load the pixel shader
 	ComPtr<ID3DBlob> pixelShaderBlob;
-	ThrowIfFailed(D3DReadFileToBlob(L"PixelShader.cso", &pixelShaderBlob));
+	ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader.cso", &pixelShaderBlob));
 
 	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
 	{

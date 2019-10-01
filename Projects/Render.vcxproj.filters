@@ -8,6 +8,9 @@
     <Filter Include="Resources">
       <UniqueIdentifier>{572f5975-786a-4cda-98c9-510f64438459}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Shaders">
+      <UniqueIdentifier>{077ea1b6-8743-4d8c-b9a8-9fad54968070}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\Main.cpp">
@@ -40,5 +43,13 @@
     <ResourceCompile Include="..\Resources\Render.rc">
       <Filter>Resources</Filter>
     </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\PixelShader.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\VertexShader.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>
