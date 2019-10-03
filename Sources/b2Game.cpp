@@ -74,7 +74,7 @@ void b2Game::OnUpdate(UpdateEventArgs& e)
 
 	// Update the model matrix
 	float angle = static_cast<float>(e.TotalTime * 90.0);
-	const XMVECTOR rotationAxis = XMVectorSet(0.0f, 1.0f, 1.0f, 0.0f);
+	const XMVECTOR rotationAxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
 
 	// Update view matrix
@@ -237,7 +237,11 @@ bool b2Game::LoadContent()
 	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
-	m_cubeMesh = Mesh::CreateCube(*commandList);
+	m_cubeMesh = Mesh::LoadFBXFromFile(*commandList, L"Resources/Models/Cube.fbx");
+	//m_cubeMesh = Mesh::LoadFBXFromFile(*commandList, L"Resources/Models/Sphere.fbx");
+	
+	//TODO Fix plane render
+	//m_cubeMesh = Mesh::LoadFBXFromFile(*commandList, L"Resources/Models/Plane.fbx");
 
 	// Load the vertex shader
 	ComPtr<ID3DBlob> vertexShaderBlob;

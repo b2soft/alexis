@@ -4,6 +4,10 @@
 
 #include "Mesh.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
@@ -20,75 +24,65 @@ void Mesh::Draw(CommandList& commandList)
 	commandList.DrawIndexed(m_indexCount);
 }
 
-std::unique_ptr<Mesh> Mesh::CreateCube(CommandList& commandList, float size /*= 1.0f*/, bool rhcoords /*= false*/)
+std::unique_ptr<Mesh> Mesh::LoadFBXFromFile(CommandList& commandList, const std::wstring& path)
 {
-	const int k_faceCount = 6;
+	Assimp::Importer importer;
 
-	static const XMVECTORF32 faceNormals[k_faceCount] =
+	std::string convertedPath(path.begin(), path.end());
+
+	auto scene = importer.ReadFile(convertedPath, aiProcess_ConvertToLeftHanded |
+		aiProcess_RemoveRedundantMaterials |
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_ValidateDataStructure |
+		aiProcess_PreTransformVertices);
+
+	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		{ 0, 0, 1 },
-		{ 0, 0, -1 },
-		{ 1, 0, 0 },
-		{ -1, 0, 0 },
-		{ 0, 1, 0 },
-		{ 0, -1, 0 },
-	};
+		std::string errorStr = "Failed to load " + convertedPath + " with error: " + importer.GetErrorString();
+		throw std::exception(errorStr.c_str());
+	}
 
-	static const XMVECTORF32 textureCoordinates[4] =
-	{
-		{ 1, 0 },
-		{ 1, 1 },
-		{ 0, 1 },
-		{ 0, 0 },
-	};
-
+	using namespace DirectX;
 	VertexCollection vertices;
 	IndexCollection indices;
 
-	size /= 2.0f;
-
-	for (int i = 0; i < k_faceCount; i++)
+	for (std::size_t i = 0; i < scene->mNumMeshes; ++i)
 	{
-		XMVECTOR normal = faceNormals[i];
+		const aiMesh* mesh = scene->mMeshes[i];
 
-		XMVECTOR basis = (i >= 4) ? g_XMIdentityR2 : g_XMIdentityR1;
+		for (unsigned int t = 0; t < mesh->mNumFaces; ++t)
+		{
+			const aiFace* face = &mesh->mFaces[t];
 
-		XMVECTOR side1 = XMVector3Cross(normal, basis);
-		XMVECTOR side2 = XMVector3Cross(normal, side1);
+			indices.emplace_back(face->mIndices[0]);
+			indices.emplace_back(face->mIndices[1]);
+			indices.emplace_back(face->mIndices[2]);
+		}
 
-		// Six indices per face
-		size_t vbase = vertices.size();
-		indices.push_back(static_cast<uint16_t>(vbase + 0));
-		indices.push_back(static_cast<uint16_t>(vbase + 1));
-		indices.push_back(static_cast<uint16_t>(vbase + 2));
-
-		indices.push_back(static_cast<uint16_t>(vbase + 0));
-		indices.push_back(static_cast<uint16_t>(vbase + 2));
-		indices.push_back(static_cast<uint16_t>(vbase + 3));
-
-		// Four vertices per face
-		vertices.push_back(VertexPositionDef((normal - side1 - side2) * size));//, normal, textureCoordinates[0]));
-		vertices.push_back(VertexPositionDef((normal - side1 + side2) * size));//, normal, textureCoordinates[1]));
-		vertices.push_back(VertexPositionDef((normal + side1 + side2) * size));//, normal, textureCoordinates[2]));
-		vertices.push_back(VertexPositionDef((normal + side1 - side2) * size));//, normal, textureCoordinates[3]));
+		if (mesh->HasPositions())
+		{
+			for (std::size_t vertexId = 0; vertexId < mesh->mNumVertices; ++vertexId)
+			{
+				VertexPositionDef def;
+				def.Position = XMFLOAT3{ mesh->mVertices[vertexId].x, mesh->mVertices[vertexId].y, mesh->mVertices[vertexId].z };
+				vertices.emplace_back(def);
+			}
+		}
 	}
 
 	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
-	mesh->Initialize(commandList, vertices, indices, rhcoords);
+	mesh->Initialize(commandList, vertices, indices);
 
 	return mesh;
 }
 
-void Mesh::Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices, bool rhcoords)
+void Mesh::Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices)
 {
 	if (vertices.size() >= USHRT_MAX)
 	{
 		throw std::exception("Too many vertices for 16-bit index buffer!");
-	}
-
-	if (!rhcoords)
-	{
-		//ReverseWinding
 	}
 
 	commandList.CopyVertexBuffer(m_vertexBuffer, vertices);

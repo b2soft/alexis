@@ -210,7 +210,7 @@
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
-      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>

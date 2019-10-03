@@ -45,14 +45,14 @@ public:
 
 	void Draw(CommandList& commandList);
 
-	static std::unique_ptr<Mesh> CreateCube(CommandList& commandList, float size = 1.0f, bool rhcoords = false);
+	static std::unique_ptr<Mesh> LoadFBXFromFile(CommandList& commandList, const std::wstring& path);
 
 private:
 	friend struct std::default_delete<Mesh>;
 
 	virtual ~Mesh() = default;
 
-	void Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices, bool rhcoords);
+	void Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices);
 
 	VertexBuffer m_vertexBuffer;
 	IndexBuffer m_indexBuffer;
