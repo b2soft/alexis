@@ -14,23 +14,13 @@
 
 struct VertexPositionDef
 {
-	VertexPositionDef() {}
-
-	VertexPositionDef(const DirectX::XMFLOAT3& position)
-		: Position(position)
-	{
-	}
-
-	VertexPositionDef(DirectX::FXMVECTOR position)
-	{
-		XMStoreFloat3(&Position, position);
-	}
-
-
 	DirectX::XMFLOAT3 Position;
-	//DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT3 Normal;
+	DirectX::XMFLOAT3 Tangent;
+	DirectX::XMFLOAT3 Bitangent;
+	DirectX::XMFLOAT2 UV0;
 
-	static const int InputElementCount = 1;
+	static const int InputElementCount = 5;
 	static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
 };
 

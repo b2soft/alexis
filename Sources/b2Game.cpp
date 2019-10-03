@@ -18,13 +18,6 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-// Vertex data for a colored cube
-struct VertexPosColor
-{
-	XMFLOAT3 position;
-	XMFLOAT3 color;
-};
-
 struct Mat
 {
 	XMMATRIX ModelMatrix;
@@ -37,7 +30,6 @@ enum RootParameters
 	MatricesCB, //ConstantBuffer<Mat> MatCB: register(b0);
 	NumRootParameters
 };
-
 
 b2Game::b2Game(const std::wstring& name, int width, int height, bool vSync /*= false*/)
 	: Game(name, width, height, vSync)
@@ -249,12 +241,6 @@ bool b2Game::LoadContent()
 	ComPtr<ID3DBlob> pixelShaderBlob;
 	ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader.cso", &pixelShaderBlob));
 
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-	};
-
 	// Create a root signature
 
 	// Check is root signature version 1.1 is available.
@@ -302,7 +288,7 @@ bool b2Game::LoadContent()
 	rtvFormats.RTFormats[0] = backBufferFormat;
 
 	pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
-	pipelineStateStream.inputLayout = { inputLayout, _countof(inputLayout) };
+	pipelineStateStream.inputLayout = { VertexPositionDef::InputElements, VertexPositionDef::InputElementCount };
 	pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 	pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
@@ -314,6 +300,7 @@ bool b2Game::LoadContent()
 	{
 		sizeof(PipelineStateStream), &pipelineStateStream
 	};
+	
 	ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pipelineState)));
 
 	auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(backBufferFormat, m_width, m_height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);
