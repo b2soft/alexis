@@ -197,7 +197,7 @@
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -210,8 +210,8 @@
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
-      <AdditionalDependencies>imgui.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -261,7 +261,7 @@
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -275,6 +275,10 @@
       <VariableName>g_%(Filename)</VariableName>
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
+    <Lib>
+      <AdditionalLibraryDirectories>..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>assimp-vc142-mt.lib</AdditionalDependencies>
+    </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,12 +4,20 @@
 
 #include "Mesh.h"
 
+#include <assimp/Importer.hpp>
+#include <assimp/postprocess.h>
+#include <assimp/scene.h>
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
 const D3D12_INPUT_ELEMENT_DESC VertexPositionDef::InputElements[] =
 {
 	{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	{ "NORMAL", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	{ "TANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	{ "BITANGENT", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
+	{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 };
 
 void Mesh::Draw(CommandList& commandList)
@@ -20,75 +28,85 @@ void Mesh::Draw(CommandList& commandList)
 	commandList.DrawIndexed(m_indexCount);
 }
 
-std::unique_ptr<Mesh> Mesh::CreateCube(CommandList& commandList, float size /*= 1.0f*/, bool rhcoords /*= false*/)
+std::unique_ptr<Mesh> Mesh::LoadFBXFromFile(CommandList& commandList, const std::wstring& path)
 {
-	const int k_faceCount = 6;
+	Assimp::Importer importer;
 
-	static const XMVECTORF32 faceNormals[k_faceCount] =
-	{
-		{ 0, 0, 1 },
-		{ 0, 0, -1 },
-		{ 1, 0, 0 },
-		{ -1, 0, 0 },
-		{ 0, 1, 0 },
-		{ 0, -1, 0 },
-	};
+	std::string convertedPath(path.begin(), path.end());
 
-	static const XMVECTORF32 textureCoordinates[4] =
+	auto scene = importer.ReadFile(convertedPath, aiProcess_ConvertToLeftHanded |
+		aiProcess_RemoveRedundantMaterials |
+		aiProcess_CalcTangentSpace |
+		aiProcess_Triangulate |
+		aiProcess_JoinIdenticalVertices |
+		aiProcess_ValidateDataStructure |
+		aiProcess_PreTransformVertices);
+
+	if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{
-		{ 1, 0 },
-		{ 1, 1 },
-		{ 0, 1 },
-		{ 0, 0 },
-	};
+		std::string errorStr = "Failed to load " + convertedPath + " with error: " + importer.GetErrorString();
+		throw std::exception(errorStr.c_str());
+	}
+
+	using namespace DirectX;
 
 	VertexCollection vertices;
 	IndexCollection indices;
 
-	size /= 2.0f;
-
-	for (int i = 0; i < k_faceCount; i++)
+	for (std::size_t i = 0; i < scene->mNumMeshes; ++i)
 	{
-		XMVECTOR normal = faceNormals[i];
+		const aiMesh* mesh = scene->mMeshes[i];
 
-		XMVECTOR basis = (i >= 4) ? g_XMIdentityR2 : g_XMIdentityR1;
+		for (unsigned int t = 0; t < mesh->mNumFaces; ++t)
+		{
+			const aiFace* face = &mesh->mFaces[t];
 
-		XMVECTOR side1 = XMVector3Cross(normal, basis);
-		XMVECTOR side2 = XMVector3Cross(normal, side1);
+			indices.emplace_back(face->mIndices[0]);
+			indices.emplace_back(face->mIndices[1]);
+			indices.emplace_back(face->mIndices[2]);
+		}
 
-		// Six indices per face
-		size_t vbase = vertices.size();
-		indices.push_back(static_cast<uint16_t>(vbase + 0));
-		indices.push_back(static_cast<uint16_t>(vbase + 1));
-		indices.push_back(static_cast<uint16_t>(vbase + 2));
+		vertices.reserve(mesh->mNumVertices);
 
-		indices.push_back(static_cast<uint16_t>(vbase + 0));
-		indices.push_back(static_cast<uint16_t>(vbase + 2));
-		indices.push_back(static_cast<uint16_t>(vbase + 3));
+		if (!mesh->HasPositions() || !mesh->HasNormals() || !mesh->HasTangentsAndBitangents() || !mesh->HasTextureCoords(0))
+		{
+			std::string errorStr = "Failed to load " + convertedPath + " : invalid model";
+			throw std::exception(errorStr.c_str());
+		}
 
-		// Four vertices per face
-		vertices.push_back(VertexPositionDef((normal - side1 - side2) * size));//, normal, textureCoordinates[0]));
-		vertices.push_back(VertexPositionDef((normal - side1 + side2) * size));//, normal, textureCoordinates[1]));
-		vertices.push_back(VertexPositionDef((normal + side1 + side2) * size));//, normal, textureCoordinates[2]));
-		vertices.push_back(VertexPositionDef((normal + side1 - side2) * size));//, normal, textureCoordinates[3]));
+		for (std::size_t vertexId = 0; vertexId < mesh->mNumVertices; ++vertexId)
+		{
+			VertexPositionDef def;
+			const auto& vertexPos = mesh->mVertices[vertexId];
+			def.Position = XMFLOAT3{ vertexPos.x, vertexPos.y,vertexPos.z };
+
+			const auto& normal = mesh->mNormals[vertexId];
+			def.Normal = XMFLOAT3{ normal.x, normal.y, normal.z };
+
+			const auto& tangent = mesh->mTangents[vertexId];
+			def.Tangent = XMFLOAT3{ tangent.x, tangent.y, tangent.z };
+
+			const auto& bitangent = mesh->mBitangents[vertexId];
+			def.Bitangent = XMFLOAT3{ bitangent.x, bitangent.y, bitangent.z };
+
+			const auto& uv0 = mesh->mTextureCoords[0][vertexId];
+			def.Bitangent = XMFLOAT3{ uv0.x, uv0.y, uv0.z };
+
+			vertices.emplace_back(def);
+		}
 	}
 
 	std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
-	mesh->Initialize(commandList, vertices, indices, rhcoords);
+	mesh->Initialize(commandList, vertices, indices);
 
 	return mesh;
 }
 
-void Mesh::Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices, bool rhcoords)
+void Mesh::Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices)
 {
 	if (vertices.size() >= USHRT_MAX)
 	{
 		throw std::exception("Too many vertices for 16-bit index buffer!");
-	}
-
-	if (!rhcoords)
-	{
-		//ReverseWinding
 	}
 
 	commandList.CopyVertexBuffer(m_vertexBuffer, vertices);

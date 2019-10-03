@@ -73,15 +73,15 @@ Application::~Application()
 void Application::Initialize()
 {
 	// Before doing anything using either the DXGI or the Direct3D API, the debug layer should be enabled in debug builds.
-// Enabling the debug layer after creating the ID3D12Device will cause the runtime to remove the device.
+	// Enabling the debug layer after creating the ID3D12Device will cause the runtime to remove the device.
 #if defined(_DEBUG)
-	ComPtr<ID3D12Debug> debugInterface;
+	ComPtr<ID3D12Debug1> debugInterface;
 	ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
 	debugInterface->EnableDebugLayer();
 
 	// Enable these if you want full validation (will slow down rendering a lot)
-	// debugInterface->SetEnableGPUBasedValidation(TRUE);
-	// debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
+	debugInterface->SetEnableGPUBasedValidation(TRUE);
+	//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
 #endif
 
 	auto dxgiAdapter = GetAdapter(false);

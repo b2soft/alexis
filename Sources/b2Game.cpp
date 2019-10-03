@@ -18,13 +18,6 @@
 using namespace Microsoft::WRL;
 using namespace DirectX;
 
-// Vertex data for a colored cube
-struct VertexPosColor
-{
-	XMFLOAT3 position;
-	XMFLOAT3 color;
-};
-
 struct Mat
 {
 	XMMATRIX ModelMatrix;
@@ -37,7 +30,6 @@ enum RootParameters
 	MatricesCB, //ConstantBuffer<Mat> MatCB: register(b0);
 	NumRootParameters
 };
-
 
 b2Game::b2Game(const std::wstring& name, int width, int height, bool vSync /*= false*/)
 	: Game(name, width, height, vSync)
@@ -74,7 +66,7 @@ void b2Game::OnUpdate(UpdateEventArgs& e)
 
 	// Update the model matrix
 	float angle = static_cast<float>(e.TotalTime * 90.0);
-	const XMVECTOR rotationAxis = XMVectorSet(0.0f, 1.0f, 1.0f, 0.0f);
+	const XMVECTOR rotationAxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
 	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
 
 	// Update view matrix
@@ -237,7 +229,9 @@ bool b2Game::LoadContent()
 	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COPY);
 	auto commandList = commandQueue->GetCommandList();
 
-	m_cubeMesh = Mesh::CreateCube(*commandList);
+	m_cubeMesh = Mesh::LoadFBXFromFile(*commandList, L"Resources/Models/Cube.fbx");
+	//m_cubeMesh = Mesh::LoadFBXFromFile(*commandList, L"Resources/Models/Sphere.fbx");
+	//m_cubeMesh = Mesh::LoadFBXFromFile(*commandList, L"Resources/Models/Plane.fbx");
 
 	// Load the vertex shader
 	ComPtr<ID3DBlob> vertexShaderBlob;
@@ -246,12 +240,6 @@ bool b2Game::LoadContent()
 	// Load the pixel shader
 	ComPtr<ID3DBlob> pixelShaderBlob;
 	ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader.cso", &pixelShaderBlob));
-
-	D3D12_INPUT_ELEMENT_DESC inputLayout[] =
-	{
-		{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-		{ "COLOR", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
-	};
 
 	// Create a root signature
 
@@ -300,7 +288,7 @@ bool b2Game::LoadContent()
 	rtvFormats.RTFormats[0] = backBufferFormat;
 
 	pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
-	pipelineStateStream.inputLayout = { inputLayout, _countof(inputLayout) };
+	pipelineStateStream.inputLayout = { VertexPositionDef::InputElements, VertexPositionDef::InputElementCount };
 	pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 	pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 	pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
@@ -312,6 +300,7 @@ bool b2Game::LoadContent()
 	{
 		sizeof(PipelineStateStream), &pipelineStateStream
 	};
+	
 	ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pipelineState)));
 
 	auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(backBufferFormat, m_width, m_height, 1, 1, 1, 0, D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET);

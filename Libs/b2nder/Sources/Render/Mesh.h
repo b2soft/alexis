@@ -14,23 +14,13 @@
 
 struct VertexPositionDef
 {
-	VertexPositionDef() {}
-
-	VertexPositionDef(const DirectX::XMFLOAT3& position)
-		: Position(position)
-	{
-	}
-
-	VertexPositionDef(DirectX::FXMVECTOR position)
-	{
-		XMStoreFloat3(&Position, position);
-	}
-
-
 	DirectX::XMFLOAT3 Position;
-	//DirectX::XMFLOAT3 normal;
+	DirectX::XMFLOAT3 Normal;
+	DirectX::XMFLOAT3 Tangent;
+	DirectX::XMFLOAT3 Bitangent;
+	DirectX::XMFLOAT2 UV0;
 
-	static const int InputElementCount = 1;
+	static const int InputElementCount = 5;
 	static const D3D12_INPUT_ELEMENT_DESC InputElements[InputElementCount];
 };
 
@@ -45,14 +35,14 @@ public:
 
 	void Draw(CommandList& commandList);
 
-	static std::unique_ptr<Mesh> CreateCube(CommandList& commandList, float size = 1.0f, bool rhcoords = false);
+	static std::unique_ptr<Mesh> LoadFBXFromFile(CommandList& commandList, const std::wstring& path);
 
 private:
 	friend struct std::default_delete<Mesh>;
 
 	virtual ~Mesh() = default;
 
-	void Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices, bool rhcoords);
+	void Initialize(CommandList& commandList, VertexCollection& vertices, IndexCollection& indices);
 
 	VertexBuffer m_vertexBuffer;
 	IndexBuffer m_indexBuffer;
