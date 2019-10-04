@@ -77,8 +77,8 @@ uint64_t CommandQueue::ExecuteCommandLists(const std::vector<std::shared_ptr<Com
 	listsToBeQueued.reserve(commandLists.size() * 2);
 
 	// Generate mips command lists
-	// std::vector<std::shared_ptr<CommandList> > generateMipsCommandLists;
-	// generateMipsCommandLists.reserve(commandLists.size());
+	std::vector<std::shared_ptr<CommandList>> generateMipsCommandLists;
+	generateMipsCommandLists.reserve(commandLists.size());
 
 	// Command lists to be executed
 	std::vector<ID3D12CommandList*> d3d12CommandLists;
@@ -100,11 +100,11 @@ uint64_t CommandQueue::ExecuteCommandLists(const std::vector<std::shared_ptr<Com
 		listsToBeQueued.push_back(pendingCommandList);
 		listsToBeQueued.push_back(commandList);
 
-		// auto generateMipsCommandList = commandList->GetGenerateMipsCommandList();
-		// if (generateMipsCommandList)
-		// {
-		// 	generateMipsCommandLists.push_back(generateMipsCommandList);
-		// }
+		auto generateMipsCommandList = commandList->GetGenerateMipsCommandList();
+		if (generateMipsCommandList)
+		{
+			generateMipsCommandLists.push_back(generateMipsCommandList);
+		}
 	}
 
 	UINT numCommandLists = static_cast<UINT>(d3d12CommandLists.size());
@@ -121,12 +121,12 @@ uint64_t CommandQueue::ExecuteCommandLists(const std::vector<std::shared_ptr<Com
 
 	// If there are any command lists that generate mips then execute those
 	// after the initial resource command lists have finished.
-	// if (generateMipsCommandLists.size() > 0)
-	// {
-	// 	auto computeQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
-	// 	computeQueue->Wait(*this);
-	// 	computeQueue->ExecuteCommandLists(generateMipsCommandLists);
-	// }
+	if (generateMipsCommandLists.size() > 0)
+	{
+		auto computeQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
+		computeQueue->Wait(*this);
+		computeQueue->ExecuteCommandLists(generateMipsCommandLists);
+	}
 
 	return fenceValue;
 }
@@ -167,7 +167,7 @@ void CommandQueue::Flush()
 		});
 
 	// In case the command queue was signaled directly using the CommandQueue::Signal method
-	//then the fence value of the command queue might be higher than the fence value of any of the executed command lists
+	// then the fence value of the command queue might be higher than the fence value of any of the executed command lists
 	WaitForFenceValue(m_fenceValue);
 }
 

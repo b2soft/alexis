@@ -192,6 +192,11 @@ public:
 
 	void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 
+	std::shared_ptr<CommandList> GetGenerateMipsCommandList() const
+	{
+		return m_computeCommandList;
+	}
+
 	void LoadFromTextureFile(Texture& texture, const std::wstring& fileName, TextureUsage textureUsage = TextureUsage::Albedo);
 
 	void GenerateMips(Texture& texture);

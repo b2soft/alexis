@@ -88,6 +88,12 @@ void b2Game::OnRender(RenderEventArgs& e)
 	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
 	auto commandList = commandQueue->GetCommandList();
 
+	auto commandQueue2 = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
+	auto commandList2 = commandQueue2->GetCommandList();
+
+	//commandList->GenerateMips(m_b3nderTexture); // Works
+	commandList2->GenerateMips(m_b3nderTexture); //Does not work
+
 	// Cleat the render targets
 	{
 		FLOAT clearColor[] = { 0.4f, 0.6f, 0.9f, 1.0f };
@@ -121,6 +127,8 @@ void b2Game::OnRender(RenderEventArgs& e)
 		ImGui::ShowDemoWindow(&showDemoWindow);
 	}
 
+
+	
 	commandQueue->ExecuteCommandList(commandList);
 
 	m_window->Present(m_renderTarget.GetTexture(AttachmentPoint::Color0));
@@ -269,12 +277,12 @@ bool b2Game::LoadContent()
 	CD3DX12_ROOT_PARAMETER1 rootParameters[RootParameters::NumRootParameters];
 	rootParameters[RootParameters::MatricesCB].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
 	rootParameters[RootParameters::DiffuseTexture].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
-	
-	CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0, D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
-	//CD3DX12_STATIC_SAMPLER_DESC anisotropicSampler(0, D3D12_FILTER_ANISOTROPIC);
+
+	//CD3DX12_STATIC_SAMPLER_DESC linearRepeatSampler(0, D3D12_FILTER_COMPARISON_MIN_MAG_MIP_LINEAR);
+	CD3DX12_STATIC_SAMPLER_DESC anisotropicSampler(0, D3D12_FILTER_ANISOTROPIC);
 
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-	rootSignatureDescription.Init_1_1(2, rootParameters, 1, &linearRepeatSampler, rootSignatureFlags);
+	rootSignatureDescription.Init_1_1(2, rootParameters, 1, &anisotropicSampler, rootSignatureFlags);
 
 	m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, featureData.HighestVersion);
 

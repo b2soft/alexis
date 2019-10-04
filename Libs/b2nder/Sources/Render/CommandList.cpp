@@ -566,6 +566,7 @@ void CommandList::Reset()
 	}
 
 	m_rootSignature = nullptr;
+	m_computeCommandList = nullptr;
 }
 
 void CommandList::TrackResource(const Resource& res)
@@ -649,10 +650,10 @@ void CommandList::LoadFromTextureFile(Texture& texture, const std::wstring& file
 		switch (metadata.dimension)
 		{
 		case TEX_DIMENSION_TEXTURE1D:
-			textureDesc = CD3DX12_RESOURCE_DESC::Tex1D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.arraySize));
+			textureDesc = CD3DX12_RESOURCE_DESC::Tex1D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT16>(metadata.arraySize));
 			break;
 		case TEX_DIMENSION_TEXTURE2D:
-			textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.height), static_cast<UINT16>(metadata.arraySize));
+			textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>( metadata.height), static_cast<UINT16>(metadata.arraySize));
 			break;
 		case TEX_DIMENSION_TEXTURE3D:
 			textureDesc = CD3DX12_RESOURCE_DESC::Tex3D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.height), static_cast<UINT16>(metadata.depth));
@@ -870,7 +871,7 @@ void CommandList::GenerateMips_UAV(Texture& texture, DXGI_FORMAT format)
 		// Maximum number of mips to generate is 4
 		mipCount = std::min<DWORD>(4, mipCount + 1);
 
-		// Clamp to total nu,ber of mips left
+		// Clamp to total nuber of mips left
 		mipCount = (srcMip + mipCount) >= resourceDesc.MipLevels ? resourceDesc.MipLevels - srcMip - 1 : mipCount;
 
 		// Dimensions should not reduce to 0
