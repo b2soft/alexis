@@ -38,6 +38,7 @@ std::unique_ptr<Mesh> Mesh::LoadFBXFromFile(CommandList& commandList, const std:
 		aiProcess_RemoveRedundantMaterials |
 		aiProcess_CalcTangentSpace |
 		aiProcess_Triangulate |
+		//aiProcess_FlipUVs |
 		aiProcess_JoinIdenticalVertices |
 		aiProcess_ValidateDataStructure |
 		aiProcess_PreTransformVertices);
@@ -90,7 +91,7 @@ std::unique_ptr<Mesh> Mesh::LoadFBXFromFile(CommandList& commandList, const std:
 			def.Bitangent = XMFLOAT3{ bitangent.x, bitangent.y, bitangent.z };
 
 			const auto& uv0 = mesh->mTextureCoords[0][vertexId];
-			def.Bitangent = XMFLOAT3{ uv0.x, uv0.y, uv0.z };
+			def.UV0 = XMFLOAT2{ uv0.x, uv0.y };
 
 			vertices.emplace_back(def);
 		}

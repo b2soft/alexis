@@ -192,7 +192,7 @@ public:
 
 	void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 
-	void LoadFromTextureFile(Texture& texture, const std::wstring& fileName, TextureUsage textureUsage);
+	void LoadFromTextureFile(Texture& texture, const std::wstring& fileName, TextureUsage textureUsage = TextureUsage::Albedo);
 
 	void GenerateMips(Texture& texture);
 

@@ -80,7 +80,7 @@ void Application::Initialize()
 	debugInterface->EnableDebugLayer();
 
 	// Enable these if you want full validation (will slow down rendering a lot)
-	debugInterface->SetEnableGPUBasedValidation(TRUE);
+	//debugInterface->SetEnableGPUBasedValidation(TRUE);
 	//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
 #endif
 

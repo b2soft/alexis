@@ -70,4 +70,6 @@ private:
 	bool m_contentLoaded;
 
 	std::unique_ptr<Mesh> m_cubeMesh;
+
+	Texture m_b3nderTexture;
 };
