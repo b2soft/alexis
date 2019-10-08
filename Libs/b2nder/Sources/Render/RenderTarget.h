@@ -3,12 +3,16 @@
 #include <cstdint>
 #include <vector>
 
+#include <DirectXMath.h> 
+
 #include "Texture.h"
 
 enum AttachmentPoint
 {
 	Color0,
 	Color1,
+	Color2,
+	Color3,
 	DepthStencil,
 	NumAttachmentPoints
 };
@@ -32,6 +36,11 @@ public:
 
 	// Resize all textures associated
 	void Resize(uint32_t width, uint32_t height);
+	void Resize(DirectX::XMUINT2 size);
+
+	DirectX::XMUINT2 GetSize() const;
+
+	D3D12_VIEWPORT GetViewport(DirectX::XMFLOAT2 scale = { 1.0f, 1.0f }, DirectX::XMFLOAT2 bias = { 0.0f, 0.0f }, float minDepth = 0.0f, float maxDepth = 1.0f) const;
 
 	// Get a list of textures attached to RT
 	const std::vector<Texture>& GetTextures() const;
@@ -44,4 +53,5 @@ public:
 
 private:
 	std::vector<Texture> m_textures;
+	DirectX::XMUINT2 m_size{ 0, 0 };
 };

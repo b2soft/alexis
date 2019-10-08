@@ -36,6 +36,7 @@ public:
 	void Draw(CommandList& commandList);
 
 	static std::unique_ptr<Mesh> LoadFBXFromFile(CommandList& commandList, const std::wstring& path);
+	static std::unique_ptr<Mesh> FullScreenQuad(CommandList& commandList);
 
 private:
 	friend struct std::default_delete<Mesh>;

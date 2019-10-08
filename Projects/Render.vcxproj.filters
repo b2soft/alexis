@@ -45,10 +45,22 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Resources\Shaders\PixelShader.hlsl">
+    <FxCompile Include="..\Resources\Shaders\PBS_object_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\VertexShader.hlsl">
+    <FxCompile Include="..\Resources\Shaders\PBS_object_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Lighting_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Lighting_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

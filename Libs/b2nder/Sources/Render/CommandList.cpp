@@ -641,10 +641,10 @@ void CommandList::LoadFromTextureFile(Texture& texture, const std::wstring& file
 			);
 		}
 
-		if (textureUsage == TextureUsage::Albedo)
-		{
-			metadata.format = MakeSRGB(metadata.format);
-		}
+		//if (textureUsage == TextureUsage::Albedo)
+		//{
+		//	metadata.format = MakeSRGB(metadata.format);
+		//}
 
 		D3D12_RESOURCE_DESC textureDesc = {};
 		switch (metadata.dimension)
