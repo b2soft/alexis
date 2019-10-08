@@ -12,6 +12,6 @@ SamplerState LinearRepeatSampler : register(s0);
 float4 main(PSInput input) : SV_TARGET
 {
 	float4 col = gb0.Sample(LinearRepeatSampler, input.uv0);
-	//return col * 8.0f;
-	return col;
+	return col * 3.0f;
+	//return col;
 }

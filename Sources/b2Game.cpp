@@ -2,6 +2,7 @@
 
 #include <d3dcompiler.h>
 #include <wrl.h>
+#include <chrono>
 
 #include "Application.h"
 #include "CommandQueue.h"
@@ -44,6 +45,8 @@ enum Hdr2SdrParameters
 	NumHdr2SdrParameters
 };
 
+static double g_FPS = 0.0;
+
 b2Game::b2Game(const std::wstring& name, int width, int height, bool vSync /*= false*/)
 	: Game(name, width, height, vSync)
 	, m_scissorRect(CD3DX12_RECT(0, 0, LONG_MAX, LONG_MAX))
@@ -65,13 +68,9 @@ void b2Game::OnUpdate(UpdateEventArgs& e)
 	totalTime += e.ElapsedTime;
 	frameCount++;
 
-	if (totalTime > 0.0)
+	if (totalTime > 1.0)
 	{
-		double fps = frameCount / totalTime;
-
-		char buffer[512];
-		sprintf_s(buffer, "FPS: %f\n", fps);
-		//OutputDebugStringA(buffer);
+		g_FPS = frameCount / totalTime;
 
 		frameCount = 0;
 		totalTime = 0.0;
@@ -79,11 +78,11 @@ void b2Game::OnUpdate(UpdateEventArgs& e)
 
 	// Update the model matrix
 	float angle = static_cast<float>(e.TotalTime * 90.0);
-	const XMVECTOR rotationAxis = XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
+	const XMVECTOR rotationAxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
 	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
 
 	// Update view matrix
-	const XMVECTOR eyePosition = XMVectorSet(0.0f, 0.0f, -10.0f, 1.0f);
+	const XMVECTOR eyePosition = XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f);
 	const XMVECTOR focusPoint = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
 	const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
 	m_viewMatrix = XMMatrixLookAtLH(eyePosition, focusPoint, upDirection);
@@ -119,7 +118,6 @@ void b2Game::OnRender(RenderEventArgs& e)
 	{
 		commandList->SetRenderTarget(m_gbufferRT);
 		commandList->SetViewport(m_gbufferRT.GetViewport());
-		
 
 		// Update the MVP matrix
 		XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
@@ -131,7 +129,8 @@ void b2Game::OnRender(RenderEventArgs& e)
 		commandList->SetPipelineState(m_pbsObjectPSO);
 		commandList->SetGraphicsRootSignature(m_pbsObjectSig);
 
-		commandList->SetShaderResourceView(PBSObjectParameters::Textures, 0, m_baseColorTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		//commandList->SetShaderResourceView(PBSObjectParameters::Textures, 0, m_baseColorTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		commandList->SetShaderResourceView(PBSObjectParameters::Textures, 0, m_checker2Tex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandList->SetShaderResourceView(PBSObjectParameters::Textures, 1, m_normalTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandList->SetShaderResourceView(PBSObjectParameters::Textures, 2, m_metalTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
@@ -144,14 +143,14 @@ void b2Game::OnRender(RenderEventArgs& e)
 	{
 		commandList->SetRenderTarget(m_hdrRT);
 		commandList->SetViewport(m_hdrRT.GetViewport());
-
+		
 		commandList->SetPipelineState(m_lightingPSO);
 		commandList->SetGraphicsRootSignature(m_lightingSig);
-
+		
 		commandList->SetShaderResourceView(LightingParameters::GBuffer, 0, m_gbufferRT.GetTexture(AttachmentPoint::Color0), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandList->SetShaderResourceView(LightingParameters::GBuffer, 1, m_gbufferRT.GetTexture(AttachmentPoint::Color1), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandList->SetShaderResourceView(LightingParameters::GBuffer, 2, m_gbufferRT.GetTexture(AttachmentPoint::Color2), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
+		
 		m_fsQuad->Draw(*commandList);
 	}
 
@@ -160,12 +159,12 @@ void b2Game::OnRender(RenderEventArgs& e)
 		const auto& windowRT = m_window->GetRenderTarget();
 		commandList->SetRenderTarget(windowRT);
 		commandList->SetViewport(windowRT.GetViewport());
-
+	
 		commandList->SetPipelineState(m_hdr2sdrPSO);
 		commandList->SetGraphicsRootSignature(m_hdr2sdrSig);
-
+	
 		commandList->SetShaderResourceView(Hdr2SdrParameters::HDR, 0, m_hdrRT.GetTexture(AttachmentPoint::Color0), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
+	
 		m_fsQuad->Draw(*commandList);
 	}
 
@@ -173,8 +172,11 @@ void b2Game::OnRender(RenderEventArgs& e)
 
 	OnGui();
 
-	m_window->Present(m_gbufferRT.GetTexture(AttachmentPoint::Color0));
-	//m_window->Present();
+
+	//std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(10));
+
+	//m_window->Present(m_gbufferRT.GetTexture(AttachmentPoint::Color0));
+	m_window->Present();
 }
 
 void b2Game::OnKeyPressed(KeyEventArgs& e)
@@ -297,62 +299,65 @@ void b2Game::OnGui()
 	//		ImGui::EndMenu();
 	//	}
 
-	//	if (ImGui::BeginMenu("Options"))
-	//	{
-	//		bool vSync = m_pWindow->IsVSync();
-	//		if (ImGui::MenuItem("V-Sync", "V", &vSync))
-	//		{
-	//			m_pWindow->SetVSync(vSync);
-	//		}
+		//	if (ImGui::BeginMenu("Options"))
+		//	{
+		//		bool vSync = m_pWindow->IsVSync();
+		//		if (ImGui::MenuItem("V-Sync", "V", &vSync))
+		//		{
+		//			m_pWindow->SetVSync(vSync);
+		//		}
 
-	//		bool fullscreen = m_pWindow->IsFullScreen();
-	//		if (ImGui::MenuItem("Full screen", "Alt+Enter", &fullscreen))
-	//		{
-	//			m_pWindow->SetFullscreen(fullscreen);
-	//		}
+		//		bool fullscreen = m_pWindow->IsFullScreen();
+		//		if (ImGui::MenuItem("Full screen", "Alt+Enter", &fullscreen))
+		//		{
+		//			m_pWindow->SetFullscreen(fullscreen);
+		//		}
 
-	//		ImGui::EndMenu();
-	//	}
+		//		ImGui::EndMenu();
+		//	}
 
-	//	char buffer[256];
+		//	char buffer[256];
 
-	//	{
-	//		// Output a slider to scale the resolution of the HDR render target.
-	//		float renderScale = m_RenderScale;
-	//		ImGui::PushItemWidth(300.0f);
-	//		ImGui::SliderFloat("Resolution Scale", &renderScale, 0.1f, 2.0f);
-	//		// Using Ctrl+Click on the slider, the user can set values outside of the 
-	//		// specified range. Make sure to clamp to a sane range to avoid creating
-	//		// giant render targets.
-	//		renderScale = clamp(renderScale, 0.0f, 2.0f);
+		//	{
+		//		// Output a slider to scale the resolution of the HDR render target.
+		//		float renderScale = m_RenderScale;
+		//		ImGui::PushItemWidth(300.0f);
+		//		ImGui::SliderFloat("Resolution Scale", &renderScale, 0.1f, 2.0f);
+		//		// Using Ctrl+Click on the slider, the user can set values outside of the 
+		//		// specified range. Make sure to clamp to a sane range to avoid creating
+		//		// giant render targets.
+		//		renderScale = clamp(renderScale, 0.0f, 2.0f);
 
-	//		// Output current resolution of render target.
-	//		auto size = m_HDRRenderTarget.GetSize();
-	//		ImGui::SameLine();
-	//		sprintf_s(buffer, _countof(buffer), "(%ux%u)", size.x, size.y);
-	//		ImGui::Text(buffer);
+		//		// Output current resolution of render target.
+		//		auto size = m_HDRRenderTarget.GetSize();
+		//		ImGui::SameLine();
+		//		sprintf_s(buffer, _countof(buffer), "(%ux%u)", size.x, size.y);
+		//		ImGui::Text(buffer);
 
-	//		// Resize HDR render target if the scale changed.
-	//		if (renderScale != m_RenderScale)
-	//		{
-	//			m_RenderScale = renderScale;
-	//			RescaleHDRRenderTarget(m_RenderScale);
-	//		}
-	//	}
+		//		// Resize HDR render target if the scale changed.
+		//		if (renderScale != m_RenderScale)
+		//		{
+		//			m_RenderScale = renderScale;
+		//			RescaleHDRRenderTarget(m_RenderScale);
+		//		}
+		//	}
 
-	//	{
-	//		sprintf_s(buffer, _countof(buffer), "FPS: %.2f (%.2f ms)  ", g_FPS, 1.0 / g_FPS * 1000.0);
-	//		auto fpsTextSize = ImGui::CalcTextSize(buffer);
-	//		ImGui::SameLine(ImGui::GetWindowWidth() - fpsTextSize.x);
-	//		ImGui::Text(buffer);
-	//	}
+		//char buffer[256];
+		//
+		//{
+		//	sprintf_s(buffer, _countof(buffer), "FPS: %.2f (%.2f ms) Frame: %i  ", g_FPS, 1.0 / g_FPS * 1000.0, Application::GetFrameCount());
+		//	auto fpsTextSize = ImGui::CalcTextSize(buffer);
+		//	ImGui::SameLine(ImGui::GetWindowWidth() - fpsTextSize.x);
+		//	ImGui::Text(buffer);
+		//}
 
-	//	ImGui::EndMainMenuBar();
+		//ImGui::EndMainMenuBar();
 	//}
 
 	//if (showDemoWindow)
 	//{
-	//	ImGui::ShowDemoWindow(&showDemoWindow);
+	bool t = true;
+		ImGui::ShowDemoWindow(&t);
 	//}
 
 	//if (showOptions)
@@ -434,6 +439,9 @@ bool b2Game::LoadContent()
 	commandList->LoadFromTextureFile(m_baseColorTex, L"Resources/Textures/metal_base.dds");
 	commandList->LoadFromTextureFile(m_normalTex, L"Resources/Textures/metal_normal.dds");
 	commandList->LoadFromTextureFile(m_metalTex, L"Resources/Textures/metal_mero.dds");
+
+	commandList->LoadFromTextureFile(m_checkerTex, L"Resources/Textures/Checker.png");
+	commandList->LoadFromTextureFile(m_checker2Tex, L"Resources/Textures/Checker2.png");
 
 	// Check is root signature version 1.1 is available.
 	// Version 1.1 is preferred over 1.0 because it allows GPU to optimize some stuff
@@ -644,6 +652,9 @@ bool b2Game::LoadContent()
 
 		m_hdr2sdrSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, featureData.HighestVersion);
 
+		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
+
 		struct PipelineStateStream
 		{
 			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSignature;
@@ -651,7 +662,8 @@ bool b2Game::LoadContent()
 			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY primitiveTopology;
 			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
 			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
-			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
+			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
+			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats; 
 		} pipelineStateStream;
 
 		pipelineStateStream.rootSignature = m_hdr2sdrSig.GetRootSignature().Get();
@@ -659,6 +671,7 @@ bool b2Game::LoadContent()
 		pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
+		pipelineStateStream.Rasterizer = rasterizerDesc;
 		pipelineStateStream.rtvFormats = m_window->GetRenderTarget().GetRenderTargetFormats();
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =

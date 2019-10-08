@@ -125,9 +125,7 @@ void GetSurfaceInfo(_In_ size_t width, _In_ size_t height, _In_ DXGI_FORMAT fmt,
 	}
 	else
 	{
-		//TODO: DirectXTex
-		//size_t bpp = BitsPerPixel(fmt);
-		size_t bpp = 32;
+		size_t bpp = BitsPerPixel(fmt);
 		rowBytes = (width * bpp + 7) / 8; // round up to nearest byte
 		numRows = height;
 		numBytes = rowBytes * height;
@@ -327,7 +325,9 @@ void ImguiWrapper::Render(std::shared_ptr<CommandList> commandList, const Render
 
 	// Check if there is anything to render.
 	if (!drawData || drawData->CmdListsCount == 0)
+	{
 		return;
+	}
 
 	ImVec2 displayPos = drawData->DisplayPos;
 
@@ -336,17 +336,17 @@ void ImguiWrapper::Render(std::shared_ptr<CommandList> commandList, const Render
 	commandList->SetRenderTarget(renderTarget);
 
 	// Set root arguments.
-//    DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixOrthographicRH( drawData->DisplaySize.x, drawData->DisplaySize.y, 0.0f, 1.0f );
+	//DirectX::XMMATRIX projectionMatrix = DirectX::XMMatrixOrthographicRH( drawData->DisplaySize.x, drawData->DisplaySize.y, 0.0f, 1.0f );
 	float L = drawData->DisplayPos.x;
 	float R = drawData->DisplayPos.x + drawData->DisplaySize.x;
 	float T = drawData->DisplayPos.y;
 	float B = drawData->DisplayPos.y + drawData->DisplaySize.y;
 	float mvp[4][4] =
 	{
-		{ 2.0f / (R - L),   0.0f,           0.0f,       0.0f },
-		{ 0.0f,         2.0f / (T - B),     0.0f,       0.0f },
-		{ 0.0f,         0.0f,           0.5f,       0.0f },
-		{ (R + L) / (L - R),  (T + B) / (B - T),    0.5f,       1.0f },
+		{ 2.0f / (R - L),		0.0f			,	0.0f,	0.0f },
+		{ 0.0f,					2.0f / (T - B),		0.0f,	0.0f },
+		{ 0.0f,					0.0f,				0.5f,	0.0f },
+		{ (R + L) / (L - R),	(T + B) / (B - T),	0.5f,	1.0f },
 	};
 
 	commandList->SetGraphics32BitConstants(RootParameters::MatrixCB, mvp);

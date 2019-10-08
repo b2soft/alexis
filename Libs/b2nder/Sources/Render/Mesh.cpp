@@ -107,20 +107,20 @@ std::unique_ptr<Mesh> Mesh::FullScreenQuad(CommandList& commandList)
 {
 	VertexPositionDef defs[4];
 
-	defs[0].Position = XMFLOAT3(-1.0f, -1.0f, 0.0f);
+	defs[0].Position = XMFLOAT3(-1.0f, -1.0f, 1.0f);
 	defs[0].UV0 = XMFLOAT2(0.0f, 0.0f);
 
-	defs[1].Position = XMFLOAT3(-1.0f, 1.0f, 0.0f);
-	defs[1].UV0 = XMFLOAT2(1.0f, 0.0f);
+	defs[1].Position = XMFLOAT3(-1.0f, 1.0f, 1.0f);
+	defs[1].UV0 = XMFLOAT2(0.0f, 1.0f);
 
-	defs[2].Position = XMFLOAT3(1.0f, 1.0f, 0.0f);
-	defs[2].UV0 = XMFLOAT2(1.0f, 1.0f);
+	defs[2].Position = XMFLOAT3(1.0f, -1.0f, 1.0f);
+	defs[2].UV0 = XMFLOAT2(1.0f, 0.0f);
 
-	defs[3].Position = XMFLOAT3(1.0f, -1.0f, 0.0f);
-	defs[3].UV0 = XMFLOAT2(0.0f, 1.0f);
+	defs[3].Position = XMFLOAT3(1.0f, 1.0f, 1.0f);
+	defs[3].UV0 = XMFLOAT2(1.0f, 1.0f);
 
 	VertexCollection vertices = { defs[0],defs[1], defs[2], defs[3] };
-	IndexCollection indices = { 0, 1, 2, 2, 3, 0 };
+	IndexCollection indices = { 0, 1, 2, 2, 1, 3 };
 
 	std::unique_ptr<Mesh> fsQuad = std::make_unique<Mesh>();
 	fsQuad->Initialize(commandList, vertices, indices);

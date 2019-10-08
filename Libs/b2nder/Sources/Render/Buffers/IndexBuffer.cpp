@@ -12,7 +12,7 @@ IndexBuffer::IndexBuffer(const std::wstring& name /*= L"Index Buffer"*/)
 
 void IndexBuffer::CreateViews(size_t numElements, size_t elementSize)
 {
-	assert(elementSize == 2 || elementSize == 4 && "Indices must be 16 or 32 bit integers only!");
+	assert((elementSize == 2 || elementSize == 4) && "Indices must be 16 or 32 bit integers only!");
 
 	m_numIndices = numElements;
 	m_indexFormat = (elementSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;

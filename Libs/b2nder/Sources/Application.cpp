@@ -183,7 +183,7 @@ Microsoft::WRL::ComPtr<ID3D12Device2> Application::CreateDevice(Microsoft::WRL::
 	// Suppress messages by specific ID
 	D3D12_MESSAGE_ID suppressedIds[] =
 	{
-		D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+		//D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
 		D3D12_MESSAGE_ID_MAP_INVALID_NULLRANGE,
 		D3D12_MESSAGE_ID_UNMAP_INVALID_NULLRANGE
 	};
@@ -465,7 +465,7 @@ MouseButtonEventArgs::MouseButton DecodeMouseButton(UINT messageID)
 	return mouseBtn;
 }
 
-static LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
 	{
@@ -487,10 +487,11 @@ static LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 		{
 		case WM_PAINT:
 		{
+			++Application::s_frameCount;
 			// DT is get from the Window
-			UpdateEventArgs updateEventArgs(0.0f, 0.0f);
+			UpdateEventArgs updateEventArgs(0.0f, 0.0f, Application::s_frameCount);
 			window->OnUpdate(updateEventArgs);
-			RenderEventArgs renderEventArgs(0.0f, 0.0f);
+			RenderEventArgs renderEventArgs(0.0f, 0.0f, Application::s_frameCount);
 			window->OnRender(renderEventArgs);
 		}
 		break;
@@ -505,10 +506,15 @@ static LRESULT WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 			// For printable characters, the next message will be WM_CHAR.
 			// This message contains the character code we need to send the KeyPressed event.
 			// Inspired by the SDL 1.2 implementation.
-			if (PeekMessage(&charMsg, hWnd, 0, 0, PM_NOREMOVE) && charMsg.message == WM_CHAR)
+			if (PeekMessageW(&charMsg, hWnd, 0, 0, PM_NOREMOVE) && charMsg.message == WM_CHAR)
 			{
 				GetMessage(&charMsg, hWnd, 0, 0);
 				c = static_cast<unsigned int>(charMsg.wParam);
+
+				if (charMsg.wParam > 0 && charMsg.wParam < 0x10000)
+				{
+					ImGui::GetIO().AddInputCharacter((unsigned short)charMsg.wParam);
+				}
 			}
 
 			bool shift = (GetAsyncKeyState(VK_SHIFT & 0x8000) != 0);

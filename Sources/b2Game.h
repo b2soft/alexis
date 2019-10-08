@@ -81,4 +81,7 @@ private:
 	Texture m_baseColorTex;
 	Texture m_normalTex;
 	Texture m_metalTex;
+
+	Texture m_checkerTex;
+	Texture m_checker2Tex;
 };

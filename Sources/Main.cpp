@@ -32,7 +32,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd)
 
 	Application::Create(hInstance);
 	{
-		std::shared_ptr<b2Game> game = std::make_shared<b2Game>(L"b2Game Sample", 1280, 720);
+		std::shared_ptr<b2Game> game = std::make_shared<b2Game>(L"b2Game Sample", 1280, 720, false);
 		retCode = Application::Get().Run(game);
 	}
 

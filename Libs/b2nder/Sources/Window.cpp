@@ -51,7 +51,7 @@ void Window::OnUpdate(UpdateEventArgs& e)
 
 	if (auto game = m_game.lock())
 	{
-		UpdateEventArgs updateEventArgs(m_updateClock.GetDeltaSeconds(), m_updateClock.GetTotalSeconds());
+		UpdateEventArgs updateEventArgs(m_updateClock.GetDeltaSeconds(), m_updateClock.GetTotalSeconds(), e.FrameNumber);
 		game->OnUpdate(updateEventArgs);
 	}
 }
@@ -62,7 +62,7 @@ void Window::OnRender(RenderEventArgs& e)
 
 	if (auto game = m_game.lock())
 	{
-		RenderEventArgs renderEventArgs(m_renderClock.GetDeltaSeconds(), m_renderClock.GetTotalSeconds());
+		RenderEventArgs renderEventArgs(m_renderClock.GetDeltaSeconds(), m_renderClock.GetTotalSeconds(), e.FrameNumber);
 		game->OnRender(renderEventArgs);
 	}
 }
