@@ -35,8 +35,6 @@ CommandList::CommandList(D3D12_COMMAND_LIST_TYPE type)
 
 	m_uploadBuffer = std::make_unique<UploadBuffer>();
 
-	m_resourceStateTracker = std::make_unique<ResourceStateTracker>();
-
 	for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
 	{
 		m_dynamicDescriptorHeap[i] = std::make_unique<DynamicDescriptorHeap>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
@@ -49,12 +47,14 @@ CommandList::~CommandList()
 
 void CommandList::TransitionBarrier(Microsoft::WRL::ComPtr<ID3D12Resource> resource, D3D12_RESOURCE_STATES stateAfter, UINT subresource /*= D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES*/, bool flushBarriers /*= false*/)
 {
-	if (resource)
-	{
-		// The "before" state is not important. It will be resolved by the resource state tracker
-		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.Get(), D3D12_RESOURCE_STATE_COMMON, stateAfter, subresource);
-		m_resourceStateTracker->ResourceBarrier(barrier);
-	}
+
+	D3D12_RESOURCE_BARRIER& barrierDesc = m_resourceBarrierBuffer[m_numBarriersToFlush++];
+
+	barrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
+	barrierDesc.Transition.pResource = resource.Get();
+	barrierDesc.Transition.StateBefore = D3D12_RESOURCE_STATE_COMMON;
+	barrierDesc.Transition.StateAfter = stateAfter;
+
 
 	if (flushBarriers)
 	{

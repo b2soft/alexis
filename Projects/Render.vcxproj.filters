@@ -22,6 +22,9 @@
     <ClCompile Include="..\Sources\Precompiled.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Sources\SampleApp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Sources\b2Game.h">
@@ -32,6 +35,9 @@
     </ClInclude>
     <ClInclude Include="..\Resources\resource.h">
       <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\SampleApp.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
