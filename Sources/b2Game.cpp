@@ -4,7 +4,7 @@
 #include <wrl.h>
 
 #include "Application.h"
-#include "CommandQueue.h"
+#include <Render/Commands/CommandListManager.h>
 #include "Helpers.h"
 #include "Window.h"
 
@@ -85,14 +85,6 @@ void b2Game::OnRender(RenderEventArgs& e)
 {
 	Game::OnRender(e);
 
-	auto commandQueue = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_DIRECT);
-	auto commandList = commandQueue->GetCommandList();
-
-	auto commandQueue2 = Application::Get().GetCommandQueue(D3D12_COMMAND_LIST_TYPE_COMPUTE);
-	auto commandList2 = commandQueue2->GetCommandList();
-
-	//commandList->GenerateMips(m_b3nderTexture); // Works
-	commandList2->GenerateMips(m_b3nderTexture); //Does not work
 
 	// Cleat the render targets
 	{

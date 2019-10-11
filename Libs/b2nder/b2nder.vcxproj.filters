@@ -17,12 +17,12 @@
     <Filter Include="Sources\Shaders">
       <UniqueIdentifier>{6d42e57a-ad61-46d0-8f97-524bb79843f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Render\Commands">
+      <UniqueIdentifier>{cf320eb8-3c9c-407c-9951-dfb28f93cf94}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Application.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\CommandQueue.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Game.cpp">
@@ -97,6 +97,15 @@
     <ClCompile Include="Sources\Precompiled.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Commands\CommandListManager.cpp">
+      <Filter>Sources\Render\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Commands\CommandAllocatorPool.cpp">
+      <Filter>Sources\Render\Commands</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Commands\CommandContext.cpp">
+      <Filter>Sources\Render\Commands</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Utils\Defines.h">
@@ -112,9 +121,6 @@
       <Filter>Sources\Shaders</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Application.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\CommandQueue.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Sources\d3dx12.h">
@@ -200,6 +206,15 @@
     </ClInclude>
     <ClInclude Include="Sources\Precompiled.h">
       <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Commands\CommandListManager.h">
+      <Filter>Sources\Render\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Commands\CommandAllocatorPool.h">
+      <Filter>Sources\Render\Commands</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Commands\CommandContext.h">
+      <Filter>Sources\Render\Commands</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
