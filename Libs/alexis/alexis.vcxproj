@@ -147,7 +147,7 @@
       <ShaderModel>5.1</ShaderModel>
       <HeaderFileOutput>Resources/Generated/%(Filename).h</HeaderFileOutput>
       <VariableName>g_%(Filename)</VariableName>
-      <ObjectFileOutput>$(OutDir)Shaders/%(Filename).cso</ObjectFileOutput>
+      <ObjectFileOutput>$(OutDir)Shaders/%(Filename)_d.cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
       <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
