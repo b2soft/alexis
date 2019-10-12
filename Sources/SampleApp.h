@@ -20,6 +20,10 @@ public:
 private:
 	static const UINT k_frameCount = 2;
 
+	// Temporary texture stuff
+	static const UINT k_textureSize = 256;
+	static const UINT k_texturePixelSize = 4;
+
 	// Pipeline objects
 	CD3DX12_VIEWPORT m_viewport;
 	CD3DX12_RECT m_scissorRect;
@@ -30,6 +34,7 @@ private:
 	ComPtr<ID3D12CommandQueue> m_commandQueue;
 	ComPtr<ID3D12RootSignature> m_rootSignature;
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> m_commandList;
 	UINT m_rtvDescriptorSize{ 0 };
@@ -37,6 +42,7 @@ private:
 	// Application resources
 	ComPtr<ID3D12Resource> m_vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	ComPtr<ID3D12Resource> m_texture;
 
 	// Sync objects
 	UINT m_frameIndex{ 0 };
@@ -46,6 +52,7 @@ private:
 
 	void LoadPipeline();
 	void LoadAssets();
+	std::vector<UINT8> GenerateTextureData();
 	void PopulateCommandList();
 	void WaitForPreviousFrame();
 };

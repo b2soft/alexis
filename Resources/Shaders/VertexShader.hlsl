@@ -1,16 +1,16 @@
 struct PSInput
 {
-	float4 color : COLOR;
+	float2 uv : TEXCOORD0;
 	float4 position : SV_POSITION;
 };
 
 
-PSInput main(float4 position : POSITION, float4 color : COLOR)
+PSInput main(float4 position : POSITION, float4 uv : TEXCOORD)
 {
 	PSInput result;
 
 	result.position = position;
-	result.color = color;
+	result.uv = uv;
 
 	return result;
 }
