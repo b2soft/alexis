@@ -1,6 +1,7 @@
 #pragma once
 
 #include <d3dx12.h>
+#include <DirectXMath.h>
 
 #include <CoreApplication.h>
 
@@ -11,6 +12,10 @@ class SampleApp : public alexis::CoreApplication
 public:
 	SampleApp(UINT width, UINT height, std::wstring name);
 
+	struct SceneConstantBuffer
+	{
+		DirectX::XMFLOAT4 offset;
+	};
 
 	virtual void OnInit() override;
 	virtual void OnUpdate() override;
@@ -36,6 +41,7 @@ private:
 	ComPtr<ID3D12RootSignature> m_rootSignature;
 	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
 	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
+	ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> m_commandList;
 	ComPtr<ID3D12GraphicsCommandList> m_bundle;
@@ -44,6 +50,9 @@ private:
 	// Application resources
 	ComPtr<ID3D12Resource> m_vertexBuffer;
 	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
+	ComPtr<ID3D12Resource> m_constantBuffer;
+	UINT8* m_pCbvDataBegin{ nullptr };
+	SceneConstantBuffer m_constantBufferData;
 	ComPtr<ID3D12Resource> m_texture;
 
 	// Sync objects
