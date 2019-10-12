@@ -18,5 +18,25 @@ public:
 private:
 	static const UINT k_frameCount = 2;
 
+	// Pipeline objects
+	ComPtr<IDXGISwapChain4> m_swapChain;
+	ComPtr<ID3D12Device> m_device;
+	ComPtr<ID3D12Resource> m_renderTargets[k_frameCount];
+	ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+	ComPtr<ID3D12CommandQueue> m_commandQueue;
+	ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+	ComPtr<ID3D12PipelineState> m_pipelineState;
+	ComPtr<ID3D12GraphicsCommandList> m_commandList;
+	UINT m_rtvDescriptorSize{ 0 };
 
+	// Sync objects
+	UINT m_frameIndex{ 0 };
+	HANDLE m_fenceEvent{ NULL };
+	ComPtr<ID3D12Fence> m_fence;
+	UINT64 m_fenceValue;
+
+	void LoadPipeline();
+	void LoadAssets();
+	void PopulateCommandList();
+	void WaitForPreviousFrame();
 };
