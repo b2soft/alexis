@@ -35,7 +35,7 @@ private:
 	ComPtr<IDXGISwapChain4> m_swapChain;
 	ComPtr<ID3D12Device> m_device;
 	ComPtr<ID3D12Resource> m_renderTargets[k_frameCount];
-	ComPtr<ID3D12CommandAllocator> m_commandAllocator;
+	ComPtr<ID3D12CommandAllocator> m_commandAllocators[k_frameCount];
 	ComPtr<ID3D12CommandAllocator> m_bundleAllocator;
 	ComPtr<ID3D12CommandQueue> m_commandQueue;
 	ComPtr<ID3D12RootSignature> m_rootSignature;
@@ -59,11 +59,12 @@ private:
 	UINT m_frameIndex{ 0 };
 	HANDLE m_fenceEvent{ NULL };
 	ComPtr<ID3D12Fence> m_fence;
-	UINT64 m_fenceValue;
+	UINT64 m_fenceValues[k_frameCount];
 
 	void LoadPipeline();
 	void LoadAssets();
 	std::vector<UINT8> GenerateTextureData();
 	void PopulateCommandList();
-	void WaitForPreviousFrame();
+	void MoveToNextFrame();
+	void WaitForGpu();
 };

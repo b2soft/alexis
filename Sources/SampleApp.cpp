@@ -17,7 +17,8 @@ struct Vertex
 SampleApp::SampleApp(UINT width, UINT height, std::wstring name) :
 	CoreApplication(width, height, name),
 	m_viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
-	m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height))
+	m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height)),
+	m_fenceValues{}
 {
 }
 
@@ -53,13 +54,13 @@ void SampleApp::OnRender()
 	ThrowIfFailed(m_swapChain->Present(1, 0));
 
 	// Wait for prev frame to be rendered
-	WaitForPreviousFrame();
+	MoveToNextFrame();
 }
 
 void SampleApp::OnDestroy()
 {
 	// Wait for GPU to render all stuff
-	WaitForPreviousFrame();
+	WaitForGpu();
 
 	CloseHandle(m_fenceEvent);
 }
@@ -78,6 +79,9 @@ void SampleApp::LoadPipeline()
 		debugInterface->EnableDebugLayer();
 
 		dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
+
+		//debugInterface->SetEnableGPUBasedValidation(TRUE);
+		//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
 	}
 #endif
 
@@ -165,17 +169,17 @@ void SampleApp::LoadPipeline()
 	{
 		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
 
-		// Create RTV per back buffer
+		// Create rtv + alloc per back buffer
 		for (UINT i = 0; i < k_frameCount; ++i)
 		{
 			ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i])));
 			m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(1, m_rtvDescriptorSize);
+
+			// Create Command Allocator
+			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
 		}
 	}
-
-	// Create Command Allocator
-	ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocator)));
 
 	// Create Bundle Allocator
 	ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS(&m_bundleAllocator)));
@@ -271,7 +275,7 @@ void SampleApp::LoadAssets()
 	ThrowIfFailed(m_device->CreateCommandList(
 		0,
 		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		m_commandAllocator.Get(),
+		m_commandAllocators[m_frameIndex].Get(),
 		nullptr,
 		IID_PPV_ARGS(&m_commandList)));
 
@@ -401,8 +405,8 @@ void SampleApp::LoadAssets()
 
 	// Create Synchronization Objects
 	{
-		ThrowIfFailed(m_device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-		m_fenceValue = 1;
+		ThrowIfFailed(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+		m_fenceValues[m_frameIndex]++;
 
 		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 		if (m_fenceEvent == nullptr)
@@ -410,7 +414,10 @@ void SampleApp::LoadAssets()
 			ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
 		}
 
-		WaitForPreviousFrame();
+		// Wait for the command list to execute; we are reusing the same command 
+		// list in our main loop but for now, we just want to wait for setup to 
+		// complete before continuing
+		WaitForGpu();
 	}
 }
 
@@ -453,10 +460,10 @@ std::vector<UINT8> SampleApp::GenerateTextureData()
 void SampleApp::PopulateCommandList()
 {
 	// Can be reset only if GPU has finished execution using such allocator
-	ThrowIfFailed(m_commandAllocator->Reset());
+	ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
 
 	// Can be reset any time after ExecuteCommandList
-	ThrowIfFailed(m_commandList->Reset(m_commandAllocator.Get(), m_pipelineState.Get()));
+	ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
 
 	// Set necessary states
 	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
@@ -487,24 +494,39 @@ void SampleApp::PopulateCommandList()
 	ThrowIfFailed(m_commandList->Close());
 }
 
-void SampleApp::WaitForPreviousFrame()
+// Prepare to render next frame
+void SampleApp::MoveToNextFrame()
 {
-	// WAITING FOR THE FRAME TO COMPLETE BEFORE CONTINUING IS NOT BEST PRACTICE.
-	// Todo - refactor
+	// Schedule a signal in the queue
+	const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
+	ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
 
-	// Signal and increment fence value
-	const UINT64 fence = m_fenceValue;
-	ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), fence));
-	m_fenceValue++;
+	// Update the frame index
+	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
-	// Wait until the prev frame is finished
-	if (m_fence->GetCompletedValue() < fence)
+	// If the next frame is not ready, wait until it is ready
+	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
 	{
-		ThrowIfFailed(m_fence->SetEventOnCompletion(fence, m_fenceEvent));
-		WaitForSingleObject(m_fenceEvent, INFINITE);
+		ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
+		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 	}
 
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+	// Set the fence value for the next frame
+	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
+}
+
+// Wait for pending GPU work to complete
+void SampleApp::WaitForGpu()
+{
+	// Schedule a signal in the queue
+	ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
+
+	// Wait until fence has been processed
+	ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
+	WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+
+	// Increment the value for current frame
+	m_fenceValues[m_frameIndex]++;
 }
 
 const UINT SampleApp::k_frameCount;
