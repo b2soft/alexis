@@ -3,11 +3,11 @@
 #include <d3dx12.h>
 #include <DirectXMath.h>
 
-#include <CoreApplication.h>
+#include <Core_Old.h>
 
 using Microsoft::WRL::ComPtr;
 
-class SampleApp : public alexis::CoreApplication
+class SampleApp : public alexis::Core_Old
 {
 public:
 	SampleApp(UINT width, UINT height, std::wstring name);

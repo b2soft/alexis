@@ -2,14 +2,14 @@
 
 #include "Win32Application.h"
 
-#include "CoreApplication.h"
+#include "Core_old.h"
 
 namespace alexis
 {
 
 	HWND Win32Application::s_hwnd = nullptr;
 
-	int Win32Application::Run(CoreApplication* app, HINSTANCE hInstance, int nCmdShow)
+	int Win32Application::Run(Core_Old* app, HINSTANCE hInstance, int nCmdShow)
 	{
 		// Parse command list args first
 		int argc = 0;
@@ -67,7 +67,7 @@ namespace alexis
 
 	LRESULT CALLBACK Win32Application::WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		CoreApplication* app = reinterpret_cast<CoreApplication*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+		Core_Old* app = reinterpret_cast<Core_Old*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
 		switch (message)
 		{

@@ -9,11 +9,11 @@
 
 namespace alexis
 {
-	class CoreApplication
+	class Core_Old
 	{
 	public:
-		CoreApplication(UINT width, UINT height, std::wstring name);
-		virtual ~CoreApplication() = default;
+		Core_Old(UINT width, UINT height, std::wstring name);
+		virtual ~Core_Old() = default;
 
 		virtual void OnInit() = 0;
 		virtual void OnUpdate() = 0;

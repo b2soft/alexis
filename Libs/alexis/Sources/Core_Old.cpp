@@ -1,13 +1,13 @@
 #include <Precompiled.h>
 
-#include "CoreApplication.h"
+#include "Core_Old.h"
 #include "CoreHelpers.h"
 
 using namespace Microsoft::WRL;
 
 namespace alexis
 {
-	CoreApplication::CoreApplication(UINT width, UINT height, std::wstring name) :
+	Core_Old::Core_Old(UINT width, UINT height, std::wstring name) :
 		m_width(width),
 		m_height(height),
 		m_windowTitle(name),
@@ -20,7 +20,7 @@ namespace alexis
 		m_aspectRatio = static_cast<float>(width) / static_cast<float>(height);
 	}
 
-	void CoreApplication::ParseCommandLineArgs(_In_reads_(argc) WCHAR* argv[], int argc)
+	void Core_Old::ParseCommandLineArgs(_In_reads_(argc) WCHAR* argv[], int argc)
 	{
 		for (int i = 1; i < argc; ++i)
 		{
@@ -33,13 +33,13 @@ namespace alexis
 		}
 	}
 
-	std::wstring CoreApplication::GetAssetFullPath(LPCWSTR assetName)
+	std::wstring Core_Old::GetAssetFullPath(LPCWSTR assetName)
 	{
 		return m_assetsPath + assetName;
 	}
 
 	_Use_decl_annotations_
-		Microsoft::WRL::ComPtr<IDXGIAdapter4> CoreApplication::GetHardwareAdapter(_In_ IDXGIFactory2* factory)
+		Microsoft::WRL::ComPtr<IDXGIAdapter4> Core_Old::GetHardwareAdapter(_In_ IDXGIFactory2* factory)
 	{
 		ComPtr<IDXGIFactory4> dxgiFactory;
 		UINT createFactoryFlags = 0;
@@ -80,7 +80,7 @@ namespace alexis
 		return dxgiAdapter4;
 	}
 
-	void CoreApplication::SetCustomWindowText(LPCWSTR text)
+	void Core_Old::SetCustomWindowText(LPCWSTR text)
 	{
 		std::wstring windowText = m_windowTitle + L": " + text;
 		SetWindowText(Win32Application::GetHwnd(), windowText.c_str());

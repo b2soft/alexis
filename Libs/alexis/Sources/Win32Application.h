@@ -2,12 +2,12 @@
 
 namespace alexis
 {
-	class CoreApplication;
+	class Core_Old;
 
 	class Win32Application
 	{
 	public:
-		static int Run(CoreApplication* app, HINSTANCE hInstance, int nCmdShow);
+		static int Run(Core_Old* app, HINSTANCE hInstance, int nCmdShow);
 		static HWND GetHwnd() { return s_hwnd; }
 
 	protected:
