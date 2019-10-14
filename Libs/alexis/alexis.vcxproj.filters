@@ -28,6 +28,9 @@
     <ClCompile Include="Sources\Core\Core.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Core\Render.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -49,6 +52,9 @@
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\Core.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\Render.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
   </ItemGroup>

@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\Core\Core.h" />
+    <ClInclude Include="Sources\Core\Render.h" />
     <ClInclude Include="Sources\Core_Old.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />
@@ -29,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Core\Core.cpp" />
+    <ClCompile Include="Sources\Core\Render.cpp" />
     <ClCompile Include="Sources\Core_Old.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>

@@ -51,10 +51,12 @@ protected:
 	void Initialize();
 
 private:
+	friend class Render;
 	friend LRESULT CALLBACK WindowProc2(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 	void CreateRenderWindow();
 
+	static HWND s_hwnd;
 	static uint64_t s_frameCount;
 	static std::shared_ptr<IGame> s_game;
 };

@@ -4,8 +4,9 @@
 
 #include <string>
 
+#include "Render.h"
+
 static Core* s_singleton = nullptr;
-static HWND s_hwnd = nullptr;
 static HINSTANCE s_hInstance;
 
 static int g_clientWidth = 1280;
@@ -14,6 +15,7 @@ static int g_clientHeight = 720;
 static constexpr wchar_t k_windowClassName[] = L"AlexisWindowClass";
 static constexpr wchar_t k_windowTitle[] = L"Alexis App";
 
+HWND Core::s_hwnd = nullptr;
 uint64_t Core::s_frameCount = 0;
 std::shared_ptr<IGame> Core::s_game;
 
@@ -37,7 +39,7 @@ void Core::CreateRenderWindow()
 		MessageBoxA(NULL, "Unable to register window class!", "Error", MB_OK | MB_ICONERROR);
 	}
 
-	s_hwnd = CreateWindowW(
+	Core::s_hwnd = CreateWindowW(
 		windowClass.lpszClassName,
 		k_windowTitle,
 		WS_OVERLAPPEDWINDOW,
@@ -78,6 +80,9 @@ void Core::Create(HINSTANCE hInstance)
 
 void Core::Destroy()
 {
+	Render::GetInstance()->Destroy();
+	Render::DestroyInstance();
+
 	s_game->UnloadContent();
 	s_game->Destroy();
 
@@ -156,7 +161,8 @@ void Core::Initialize()
 		MessageBoxA(NULL, "Failed to verify DirectX Math library support!", "Error", MB_OK | MB_ICONERROR);
 	}
 
-	// Graphics::Initialize
+	Render::GetInstance()->Initialize(g_clientWidth, g_clientHeight);
+
 	s_frameCount = 0;
 }
 
@@ -167,7 +173,7 @@ static LRESULT CALLBACK WindowProc2(HWND hWnd, UINT message, WPARAM wParam, LPAR
 	//	return true;
 	//}
 
-	if (!s_hwnd)
+	if (!Core::s_hwnd)
 	{
 		return DefWindowProcW(hWnd, message, wParam, lParam);
 	}
@@ -180,7 +186,16 @@ static LRESULT CALLBACK WindowProc2(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
 		Core::s_game->OnUpdate(0.0f);
 
+
+		auto render = Render::GetInstance();
+		// Reset queue and lists
+		render->BeginRender();
+
+		// Populate game command lists to render
 		Core::s_game->OnRender();
+
+		// Present to screen
+		render->Present();
 	}
 	break;
 
@@ -328,12 +343,13 @@ static LRESULT CALLBACK WindowProc2(HWND hWnd, UINT message, WPARAM wParam, LPAR
 
 	case WM_SIZE:
 	{
-		int width = ((int)(short)LOWORD(lParam));
-		int height = ((int)(short)HIWORD(lParam));
+		g_clientWidth = ((int)(short)LOWORD(lParam));
+		g_clientHeight = ((int)(short)HIWORD(lParam));
 
 		if (Core::s_game)
 		{
-			Core::s_game->OnResize(width, height);
+			Render::GetInstance()->OnResize(g_clientWidth, g_clientHeight);
+			Core::s_game->OnResize(g_clientWidth, g_clientHeight);
 		}
 	}
 	break;
@@ -349,5 +365,5 @@ static LRESULT CALLBACK WindowProc2(HWND hWnd, UINT message, WPARAM wParam, LPAR
 		return DefWindowProcW(hWnd, message, wParam, lParam);
 	}
 
-	return DefWindowProcW(hWnd, message, wParam, lParam);
+	return 0;
 }
