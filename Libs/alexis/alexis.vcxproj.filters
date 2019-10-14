@@ -42,6 +42,9 @@
     <ClInclude Include="Sources\Core_Old.h">
       <Filter>Sources</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Core.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">

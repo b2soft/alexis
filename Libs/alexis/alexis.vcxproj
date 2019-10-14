@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\Core.h" />
     <ClInclude Include="Sources\Core_Old.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />

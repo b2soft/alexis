@@ -8,6 +8,12 @@ namespace alexis
 	class Singleton
 	{
 	public:
+		Singleton() = delete;
+		Singleton(const Singleton&) = delete;
+		Singleton& operator=(const Singleton&) = delete;
+		Singleton(Singleton&&) = default;
+		Singleton& operator=(Singleton&&) = default;
+
 		static T* Get();
 		static void Destroy();
 		static bool HasInstance();
