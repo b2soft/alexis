@@ -19,6 +19,38 @@
 
 #include "SampleApp.h"
 
+#include <Core/Core.h>
+
+class Sample : public IGame
+{
+
+
+public:
+	virtual bool LoadContent() override
+	{
+		return true;
+	}
+
+
+	virtual void UnloadContent() override
+	{
+		
+	}
+
+
+	virtual void OnUpdate(float dt) override
+	{
+		
+	}
+
+
+	virtual void OnRender() override
+	{
+		
+	}
+
+};
+
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 	// Set the working directory to the path of the executable
@@ -32,6 +64,16 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 
 	//atexit(&ReportLiveObjects);
 
-	SampleApp sample(1280, 720, L"Alexis Sample App");
-	return alexis::Win32Application::Run(&sample, hInstance, nCmdShow);
+	int returnCode = 0;
+	Core::Create(hInstance);
+	{
+		std::shared_ptr<Sample> sample = std::make_shared<Sample>();
+		returnCode = Core::Get().Run(sample);
+	}
+	Core::Destroy();
+
+	return returnCode;
+
+	//SampleApp sample(1280, 720, L"Alexis Sample App");
+	//return alexis::Win32Application::Run(&sample, hInstance, nCmdShow);
 }

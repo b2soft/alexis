@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
@@ -19,7 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Sources\Core.h" />
+    <ClInclude Include="Sources\Core\Core.h" />
     <ClInclude Include="Sources\Core_Old.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />
@@ -28,6 +28,7 @@
     <ClInclude Include="Sources\Win32Application.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\Core\Core.cpp" />
     <ClCompile Include="Sources\Core_Old.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>

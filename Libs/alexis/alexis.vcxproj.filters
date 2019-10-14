@@ -11,6 +11,9 @@
     <Filter Include="Sources\Utils">
       <UniqueIdentifier>{9b32f743-ae3d-4e34-881a-5712eb5b0ecb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Core">
+      <UniqueIdentifier>{63d984d8-9dc0-4da4-b0e7-73ff5c7bbb54}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Precompiled.cpp">
@@ -21,6 +24,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Core_Old.cpp">
       <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Core\Core.cpp">
+      <Filter>Sources\Core</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -42,8 +48,8 @@
     <ClInclude Include="Sources\Core_Old.h">
       <Filter>Sources</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Core.h">
-      <Filter>Sources</Filter>
+    <ClInclude Include="Sources\Core\Core.h">
+      <Filter>Sources\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

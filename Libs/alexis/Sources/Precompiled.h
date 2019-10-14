@@ -47,3 +47,5 @@
 
 namespace fs = std::filesystem;
 using namespace DirectX;
+
+#include "CoreHelpers.h"
