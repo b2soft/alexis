@@ -47,22 +47,24 @@ public:
 	{
 		auto render = Render::GetInstance();
 		auto commandList = render->GetGraphicsCommandList();
-
+		
 		auto backBuffer = render->GetCurrentBackBufferResource();
 		auto rtvHandle = render->GetCurrentBackBufferRTV();
-
+		
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
+		
 		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-
+		
 		// Record actual commands
 		const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-
+		
 		//m_commandList->ExecuteBundle(m_bundle.Get());
-
+		
 		// Transit back buffer back to Present state
 		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+		
+		commandList->Close();
 	}
 
 };

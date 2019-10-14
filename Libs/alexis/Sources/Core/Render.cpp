@@ -4,12 +4,21 @@
 
 #include "Core.h"
 
+struct Vertex
+{
+	XMFLOAT3 position;
+	XMFLOAT2 uv;
+};
+
 const UINT Render::k_frameCount;
 
 void Render::Initialize(int width, int height)
 {
 	m_windowWidth = width;
 	m_windowHeight = height;
+
+	m_viewport = CD3DX12_VIEWPORT(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
+	m_scissorRect = CD3DX12_RECT(0, 0, static_cast<LONG>(width), static_cast<LONG>(height)),
 
 	InitDevice();
 	InitPipeline();
@@ -25,30 +34,16 @@ void Render::Destroy()
 void Render::BeginRender()
 {
 	// Can be reset only if GPU has finished execution using such allocator
-	ThrowIfFailed(m_coreCommandAllocators[m_frameIndex]->Reset());
 	ThrowIfFailed(m_clientCommandAllocators[m_frameIndex]->Reset());
-
-	ThrowIfFailed(m_coreCommandList->Reset(m_coreCommandAllocators[m_frameIndex].Get(), nullptr));
 	ThrowIfFailed(m_clientCommandList->Reset(m_clientCommandAllocators[m_frameIndex].Get(), nullptr));
 }
 
 void Render::Present()
 {
-	m_coreCommandList->RSSetViewports(1, &m_viewport);
-	m_coreCommandList->RSSetScissorRects(1, &m_scissorRect);
-	m_coreCommandList->Close();
-	m_clientCommandList->Close();
-
-	ID3D12CommandList* ppCommandLists[] = { m_coreCommandList.Get(), m_clientCommandList.Get() };
+	ID3D12CommandList* ppCommandLists[] = { m_clientCommandList.Get() };
 	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-	auto& backBuffer = m_backbufferTextures[m_frameIndex];
-
 	// TODO: GUI here?
-
-
-	// Transit back buffer back to Present state
-	//m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_backbufferTextures[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
 	UINT syncInterval = m_vSync ? 1 : 0;
 	UINT presetFlags = m_isTearingSupported && !m_vSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
@@ -65,7 +60,6 @@ void Render::OnResize(int width, int height)
 
 ComPtr<ID3D12GraphicsCommandList> Render::GetGraphicsCommandList()
 {
-	m_clientCommandList->Reset(m_clientCommandAllocators[m_frameIndex].Get(), nullptr);
 	return m_clientCommandList;
 }
 
@@ -219,23 +213,10 @@ void Render::InitPipeline()
 			m_device->CreateRenderTargetView(m_backbufferTextures[i].Get(), nullptr, rtvHandle);
 			rtvHandle.Offset(1, m_rtvDescriptorSize);
 
-			// Create internal Command Allocator
-			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_coreCommandAllocators[i])));
-
 			// Create client Command Allocator
 			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_clientCommandAllocators[i])));
 		}
 	}
-
-	// Create internal Command List
-	ThrowIfFailed(m_device->CreateCommandList(
-		0,
-		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		m_coreCommandAllocators[m_frameIndex].Get(),
-		nullptr,
-		IID_PPV_ARGS(&m_coreCommandList)));
-
-	ThrowIfFailed(m_coreCommandList->Close());
 
 	// Create Client List
 	ThrowIfFailed(m_device->CreateCommandList(
@@ -246,6 +227,115 @@ void Render::InitPipeline()
 		IID_PPV_ARGS(&m_clientCommandList)));
 
 	ThrowIfFailed(m_clientCommandList->Close());
+
+	// Create Vertex Buffer
+
+	Vertex triangleVertices[] =
+	{
+		{ {0.0f, 0.25f, 0.0f}, {0.5f, 0.0f,} },
+		{ {0.25f, -0.25f, 0.0f}, {1.0f, 1.0f} },
+		{ {-0.25f, -0.25f, 0.0f}, {0.0, 1.0f} },
+	};
+
+	const UINT vertexBufferSize = sizeof(triangleVertices);
+
+	// Todo - replace with upload->default buffer
+	ThrowIfFailed(m_device->CreateCommittedResource(
+		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+		D3D12_HEAP_FLAG_NONE,
+		&CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize),
+		D3D12_RESOURCE_STATE_GENERIC_READ,
+		nullptr,
+		IID_PPV_ARGS(&m_vertexBuffer)
+	));
+
+	// Copy CPU data to buffer
+	UINT8* pVertexDataBegin;
+	CD3DX12_RANGE readRange(0, 0); // disable reading
+	ThrowIfFailed(m_vertexBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
+	memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));
+	m_vertexBuffer->Unmap(0, nullptr);
+
+	// Create Vertex Buffer View
+	m_vertexBufferView.BufferLocation = m_vertexBuffer->GetGPUVirtualAddress();
+	m_vertexBufferView.StrideInBytes = sizeof(Vertex);
+	m_vertexBufferView.SizeInBytes = vertexBufferSize;
+
+	// Create PSO + loading shaders + compiling shaders
+	{
+		ComPtr<ID3DBlob> vertexShader;
+		ComPtr<ID3DBlob> pixelShader;
+
+#if defined(_DEBUG)
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/VertexShader_d.cso", &vertexShader));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader_d.cso", &pixelShader));
+#else
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/VertexShader.cso", &vertexShader));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader.cso", &pixelShader));
+#endif
+
+		// Create empty root signature
+		{
+			D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+
+			if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+			{
+				featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+			}
+
+			// Sampler
+			D3D12_STATIC_SAMPLER_DESC sampler = {};
+			sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
+			sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
+			sampler.MipLODBias = 0;
+			sampler.MaxAnisotropy = 0;
+			sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
+			sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
+			sampler.MinLOD = 0.0f;
+			sampler.MaxLOD = D3D12_FLOAT32_MAX;
+			sampler.ShaderRegister = 0;
+			sampler.RegisterSpace = 0;
+			sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+
+			CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
+			rootSignatureDesc.Init_1_1(0, nullptr, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+
+			ComPtr<ID3DBlob> signature;
+			ComPtr<ID3DBlob> error;
+			ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
+			ThrowIfFailed(m_device->CreateRootSignature(
+				0,
+				signature->GetBufferPointer(),
+				signature->GetBufferSize(),
+				IID_PPV_ARGS(&m_rootSignature)));
+		}
+
+		D3D12_INPUT_ELEMENT_DESC inputElementDesc[] =
+		{
+			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
+			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
+		};
+
+		// Create PSO
+		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
+		psoDesc.InputLayout = { inputElementDesc, _countof(inputElementDesc) };
+		psoDesc.pRootSignature = m_rootSignature.Get();
+		psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
+		psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
+		psoDesc.RasterizerState = CD3DX12_RASTERIZER_DESC(D3D12_DEFAULT);
+		psoDesc.BlendState = CD3DX12_BLEND_DESC(D3D12_DEFAULT);
+		psoDesc.DepthStencilState.DepthEnable = FALSE;
+		psoDesc.DepthStencilState.StencilEnable = FALSE;
+		psoDesc.SampleMask = UINT_MAX;
+		psoDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
+		psoDesc.NumRenderTargets = 1;
+		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
+		psoDesc.SampleDesc.Count = 1;
+		ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
+}
 
 	// Create Synchronization Objects
 	{
