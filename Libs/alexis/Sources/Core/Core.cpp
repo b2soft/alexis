@@ -20,6 +20,7 @@ namespace alexis
 	HWND Core::s_hwnd = nullptr;
 	uint64_t Core::s_frameCount = 0;
 	std::shared_ptr<IGame> Core::s_game;
+	HighResolutionClock Core::s_updateClock;
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -186,8 +187,9 @@ namespace alexis
 		{
 			++Core::s_frameCount;
 
-			Core::s_game->OnUpdate(0.0f);
+			Core::s_updateClock.Tick();
 
+			Core::s_game->OnUpdate(Core::s_updateClock.GetDeltaSeconds());
 
 			auto render = Render::GetInstance();
 			// Reset queue and lists

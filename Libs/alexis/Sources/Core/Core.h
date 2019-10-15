@@ -3,6 +3,8 @@
 #include <memory>
 #include <d3d12.h>
 
+#include "HighResolutionClock.h"
+
 namespace alexis
 {
 	extern int g_clientWidth;
@@ -63,6 +65,8 @@ namespace alexis
 		friend LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
 		void CreateRenderWindow();
+
+		static HighResolutionClock s_updateClock;
 
 		static HWND s_hwnd;
 		static uint64_t s_frameCount;

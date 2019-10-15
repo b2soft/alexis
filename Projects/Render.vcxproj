@@ -19,9 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Sources\b2Game.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="..\Sources\Main.cpp" />
     <ClCompile Include="..\Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -31,7 +28,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Resources\resource.h" />
-    <ClInclude Include="..\Sources\b2Game.h" />
     <ClInclude Include="..\Sources\Precompiled.h" />
     <ClInclude Include="..\Sources\SampleApp.h" />
   </ItemGroup>

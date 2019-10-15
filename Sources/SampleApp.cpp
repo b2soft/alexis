@@ -29,14 +29,28 @@ SampleApp::SampleApp() :
 
 void SampleApp::OnUpdate(float dt)
 {
-	const float translationSpeed = 0.005f;
+	m_frameCount++;
+	m_timeCount += dt;
+
+	if (m_timeCount > 1.f)
+	{
+		m_fps = m_frameCount;
+		m_timeCount = 0.f;
+		m_frameCount = 0;
+
+		std::wstring fpsString = L"FPS: " + std::to_wstring(m_fps) + L"\n";
+		OutputDebugString(fpsString.c_str());
+	}
+
+	const float translationSpeed = 1.f;
 	const float offsetBounds = 1.25f;
 
-	m_constantBufferData.offset.x += translationSpeed;
+	m_constantBufferData.offset.x += translationSpeed * dt;
 	if (m_constantBufferData.offset.x > offsetBounds)
 	{
 		m_constantBufferData.offset.x = -offsetBounds;
 	}
+
 	memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
 }
 

@@ -28,6 +28,9 @@
     <ClCompile Include="Sources\Core\CommandManager.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Core\HighResolutionClock.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -49,6 +52,9 @@
       <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\CommandManager.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\HighResolutionClock.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
   </ItemGroup>

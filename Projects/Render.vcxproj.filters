@@ -16,9 +16,6 @@
     <ClCompile Include="..\Sources\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Sources\b2Game.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\Sources\Precompiled.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -27,9 +24,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sources\b2Game.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Sources\Precompiled.h">
       <Filter>Source Files</Filter>
     </ClInclude>

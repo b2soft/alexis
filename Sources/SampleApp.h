@@ -50,6 +50,10 @@ private:
 	SceneConstantBuffer m_constantBufferData;
 	ComPtr<ID3D12Resource> m_texture;
 
+	float m_timeCount{ 0.f };
+	int m_frameCount{ 0 };
+	float m_fps{ 0.f };
+
 	void LoadPipeline();
 	void LoadAssets();
 	std::vector<UINT8> GenerateTextureData();
