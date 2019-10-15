@@ -7,6 +7,7 @@
 
 #include <Core/Core.h>
 #include <Core/Render.h>
+#include <Core/CommandManager.h>
 
 using namespace alexis;
 using namespace DirectX;
@@ -31,7 +32,7 @@ void SampleApp::OnUpdate(float dt)
 	const float translationSpeed = 0.005f;
 	const float offsetBounds = 1.25f;
 
-	m_constantBufferData.offset.x += translationSpeed * 0.15f;
+	m_constantBufferData.offset.x += translationSpeed;
 	if (m_constantBufferData.offset.x > offsetBounds)
 	{
 		m_constantBufferData.offset.x = -offsetBounds;
@@ -266,7 +267,7 @@ void SampleApp::LoadAssets()
 		textureData.RowPitch = k_textureSize * k_texturePixelSize;
 		textureData.SlicePitch = textureData.RowPitch * k_textureSize;
 
-		auto commandList = render->GetGraphicsCommandList();
+		//auto commandList = render->GetGraphicsCommandList();
 
 		//UpdateSubresources(commandList.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
 		//commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
@@ -286,7 +287,7 @@ void SampleApp::LoadAssets()
 
 	// Create Synchronization Objects
 	{
-		render->WaitForGpu();
+		alexis::CommandManager::GetInstance()->WaitForGpu();
 	}
 }
 
@@ -329,7 +330,8 @@ std::vector<UINT8> SampleApp::GenerateTextureData()
 void SampleApp::PopulateCommandList()
 {
 	auto render = alexis::Render::GetInstance();
-	auto commandList = render->GetGraphicsCommandList();
+	auto commandManager = alexis::CommandManager::GetInstance();
+	auto commandList = commandManager->CreateCommandList();
 
 	// Set necessary states
 
@@ -366,7 +368,7 @@ void SampleApp::PopulateCommandList()
 	// Transit back buffer back to Present state
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backbufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-	render->ExecuteCommandList(commandList);
+	commandManager->ExecuteCommandList(commandList);
 }
 
 bool SampleApp::LoadContent()

@@ -19,6 +19,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Sources\Core\CommandManager.h" />
     <ClInclude Include="Sources\Core\Core.h" />
     <ClInclude Include="Sources\Core\Render.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
@@ -27,6 +28,7 @@
     <ClInclude Include="Sources\Utils\Singleton.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Sources\Core\CommandManager.cpp" />
     <ClCompile Include="Sources\Core\Core.cpp" />
     <ClCompile Include="Sources\Core\Render.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
