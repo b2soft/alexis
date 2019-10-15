@@ -5,6 +5,9 @@
 
 #include "HighResolutionClock.h"
 
+#include <imgui.h>
+#include <imgui_impl_win32.h>
+
 namespace alexis
 {
 	extern int g_clientWidth;
@@ -54,6 +57,11 @@ namespace alexis
 		Core(const Core&) = delete;
 		Core& operator=(const Core&) = delete;
 
+		static HWND GetHwnd()
+		{
+			return s_hwnd;
+		}
+
 	protected:
 		// Create app instance
 		Core(HINSTANCE hInstance);
@@ -63,8 +71,10 @@ namespace alexis
 	private:
 		friend class Render;
 		friend LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
+		friend extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		void CreateRenderWindow();
+		void InitImgui();
 
 		static HighResolutionClock s_updateClock;
 

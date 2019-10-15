@@ -6,6 +6,8 @@
 
 #include "Render.h"
 
+extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
+
 namespace alexis
 {
 	static Core* s_singleton = nullptr;
@@ -72,6 +74,11 @@ namespace alexis
 		}
 	}
 
+	void Core::InitImgui()
+	{
+
+	}
+
 	void Core::Create(HINSTANCE hInstance)
 	{
 		if (!s_singleton)
@@ -85,11 +92,6 @@ namespace alexis
 	{
 		Render::GetInstance()->Destroy();
 		Render::DestroyInstance();
-
-		s_game->UnloadContent();
-		s_game->Destroy();
-
-		s_game.reset();
 
 		s_hwnd = nullptr;
 
@@ -133,6 +135,7 @@ namespace alexis
 		//Graphics Flush
 		s_game->UnloadContent();
 		s_game->Destroy();
+		s_game.reset();
 
 		return static_cast<int>(msg.wParam);
 	}
@@ -165,16 +168,15 @@ namespace alexis
 		}
 
 		Render::GetInstance()->Initialize(g_clientWidth, g_clientHeight);
-
 		s_frameCount = 0;
 	}
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 	{
-		//if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
-		//{
-		//	return true;
-		//}
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, message, wParam, lParam))
+		{
+			return true;
+		}
 
 		if (!Core::s_hwnd)
 		{

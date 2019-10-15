@@ -9,6 +9,10 @@
 #include <Core/Render.h>
 #include <Core/CommandManager.h>
 
+#include <imgui.h>
+#include <imgui_impl_dx12.h>
+#include <imgui_impl_win32.h>
+
 using namespace alexis;
 using namespace DirectX;
 
@@ -26,9 +30,21 @@ SampleApp::SampleApp() :
 	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 }
 
+bool SampleApp::Initialize()
+{
+	return true;
+}
 
 void SampleApp::OnUpdate(float dt)
 {
+	ImGui::SetCurrentContext(m_context);
+	ImGui_ImplDX12_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+
+	bool show = true;
+	ImGui::ShowDemoWindow(&show);
+
 	m_frameCount++;
 	m_timeCount += dt;
 
@@ -60,6 +76,13 @@ void SampleApp::OnRender()
 	PopulateCommandList();
 }
 
+void SampleApp::Destroy()
+{
+	ImGui_ImplDX12_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext(m_context);
+}
+
 void SampleApp::LoadPipeline()
 {
 	auto device = alexis::Render::GetInstance()->GetDevice();
@@ -79,6 +102,13 @@ void SampleApp::LoadPipeline()
 		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&m_cbvHeap)));
+
+		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
+		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		desc.NumDescriptors = 1;
+		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		ThrowIfFailed(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_imguiSrvHeap)));
+
 	}
 
 	// Create Bundle Allocator
@@ -299,10 +329,24 @@ void SampleApp::LoadAssets()
 		//render->ExecuteCommandList(commandList);
 	}
 
+	IMGUI_CHECKVERSION();
+	m_context = ImGui::CreateContext();
+	ImGuiIO& io = ImGui::GetIO();
+
+	ImGui::StyleColorsDark();
+
+	ImGui_ImplWin32_Init(Core::GetHwnd());
+	ImGui_ImplDX12_Init(Render::GetInstance()->GetDevice(), 2,
+		DXGI_FORMAT_R8G8B8A8_UNORM,
+		m_imguiSrvHeap->GetCPUDescriptorHandleForHeapStart(),
+		m_imguiSrvHeap->GetGPUDescriptorHandleForHeapStart());
+
+
 	// Create Synchronization Objects
 	{
 		alexis::CommandManager::GetInstance()->WaitForGpu();
 	}
+
 }
 
 std::vector<UINT8> SampleApp::GenerateTextureData()
@@ -352,7 +396,6 @@ void SampleApp::PopulateCommandList()
 	commandList->RSSetViewports(1, &m_viewport);
 	commandList->RSSetScissorRects(1, &m_scissorRect);
 
-
 	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 
 	//ID3D12DescriptorHeap* ppHeaps[] = { m_srvHeap.Get() };
@@ -378,6 +421,12 @@ void SampleApp::PopulateCommandList()
 	commandList->DrawInstanced(3, 1, 0, 0);
 
 	//commandList->ExecuteBundle(m_bundle.Get());
+
+	// GUI
+	ID3D12DescriptorHeap* imguiHeap[] = { m_imguiSrvHeap.Get() };
+	commandList->SetDescriptorHeaps(_countof(imguiHeap), imguiHeap);
+	ImGui::Render();
+	ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), commandList);
 
 	// Transit back buffer back to Present state
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backbufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));

@@ -17,11 +17,15 @@ public:
 		DirectX::XMFLOAT4 offset;
 	};
 
+	virtual bool Initialize() override;
+
 	virtual bool LoadContent();
 	virtual void UnloadContent();
 
 	virtual void OnUpdate(float dt) override;
 	virtual void OnRender() override;
+
+	virtual void Destroy() override;
 
 private:
 	static const UINT k_frameCount = 2;
@@ -40,6 +44,9 @@ private:
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> m_bundle;
 
+	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
+	ImGuiContext* m_context{ nullptr };
+
 	float m_aspectRatio{ 1.0f };
 
 	// Application resources
@@ -57,5 +64,6 @@ private:
 	void LoadPipeline();
 	void LoadAssets();
 	std::vector<UINT8> GenerateTextureData();
+
 	void PopulateCommandList();
 };

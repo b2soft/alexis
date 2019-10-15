@@ -155,7 +155,7 @@ ImguiWrapper::~ImguiWrapper()
 	Destroy();
 }
 
-bool ImguiWrapper::Initialize(std::shared_ptr<Window> window)
+bool ImguiWrapper::Initialize(HWND hWnd)
 {
 	m_window = window;
 	m_imguiContext = ImGui::CreateContext();
