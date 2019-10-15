@@ -22,53 +22,6 @@
 #include <Core/Core.h>
 #include <Core/Render.h>
 
-class Sample : public IGame
-{
-public:
-	virtual bool LoadContent() override
-	{
-		return true;
-	}
-
-
-	virtual void UnloadContent() override
-	{
-		
-	}
-
-
-	virtual void OnUpdate(float dt) override
-	{
-		
-	}
-
-
-	virtual void OnRender() override
-	{
-		auto render = Render::GetInstance();
-		auto commandList = render->GetGraphicsCommandList();
-		
-		auto backBuffer = render->GetCurrentBackBufferResource();
-		auto rtvHandle = render->GetCurrentBackBufferRTV();
-		
-		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-		
-		commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
-		
-		// Record actual commands
-		const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-		commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
-		
-		//m_commandList->ExecuteBundle(m_bundle.Get());
-		
-		// Transit back buffer back to Present state
-		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backBuffer, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
-		
-		commandList->Close();
-	}
-
-};
-
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
 	// Set the working directory to the path of the executable
@@ -83,12 +36,12 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 	//atexit(&ReportLiveObjects);
 
 	int returnCode = 0;
-	Core::Create(hInstance);
+	alexis::Core::Create(hInstance);
 	{
-		std::shared_ptr<Sample> sample = std::make_shared<Sample>();
-		returnCode = Core::Get().Run(sample);
+		std::shared_ptr<SampleApp> sample = std::make_shared<SampleApp>();
+		returnCode = alexis::Core::Get().Run(sample);
 	}
-	Core::Destroy();
+	alexis::Core::Destroy();
 
 	return returnCode;
 

@@ -19,12 +19,6 @@
     <ClCompile Include="Sources\Precompiled.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Win32Application.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Core_Old.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Core\Core.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
@@ -39,17 +33,11 @@
     <ClInclude Include="Sources\Precompiled.h">
       <Filter>Sources</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Win32Application.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\CoreHelpers.h">
       <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Utils\Singleton.h">
       <Filter>Sources\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Core_Old.h">
-      <Filter>Sources</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\Core.h">
       <Filter>Sources\Core</Filter>

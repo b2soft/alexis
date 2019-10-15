@@ -7,7 +7,6 @@
 #include <stdexcept>
 #include <wrl.h>
 
-
 using Microsoft::WRL::ComPtr;
 
 inline std::string HrToString(HRESULT hr)

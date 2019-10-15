@@ -5,6 +5,9 @@
 #include <CoreHelpers.h>
 #include <d3dcompiler.h>
 
+#include <Core/Core.h>
+#include <Core/Render.h>
+
 using namespace alexis;
 using namespace DirectX;
 
@@ -14,26 +17,21 @@ struct Vertex
 	XMFLOAT2 uv;
 };
 
-SampleApp::SampleApp(UINT width, UINT height, std::wstring name) :
-	Core_Old(width, height, name),
-	m_viewport(0.0f, 0.0f, static_cast<float>(width), static_cast<float>(height)),
-	m_scissorRect(0, 0, static_cast<LONG>(width), static_cast<LONG>(height)),
-	m_fenceValues{}
+SampleApp::SampleApp() :
+	m_viewport(0.0f, 0.0f, static_cast<float>(alexis::g_clientWidth), static_cast<float>(alexis::g_clientHeight)),
+	m_scissorRect(0, 0, static_cast<LONG>(alexis::g_clientWidth), static_cast<LONG>(alexis::g_clientHeight)),
+	m_constantBufferData{}
 {
+	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 }
 
-void SampleApp::OnInit()
-{
-	LoadPipeline();
-	LoadAssets();
-}
 
-void SampleApp::OnUpdate()
+void SampleApp::OnUpdate(float dt)
 {
 	const float translationSpeed = 0.005f;
 	const float offsetBounds = 1.25f;
 
-	m_constantBufferData.offset.x += translationSpeed;
+	m_constantBufferData.offset.x += translationSpeed * 0.15f;
 	if (m_constantBufferData.offset.x > offsetBounds)
 	{
 		m_constantBufferData.offset.x = -offsetBounds;
@@ -45,161 +43,51 @@ void SampleApp::OnRender()
 {
 	// Records commands
 	PopulateCommandList();
-
-	// Execute commands
-	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
-
-	// Present frame
-	ThrowIfFailed(m_swapChain->Present(1, 0));
-
-	// Wait for prev frame to be rendered
-	MoveToNextFrame();
-}
-
-void SampleApp::OnDestroy()
-{
-	// Wait for GPU to render all stuff
-	WaitForGpu();
-
-	CloseHandle(m_fenceEvent);
 }
 
 void SampleApp::LoadPipeline()
 {
-	UINT dxgiFactoryFlags = 0;
-
-#if defined(_DEBUG)
-	// Enable debug layer
-	// Note, that enabling the debug layer after device creation will invalidate the active device
-	{
-		ComPtr<ID3D12Debug1> debugInterface;
-		ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
-
-		debugInterface->EnableDebugLayer();
-
-		dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
-
-		//debugInterface->SetEnableGPUBasedValidation(TRUE);
-		//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
-	}
-#endif
-
-	ComPtr<IDXGIFactory4> factory;
-	ThrowIfFailed(CreateDXGIFactory2(dxgiFactoryFlags, IID_PPV_ARGS(&factory)));
-
-	if (m_useWarpDevice)
-	{
-		ComPtr<IDXGIAdapter> warpAdapter;
-		ThrowIfFailed(factory->EnumWarpAdapter(IID_PPV_ARGS(&warpAdapter)));
-
-		ThrowIfFailed(D3D12CreateDevice(
-			warpAdapter.Get(),
-			D3D_FEATURE_LEVEL_11_0,
-			IID_PPV_ARGS(&m_device)));
-	}
-	else
-	{
-		ComPtr<IDXGIAdapter4> hardwareAdapter = GetHardwareAdapter(factory.Get());
-
-		ThrowIfFailed(D3D12CreateDevice(
-			hardwareAdapter.Get(),
-			D3D_FEATURE_LEVEL_11_0,
-			IID_PPV_ARGS(&m_device)));
-	}
-
-	// Create Command Queue
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
-	queueDesc.Type = D3D12_COMMAND_LIST_TYPE_DIRECT;
-
-	ThrowIfFailed(m_device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(&m_commandQueue)));
-
-	// Create Swap Chain
-	DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
-	swapChainDesc.BufferCount = k_frameCount;
-	swapChainDesc.Width = m_width;
-	swapChainDesc.Height = m_height;
-	swapChainDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-	swapChainDesc.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
-	swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
-	swapChainDesc.SampleDesc.Count = 1;
-
-	ComPtr<IDXGISwapChain1> swapChain;
-	ThrowIfFailed(factory->CreateSwapChainForHwnd(
-		m_commandQueue.Get(),
-		Win32Application::GetHwnd(),
-		&swapChainDesc,
-		nullptr,
-		nullptr,
-		&swapChain));
-
-	ThrowIfFailed(factory->MakeWindowAssociation(Win32Application::GetHwnd(), DXGI_MWA_NO_ALT_ENTER));
-
-	ThrowIfFailed(swapChain.As(&m_swapChain));
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+	auto device = alexis::Render::GetInstance()->GetDevice();
 
 	// Create Descriptor Heaps
 	{
-		// Create RTV Descriptors Heap for backbuffers
-		D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-		rtvHeapDesc.NumDescriptors = k_frameCount;
-		rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-		rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-		ThrowIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
-
-		m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-
 		// Create SRV Descriptors Heap for texture
 		D3D12_DESCRIPTOR_HEAP_DESC srvHeapDesc = {};
 		srvHeapDesc.NumDescriptors = 1;
 		srvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		srvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		ThrowIfFailed(m_device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap)));
+		ThrowIfFailed(device->CreateDescriptorHeap(&srvHeapDesc, IID_PPV_ARGS(&m_srvHeap)));
 
 		// Create CBV Descriptors Heap for texture
 		D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
 		cbvHeapDesc.NumDescriptors = 1;
 		cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		ThrowIfFailed(m_device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&m_cbvHeap)));
-	}
-
-	// Create Frame Resources
-	{
-		CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-
-		// Create rtv + alloc per back buffer
-		for (UINT i = 0; i < k_frameCount; ++i)
-		{
-			ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_renderTargets[i])));
-			m_device->CreateRenderTargetView(m_renderTargets[i].Get(), nullptr, rtvHandle);
-			rtvHandle.Offset(1, m_rtvDescriptorSize);
-
-			// Create Command Allocator
-			ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&m_commandAllocators[i])));
-		}
+		ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&m_cbvHeap)));
 	}
 
 	// Create Bundle Allocator
-	ThrowIfFailed(m_device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS(&m_bundleAllocator)));
+	ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS(&m_bundleAllocator)));
 }
 
 void SampleApp::LoadAssets()
 {
+	auto render = alexis::Render::GetInstance();
+	auto device = render->GetDevice();
+
 	// Create empty root signature
 	{
 		D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
 		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
 
-		if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+		if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
 		{
 			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 		}
 
 		CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
 		//ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
-		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_STATIC);
+		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DATA_VOLATILE);
 
 		CD3DX12_ROOT_PARAMETER1 rootParameters[1];
 		//rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
@@ -222,12 +110,12 @@ void SampleApp::LoadAssets()
 		sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 0, nullptr, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
 
 		ComPtr<ID3DBlob> signature;
 		ComPtr<ID3DBlob> error;
 		ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&rootSignatureDesc, featureData.HighestVersion, &signature, &error));
-		ThrowIfFailed(m_device->CreateRootSignature(
+		ThrowIfFailed(device->CreateRootSignature(
 			0,
 			signature->GetBufferPointer(),
 			signature->GetBufferSize(),
@@ -268,16 +156,8 @@ void SampleApp::LoadAssets()
 		psoDesc.NumRenderTargets = 1;
 		psoDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM;
 		psoDesc.SampleDesc.Count = 1;
-		ThrowIfFailed(m_device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
+		ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 	}
-
-	// Create Command List
-	ThrowIfFailed(m_device->CreateCommandList(
-		0,
-		D3D12_COMMAND_LIST_TYPE_DIRECT,
-		m_commandAllocators[m_frameIndex].Get(),
-		nullptr,
-		IID_PPV_ARGS(&m_commandList)));
 
 	// Create Vertex Buffer
 
@@ -291,7 +171,7 @@ void SampleApp::LoadAssets()
 	const UINT vertexBufferSize = sizeof(triangleVertices);
 
 	// Todo - replace with upload->default buffer
-	ThrowIfFailed(m_device->CreateCommittedResource(
+	ThrowIfFailed(device->CreateCommittedResource(
 		&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 		D3D12_HEAP_FLAG_NONE,
 		&CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize),
@@ -315,7 +195,7 @@ void SampleApp::LoadAssets()
 	// Create Constant Buffer stuff
 	{
 		// Buffer
-		ThrowIfFailed(m_device->CreateCommittedResource(
+		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64),
@@ -327,7 +207,7 @@ void SampleApp::LoadAssets()
 		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc = {};
 		cbvDesc.BufferLocation = m_constantBuffer->GetGPUVirtualAddress();
 		cbvDesc.SizeInBytes = (sizeof(SceneConstantBuffer) + 255) & ~255;
-		m_device->CreateConstantBufferView(&cbvDesc, m_cbvHeap->GetCPUDescriptorHandleForHeapStart());
+		device->CreateConstantBufferView(&cbvDesc, m_cbvHeap->GetCPUDescriptorHandleForHeapStart());
 
 		// Map + init the CB. Will be mapped for whole app life
 		CD3DX12_RANGE readRange(0, 0); // won't read from it
@@ -337,7 +217,7 @@ void SampleApp::LoadAssets()
 
 	// Create Bundle
 	{
-		ThrowIfFailed(m_device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_BUNDLE, m_bundleAllocator.Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_bundle)));
+		ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_BUNDLE, m_bundleAllocator.Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_bundle)));
 		m_bundle->SetGraphicsRootSignature(m_rootSignature.Get());
 		m_bundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		m_bundle->IASetVertexBuffers(0, 1, &m_vertexBufferView);
@@ -360,7 +240,7 @@ void SampleApp::LoadAssets()
 		textureDesc.SampleDesc.Quality = 0;
 		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
-		ThrowIfFailed(m_device->CreateCommittedResource(
+		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
 			&textureDesc,
@@ -370,7 +250,7 @@ void SampleApp::LoadAssets()
 
 		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, 1);
 
-		ThrowIfFailed(m_device->CreateCommittedResource(
+		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
@@ -386,8 +266,10 @@ void SampleApp::LoadAssets()
 		textureData.RowPitch = k_textureSize * k_texturePixelSize;
 		textureData.SlicePitch = textureData.RowPitch * k_textureSize;
 
-		UpdateSubresources(m_commandList.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
-		m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
+		auto commandList = render->GetGraphicsCommandList();
+
+		//UpdateSubresources(commandList.Get(), m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
+		//commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE));
 
 		// Create SRV for a texture
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -395,29 +277,16 @@ void SampleApp::LoadAssets()
 		srvDesc.Format = textureDesc.Format;
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = 1;
-		m_device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
-	}
+		device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_srvHeap->GetCPUDescriptorHandleForHeapStart());
 
-	// Close command list to upload Texture
-	ThrowIfFailed(m_commandList->Close());
-	ID3D12CommandList* ppCommandLists[] = { m_commandList.Get() };
-	m_commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
+		// Close command list to upload Texture
+		//ThrowIfFailed(commandList->Close());
+		//render->ExecuteCommandList(commandList);
+	}
 
 	// Create Synchronization Objects
 	{
-		ThrowIfFailed(m_device->CreateFence(m_fenceValues[m_frameIndex], D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-		m_fenceValues[m_frameIndex]++;
-
-		m_fenceEvent = CreateEvent(nullptr, FALSE, FALSE, nullptr);
-		if (m_fenceEvent == nullptr)
-		{
-			ThrowIfFailed(HRESULT_FROM_WIN32(GetLastError()));
-		}
-
-		// Wait for the command list to execute; we are reusing the same command 
-		// list in our main loop but for now, we just want to wait for setup to 
-		// complete before continuing
-		WaitForGpu();
+		render->WaitForGpu();
 	}
 }
 
@@ -459,74 +328,56 @@ std::vector<UINT8> SampleApp::GenerateTextureData()
 
 void SampleApp::PopulateCommandList()
 {
-	// Can be reset only if GPU has finished execution using such allocator
-	ThrowIfFailed(m_commandAllocators[m_frameIndex]->Reset());
-
-	// Can be reset any time after ExecuteCommandList
-	ThrowIfFailed(m_commandList->Reset(m_commandAllocators[m_frameIndex].Get(), m_pipelineState.Get()));
+	auto render = alexis::Render::GetInstance();
+	auto commandList = render->GetGraphicsCommandList();
 
 	// Set necessary states
-	m_commandList->SetGraphicsRootSignature(m_rootSignature.Get());
+
+	commandList->RSSetViewports(1, &m_viewport);
+	commandList->RSSetScissorRects(1, &m_scissorRect);
+
+
+	commandList->SetGraphicsRootSignature(m_rootSignature.Get());
 
 	//ID3D12DescriptorHeap* ppHeaps[] = { m_srvHeap.Get() };
 	ID3D12DescriptorHeap* ppHeaps[] = { m_cbvHeap.Get() };
-	m_commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+	commandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+	commandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
 
-	m_commandList->SetGraphicsRootDescriptorTable(0, m_cbvHeap->GetGPUDescriptorHandleForHeapStart());
-	m_commandList->RSSetViewports(1, &m_viewport);
-	m_commandList->RSSetScissorRects(1, &m_scissorRect);
+	commandList->SetPipelineState(m_pipelineState.Get());
 
+	auto backbufferResource = render->GetCurrentBackBufferResource();
+	auto backBufferRTV = render->GetCurrentBackBufferRTV();
 	// Transition back buffer -> RT
-	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
+	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backbufferResource, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-	m_commandList->OMSetRenderTargets(1, &rtvHandle, FALSE, nullptr);
+	commandList->OMSetRenderTargets(1, &backBufferRTV, FALSE, nullptr);
 
 	// Record actual commands
 	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-	m_commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	commandList->ClearRenderTargetView(backBufferRTV, clearColor, 0, nullptr);
 
-	m_commandList->ExecuteBundle(m_bundle.Get());
+	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+	commandList->IASetVertexBuffers(0, 1, &m_vertexBufferView);
+	commandList->DrawInstanced(3, 1, 0, 0);
+
+	//commandList->ExecuteBundle(m_bundle.Get());
 
 	// Transit back buffer back to Present state
-	m_commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_renderTargets[m_frameIndex].Get(), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
+	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backbufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
-	ThrowIfFailed(m_commandList->Close());
+	render->ExecuteCommandList(commandList);
 }
 
-// Prepare to render next frame
-void SampleApp::MoveToNextFrame()
+bool SampleApp::LoadContent()
 {
-	// Schedule a signal in the queue
-	const UINT64 currentFenceValue = m_fenceValues[m_frameIndex];
-	ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), currentFenceValue));
+	LoadPipeline();
+	LoadAssets();
 
-	// Update the frame index
-	m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-
-	// If the next frame is not ready, wait until it is ready
-	if (m_fence->GetCompletedValue() < m_fenceValues[m_frameIndex])
-	{
-		ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
-		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-	}
-
-	// Set the fence value for the next frame
-	m_fenceValues[m_frameIndex] = currentFenceValue + 1;
+	return true;
 }
 
-// Wait for pending GPU work to complete
-void SampleApp::WaitForGpu()
+void SampleApp::UnloadContent()
 {
-	// Schedule a signal in the queue
-	ThrowIfFailed(m_commandQueue->Signal(m_fence.Get(), m_fenceValues[m_frameIndex]));
 
-	// Wait until fence has been processed
-	ThrowIfFailed(m_fence->SetEventOnCompletion(m_fenceValues[m_frameIndex], m_fenceEvent));
-	WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-
-	// Increment the value for current frame
-	m_fenceValues[m_frameIndex]++;
 }
-
-const UINT SampleApp::k_frameCount;
