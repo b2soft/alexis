@@ -61,6 +61,11 @@ namespace alexis
 		{
 			return s_hwnd;
 		}
+		
+		static uint64_t GetFrameCount()
+		{
+			return s_frameCount;
+		}
 
 	protected:
 		// Create app instance

@@ -26,6 +26,10 @@
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />
     <ClInclude Include="Sources\Precompiled.h" />
+    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h" />
+    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
+    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
+    <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
   </ItemGroup>
   <ItemGroup>
@@ -37,6 +41,10 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
+    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
+    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />
+    <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">

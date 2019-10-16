@@ -28,6 +28,7 @@ namespace alexis
 		void Release();
 
 
+
 	private:
 
 		void AllocateCommand();
@@ -47,8 +48,6 @@ namespace alexis
 		HANDLE m_fenceEvent{ NULL };
 		uint64_t m_lastCompletedFenceValue{ 0UL };
 		uint64_t m_nextFenceValue{ 1UL };
-
-		int currentAlloc{ 0 };
 	};
 
 }
