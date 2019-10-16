@@ -39,8 +39,7 @@ private:
 	CD3DX12_RECT m_scissorRect;
 	ComPtr<ID3D12CommandAllocator> m_bundleAllocator;
 	ComPtr<ID3D12RootSignature> m_rootSignature;
-	ComPtr<ID3D12DescriptorHeap> m_srvHeap;
-	ComPtr<ID3D12DescriptorHeap> m_cbvHeap;
+	ComPtr<ID3D12DescriptorHeap> m_baseHeap;
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> m_bundle;
 
