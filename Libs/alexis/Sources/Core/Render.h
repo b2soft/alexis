@@ -7,11 +7,14 @@
 #include <wrl.h>
 
 #include <Utils/Singleton.h>
+#include <Render/Descriptors/DescriptorAllocation.h>
+#include <Render/Descriptors/DescriptorAllocator.h>
 
 using Microsoft::WRL::ComPtr;
 
 namespace alexis
 {
+	class DescriptorAllocator;
 
 	class Render : public alexis::Singleton<Render>
 	{
@@ -45,9 +48,13 @@ namespace alexis
 			return m_device.Get();
 		}
 
+		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors);
+
 	private:
 		void InitDevice();
 		void InitPipeline();
+
+		void ReleaseStaleDescriptors(uint64_t fenceValue);
 
 		Microsoft::WRL::ComPtr<IDXGIAdapter4> GetHardwareAdapter(IDXGIFactory4* factory);
 		static const UINT k_frameCount = 2;
@@ -60,6 +67,8 @@ namespace alexis
 		ComPtr<ID3D12Resource> m_backbufferTextures[k_frameCount];
 		ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
 		UINT m_rtvDescriptorSize{ 0 };
+
+		std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 
 		// Sync objects
 		UINT m_frameIndex{ 0 };

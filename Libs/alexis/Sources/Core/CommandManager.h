@@ -2,7 +2,10 @@
 
 #include <d3d12.h>
 #include <wrl.h>
+#include <mutex>
 
+#include <Render/Descriptors/DynamicDescriptorHeap.h>
+#include <Render/CommandContext.h>
 #include <Utils/Singleton.h>
 
 namespace alexis
@@ -15,9 +18,8 @@ namespace alexis
 		void Initialize();
 		void Destroy();
 
-
-		ID3D12GraphicsCommandList* CreateCommandList();
-		void ExecuteCommandList(ID3D12GraphicsCommandList* list);
+		CommandContext* CreateCommandContext();
+		uint64_t ExecuteCommandContext(CommandContext* context, bool waitForCompletion = false);
 
 		void WaitForFence(uint64_t fenceValue);
 		bool IsFenceCompleted(uint64_t fenceValue);
@@ -27,19 +29,18 @@ namespace alexis
 
 		void Release();
 
-
+		uint64_t GetLastCompletedFence() const
+		{
+			return m_lastCompletedFenceValue;
+		}
 
 	private:
+		void AllocateContext();
 
-		void AllocateCommand();
+		std::mutex m_allocatorMutex;
 
-		struct CommandStuff
-		{
-			ComPtr<ID3D12CommandAllocator> allocator;
-			ComPtr<ID3D12GraphicsCommandList> list;
-		};
-
-		std::vector<std::pair<uint64_t, CommandStuff>> m_commandsPool;
+		std::vector<std::unique_ptr<CommandContext>> m_commandContextPool;
+		std::queue<std::pair<uint64_t, CommandContext*>> m_cachedContexts;
 
 		friend class Render;
 		ComPtr<ID3D12CommandQueue> m_directCommandQueue;

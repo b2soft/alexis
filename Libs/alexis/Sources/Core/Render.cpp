@@ -19,8 +19,12 @@ namespace alexis
 
 		InitDevice();
 
-
 		InitPipeline();
+
+		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+		{
+			m_descriptorAllocators[i] = std::make_unique<DescriptorAllocator>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+		}
 	}
 
 	void Render::Destroy()
@@ -44,6 +48,8 @@ namespace alexis
 		ThrowIfFailed(m_swapChain->Present(syncInterval, presetFlags));
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+		ReleaseStaleDescriptors(CommandManager::GetInstance()->GetLastCompletedFence());
 	}
 
 	void Render::OnResize(int width, int height)
@@ -60,6 +66,11 @@ namespace alexis
 	CD3DX12_CPU_DESCRIPTOR_HANDLE Render::GetCurrentBackBufferRTV() const
 	{
 		return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
+	}
+
+	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors)
+	{
+		return m_descriptorAllocators[type]->Allocate(numDescriptors);
 	}
 
 	void Render::InitDevice()
@@ -167,6 +178,14 @@ namespace alexis
 				m_device->CreateRenderTargetView(m_backbufferTextures[i].Get(), nullptr, rtvHandle);
 				rtvHandle.Offset(1, m_rtvDescriptorSize);
 			}
+		}
+	}
+
+	void Render::ReleaseStaleDescriptors(uint64_t fenceValue)
+	{
+		for (auto& allocator : m_descriptorAllocators)
+		{
+			allocator->ReleaseStaleDescriptors(fenceValue);
 		}
 	}
 

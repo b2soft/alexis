@@ -4,6 +4,8 @@
 #include <DirectXMath.h>
 
 #include <Core/Core.h>
+#include <Render/RootSignature.h>
+#include <Render/Buffers/GpuBuffer.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -14,7 +16,7 @@ public:
 
 	struct SceneConstantBuffer
 	{
-		DirectX::XMFLOAT4 offset;
+		DirectX::XMFLOAT4 test{ 1.0f, 0.0f, 1.0f, 1.0f };
 	};
 
 	virtual bool Initialize() override;
@@ -38,10 +40,15 @@ private:
 	CD3DX12_VIEWPORT m_viewport;
 	CD3DX12_RECT m_scissorRect;
 	ComPtr<ID3D12CommandAllocator> m_bundleAllocator;
-	ComPtr<ID3D12RootSignature> m_rootSignature;
-	ComPtr<ID3D12DescriptorHeap> m_baseHeap;
+	
+	//ComPtr<ID3D12DescriptorHeap> m_baseHeap;
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> m_bundle;
+
+	alexis::ColorBuffer m_checkerTexture;
+	alexis::VertexBuffer m_triangleVB;
+	alexis::ConstantBuffer m_triangleCB;
+	alexis::RootSignature m_rootSignature;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
 	ImGuiContext* m_context{ nullptr };
@@ -49,12 +56,11 @@ private:
 	float m_aspectRatio{ 1.0f };
 
 	// Application resources
-	ComPtr<ID3D12Resource> m_vertexBuffer;
-	D3D12_VERTEX_BUFFER_VIEW m_vertexBufferView;
-	ComPtr<ID3D12Resource> m_constantBuffer;
-	UINT8* m_pCbvDataBegin{ nullptr };
+	//ComPtr<ID3D12Resource> m_vertexBuffer;
+	
+	//ComPtr<ID3D12Resource> m_constantBuffer;
+	//UINT8* m_pCbvDataBegin{ nullptr };
 	SceneConstantBuffer m_constantBufferData;
-	ComPtr<ID3D12Resource> m_texture;
 
 	float m_timeCount{ 0.f };
 	int m_frameCount{ 0 };

@@ -6,7 +6,7 @@ struct PSInput
 
 struct SceneOffset
 {
-	float4 offset;
+	float4 test;
 };
 
 ConstantBuffer<SceneOffset> cb : register(b0);
@@ -15,7 +15,7 @@ PSInput main(float4 position : POSITION, float4 uv : TEXCOORD)
 {
 	PSInput result;
 
-    result.position = position + cb.offset;
+    result.position = position + cb.test * 0.5;
 	result.uv = uv;
 
 	return result;

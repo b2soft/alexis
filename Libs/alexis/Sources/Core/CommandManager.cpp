@@ -27,45 +27,54 @@ namespace alexis
 		CloseHandle(m_fenceEvent);
 	}
 
-	ID3D12GraphicsCommandList* CommandManager::CreateCommandList()
+	CommandContext* CommandManager::CreateCommandContext()
 	{
-		for (auto& stuff : m_commandsPool)
+		std::lock_guard<std::mutex> lock(m_allocatorMutex);
+
+		if (m_cachedContexts.size() > 0)
 		{
-			if (IsFenceCompleted(stuff.first))
+			CommandContext* commandContext = m_cachedContexts.front().second;
+			if (IsFenceCompleted(m_cachedContexts.front().first))
 			{
-				stuff.second.allocator->Reset();
-				stuff.second.list->Reset(stuff.second.allocator.Get(), nullptr);
-				return stuff.second.list.Get();
+				m_cachedContexts.pop();
+				commandContext->Reset();
+				return commandContext;
 			}
 		}
 
-		AllocateCommand();
+		AllocateContext();
 
 		std::wstring c;
-		c = L"Allocated: " + std::to_wstring(m_commandsPool.size()) + L"\n";
+		c = L"Allocated: " + std::to_wstring(m_commandContextPool.size()) + L"\n";
 
 		OutputDebugString(c.c_str());
-		return m_commandsPool.at(m_commandsPool.size() - 1).second.list.Get();
+		return m_commandContextPool.at(m_commandContextPool.size() - 1).get();
 	}
 
-	void CommandManager::ExecuteCommandList(ID3D12GraphicsCommandList* list)
+	uint64_t CommandManager::ExecuteCommandContext(CommandContext* context, bool waitForCompletion)
 	{
-		list->Close();
+		context->List.Get()->Close();
 
-		ID3D12CommandList* ppCommandLists[] = { list };
+		ID3D12CommandList* ppCommandLists[] = { context->List.Get() };
 		m_directCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-		m_directCommandQueue->Signal(m_fence.Get(), m_nextFenceValue);
+		uint64_t fenceValue = m_nextFenceValue;
 
-		for (auto& stuff : m_commandsPool)
+		m_directCommandQueue->Signal(m_fence.Get(), fenceValue);
+
 		{
-			if (stuff.second.list.Get() == list)
-			{
-				stuff.first = m_nextFenceValue;
-			}
+			std::lock_guard<std::mutex> lock(m_allocatorMutex);
+			m_cachedContexts.push(std::make_pair(fenceValue, context));
+		}
+
+		if (waitForCompletion)
+		{
+			WaitForFence(fenceValue);
 		}
 
 		m_nextFenceValue++;
+
+		return fenceValue;
 	}
 
 	void CommandManager::WaitForFence(uint64_t fenceValue)
@@ -105,24 +114,30 @@ namespace alexis
 	{
 	}
 
-	void CommandManager::AllocateCommand()
+	void CommandManager::AllocateContext()
 	{
 		auto render = Render::GetInstance();
 		auto device = render->GetDevice();
 
-		CommandStuff stuff;
+		std::unique_ptr<CommandContext> context = std::make_unique<CommandContext>();
 
-		ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&stuff.allocator)));
+		ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&context->Allocator)));
 
 		// Create Client List
 		ThrowIfFailed(device->CreateCommandList(
 			0,
 			D3D12_COMMAND_LIST_TYPE_DIRECT,
-			stuff.allocator.Get(),
+			context->Allocator.Get(),
 			nullptr,
-			IID_PPV_ARGS(&stuff.list)));
+			IID_PPV_ARGS(&context->List)));
 
-		m_commandsPool.push_back(std::make_pair(m_lastCompletedFenceValue, std::move(stuff)));
+		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
+		{
+			context->DynamicDescriptors[i] = new DynamicDescriptorHeap(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
+			context->DescriptorHeap[i] = nullptr;
+		}
+
+		m_commandContextPool.push_back(std::move(context));
 	}
 
 }

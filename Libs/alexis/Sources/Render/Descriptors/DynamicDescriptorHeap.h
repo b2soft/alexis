@@ -9,8 +9,11 @@
 #include <queue>
 #include <functional>
 
+#include <Render/RootSignature.h>
+
 namespace alexis
 {
+	class CommandContext;
 
 	class DynamicDescriptorHeap
 	{
@@ -34,9 +37,9 @@ namespace alexis
 		* be passed as an argument to the function.
 		*/
 
-		void CommitStagedDescriptors(ID3D12GraphicsCommandList* commandList, std::function<void(ID3D12GraphicsCommandList*, UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc);
-		void CommitStagedDescriptorsForDraw(ID3D12GraphicsCommandList* commandList);
-		void CommitStagedDescriptorsForDispatch(ID3D12GraphicsCommandList* commandList);
+		void CommitStagedDescriptors(CommandContext* commandContext, std::function<void(ID3D12GraphicsCommandList*, UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc);
+		void CommitStagedDescriptorsForDraw(CommandContext* commandContext);
+		void CommitStagedDescriptorsForDispatch(CommandContext* commandContext);
 
 		/**
 		* Copies a single CPU visible descriptor to a GPU visible descriptor heap.
@@ -53,14 +56,14 @@ namespace alexis
 		*
 		* @return The GPU visible descriptor.
 		*/
-		D3D12_GPU_DESCRIPTOR_HANDLE CopyDescriptor(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor);
+		D3D12_GPU_DESCRIPTOR_HANDLE CopyDescriptor(CommandContext* commandContext, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor);
 
 		/**
 		* Parse the root signature to determine which root parameters contain
 		* descriptor tables and determine the number of descriptors needed for
 		* each table.
 		*/
-		//void ParseRootSignature(const RootSignature& rootSignature);
+		void ParseRootSignature(const RootSignature& rootSignature);
 
 		/**
 		* Reset used descriptors. This should only be done if any descriptors

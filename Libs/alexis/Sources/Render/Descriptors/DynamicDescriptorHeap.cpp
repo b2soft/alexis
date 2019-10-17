@@ -6,6 +6,7 @@
 #include "DynamicDescriptorHeap.h"
 
 #include <Core/Render.h>
+#include <Render/CommandContext.h>
 
 namespace alexis
 {
@@ -57,7 +58,7 @@ namespace alexis
 		m_staleDescriptorTableBitMask |= (1 << rootParameterIndex);
 	}
 
-	void DynamicDescriptorHeap::CommitStagedDescriptors(ID3D12GraphicsCommandList* commandList, std::function<void(ID3D12GraphicsCommandList*, UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc)
+	void DynamicDescriptorHeap::CommitStagedDescriptors(CommandContext* commandContext, std::function<void(ID3D12GraphicsCommandList*, UINT, D3D12_GPU_DESCRIPTOR_HANDLE)> setFunc)
 	{
 		// Compute the number of descriptors that need to be copied
 		uint32_t numDescriptorsToCommit = ComputeStaleDescriptorCount();
@@ -65,7 +66,7 @@ namespace alexis
 		if (numDescriptorsToCommit > 0)
 		{
 			auto device = Render::GetInstance()->GetDevice();
-			assert(commandList != nullptr);
+			assert(commandContext != nullptr);
 
 			if (!m_currentDescriptorHeap || m_numFreeHandles < numDescriptorsToCommit)
 			{
@@ -74,8 +75,7 @@ namespace alexis
 				m_currentGPUDescriptorHandle = m_currentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 				m_numFreeHandles = m_numDescriptorsPerHeap;
 
-				// TODO
-				//commandList->SetDescriptorHeap(m_descriptorHeapType, m_currentDescriptorHeap.Get());
+				commandContext->SetDescriptorHeap(m_descriptorHeapType, m_currentDescriptorHeap.Get());
 
 				// When updating the descriptor heap on the command list, all descriptor
 				// tables must be (re)recopied to the new descriptor heap (not just the stale descriptor tables)
@@ -103,7 +103,7 @@ namespace alexis
 					numSrcDescriptors, srcDescriptorHandles, nullptr, m_descriptorHeapType);
 
 				// Set the descriptors on the command list using the passed-in setter function
-				setFunc(commandList, rootIndex, m_currentGPUDescriptorHandle);
+				setFunc(commandContext->List.Get(), rootIndex, m_currentGPUDescriptorHandle);
 
 				// Offset current CPU and GPU descriptor handles.
 				m_currentCPUDescriptorHandle.Offset(numSrcDescriptors, m_descriptorHandleIncrementSize);
@@ -116,17 +116,17 @@ namespace alexis
 		}
 	}
 
-	void DynamicDescriptorHeap::CommitStagedDescriptorsForDraw(ID3D12GraphicsCommandList* commandList)
+	void DynamicDescriptorHeap::CommitStagedDescriptorsForDraw(CommandContext* commandContext)
 	{
-		CommitStagedDescriptors(commandList, &ID3D12GraphicsCommandList::SetGraphicsRootDescriptorTable);
+		CommitStagedDescriptors(commandContext, &ID3D12GraphicsCommandList::SetGraphicsRootDescriptorTable);
 	}
 
-	void DynamicDescriptorHeap::CommitStagedDescriptorsForDispatch(ID3D12GraphicsCommandList* commandList)
+	void DynamicDescriptorHeap::CommitStagedDescriptorsForDispatch(CommandContext* commandContext)
 	{
-		CommitStagedDescriptors(commandList, &ID3D12GraphicsCommandList::SetComputeRootDescriptorTable);
+		CommitStagedDescriptors(commandContext, &ID3D12GraphicsCommandList::SetComputeRootDescriptorTable);
 	}
 
-	D3D12_GPU_DESCRIPTOR_HANDLE DynamicDescriptorHeap::CopyDescriptor(ID3D12GraphicsCommandList* commandList, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor)
+	D3D12_GPU_DESCRIPTOR_HANDLE DynamicDescriptorHeap::CopyDescriptor(CommandContext* commandContext, D3D12_CPU_DESCRIPTOR_HANDLE cpuDescriptor)
 	{
 		if (!m_currentDescriptorHeap || m_numFreeHandles < 1)
 		{
@@ -135,8 +135,7 @@ namespace alexis
 			m_currentGPUDescriptorHandle = m_currentDescriptorHeap->GetGPUDescriptorHandleForHeapStart();
 			m_numFreeHandles = m_numDescriptorsPerHeap;
 
-			// TODO
-			//commandList.SetDescriptorHeap(m_descriptorHeapType, m_currentDescriptorHeap.Get());
+			commandContext->SetDescriptorHeap(m_descriptorHeapType, m_currentDescriptorHeap.Get());
 
 			// When updating the descriptor heap on the command list, all descriptor
 			// tables must be (re)recopied to the new descriptor heap (not just
@@ -156,36 +155,36 @@ namespace alexis
 		return handleGPU;
 	}
 
-	//void DynamicDescriptorHeap::ParseRootSignature(const RootSignature& rootSignature)
-	//{
-	//	// If the root signature changes, all descriptors must be (re)bound to the command list
-	//	m_staleDescriptorTableBitMask = 0;
-	//
-	//	const auto& rootSignatureDesc = rootSignature.GetRootSignatureDesc();
-	//
-	//	// Get a bit mask that represents the root parameter indices that match the descriptor heap type for this dynamic descriptor heap
-	//	m_descriptorTableBitMask = rootSignature.GetDescriptorTableBitMask(m_descriptorHeapType);
-	//	uint32_t descriptorTableBitMask = m_descriptorTableBitMask;
-	//
-	//	uint32_t currentOffset = 0;
-	//	DWORD rootIndex;
-	//	while (_BitScanForward(&rootIndex, descriptorTableBitMask) && rootIndex < rootSignatureDesc.NumParameters)
-	//	{
-	//		uint32_t numDescriptors = rootSignature.GetNumDescriptors(rootIndex);
-	//
-	//		DescriptorTableCache& descriptorTableCache = m_descriptorTableCache[rootIndex];
-	//		descriptorTableCache.NumDescriptors = numDescriptors;
-	//		descriptorTableCache.BaseDescriptor = m_descriptorHandleCache.get() + currentOffset;
-	//
-	//		currentOffset += numDescriptors;
-	//
-	//		// Flip the descriptor table bit so it's not scanned again for the current index
-	//		descriptorTableBitMask ^= (1 << rootIndex);
-	//	}
-	//
-	//	// Make sure the maximum number of descriptors per descriptor heap has not been exceeded
-	//	assert(currentOffset <= m_numDescriptorsPerHeap && "The root signature requires more than the maximum number of descriptors per descriptor heap. Consider increasing the maximum number of descriptors per descriptor heap.");
-	//}
+	void DynamicDescriptorHeap::ParseRootSignature(const RootSignature& rootSignature)
+	{
+		// If the root signature changes, all descriptors must be (re)bound to the command list
+		m_staleDescriptorTableBitMask = 0;
+	
+		const auto& rootSignatureDesc = rootSignature.GetRootSignatureDesc();
+	
+		// Get a bit mask that represents the root parameter indices that match the descriptor heap type for this dynamic descriptor heap
+		m_descriptorTableBitMask = rootSignature.GetDescriptorTableBitMask(m_descriptorHeapType);
+		uint32_t descriptorTableBitMask = m_descriptorTableBitMask;
+	
+		uint32_t currentOffset = 0;
+		DWORD rootIndex;
+		while (_BitScanForward(&rootIndex, descriptorTableBitMask) && rootIndex < rootSignatureDesc.NumParameters)
+		{
+			uint32_t numDescriptors = rootSignature.GetNumDescriptors(rootIndex);
+	
+			DescriptorTableCache& descriptorTableCache = m_descriptorTableCache[rootIndex];
+			descriptorTableCache.NumDescriptors = numDescriptors;
+			descriptorTableCache.BaseDescriptor = m_descriptorHandleCache.get() + currentOffset;
+	
+			currentOffset += numDescriptors;
+	
+			// Flip the descriptor table bit so it's not scanned again for the current index
+			descriptorTableBitMask ^= (1 << rootIndex);
+		}
+	
+		// Make sure the maximum number of descriptors per descriptor heap has not been exceeded
+		assert(currentOffset <= m_numDescriptorsPerHeap && "The root signature requires more than the maximum number of descriptors per descriptor heap. Consider increasing the maximum number of descriptors per descriptor heap.");
+	}
 
 	void DynamicDescriptorHeap::Reset()
 	{
