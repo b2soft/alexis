@@ -6,6 +6,9 @@
 
 #include "Render.h"
 
+// TODO: rework it! Needed to get app's icon
+#include "../../Resources/resource.h"
+
 extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 namespace alexis
@@ -37,6 +40,7 @@ namespace alexis
 		windowClass.lpfnWndProc = WindowProc;
 		windowClass.hInstance = s_hInstance;
 		windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
+		windowClass.hIcon = ::LoadIconW(s_hInstance, MAKEINTRESOURCE(IDI_ICON1));
 		windowClass.lpszClassName = k_windowClassName;
 
 		if (!RegisterClassExW(&windowClass))

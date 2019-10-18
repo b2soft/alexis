@@ -42,8 +42,7 @@ void SampleApp::OnUpdate(float dt)
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 
-	bool show = true;
-	ImGui::ShowDemoWindow(&show);
+	UpdateGUI();
 
 	m_frameCount++;
 	m_timeCount += dt;
@@ -261,6 +260,64 @@ void SampleApp::PopulateCommandList()
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backbufferResource, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT));
 
 	commandManager->ExecuteCommandContext(commandContext);
+}
+
+void SampleApp::UpdateGUI()
+{
+	static bool showDemoWindow = false;
+
+	if (ImGui::BeginMainMenuBar())
+	{
+		if (ImGui::BeginMenu("File"))
+		{
+			if (ImGui::MenuItem("Exit", "Esc"))
+			{
+				alexis::Core::Get().Quit(0);
+			}
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("View"))
+		{
+			ImGui::MenuItem("ImGui Demo", nullptr, &showDemoWindow);
+
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Options"))
+		{
+			bool vSync = false;// m_pWindow->IsVSync();
+			if (ImGui::MenuItem("V-Sync", "V", &vSync))
+			{
+				//m_pWindow->SetVSync(vSync);
+			}
+
+			bool fullscreen = false;// m_pWindow->IsFullScreen();
+			if (ImGui::MenuItem("Full screen", "Alt+Enter", &fullscreen))
+			{
+				//m_pWindow->SetFullscreen(fullscreen);
+			}
+
+			ImGui::EndMenu();
+		}
+
+		char buffer[256];
+
+
+		{
+			sprintf_s(buffer, _countof(buffer), "FPS: %i (%.2f ms) Frame: %I64i  ", m_fps, 1.0 / m_fps * 1000.0, alexis::Core::GetFrameCount());
+			auto fpsTextSize = ImGui::CalcTextSize(buffer);
+			ImGui::SameLine(ImGui::GetWindowWidth() - fpsTextSize.x);
+			ImGui::Text(buffer);
+		}
+
+		ImGui::EndMainMenuBar();
+	}
+
+	if (showDemoWindow)
+	{
+		ImGui::ShowDemoWindow(&showDemoWindow);
+	}
 }
 
 bool SampleApp::LoadContent()

@@ -55,7 +55,7 @@ private:
 
 	float m_timeCount{ 0.f };
 	int m_frameCount{ 0 };
-	float m_fps{ 0.f };
+	int m_fps{ 0 };
 
 	DirectX::XMMATRIX m_modelMatrix;
 	DirectX::XMMATRIX m_viewMatrix;
@@ -64,4 +64,6 @@ private:
 	void LoadPipeline();
 	void LoadAssets();
 	void PopulateCommandList();
+
+	void UpdateGUI();
 };
