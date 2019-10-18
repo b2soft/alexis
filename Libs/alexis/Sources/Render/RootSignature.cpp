@@ -128,7 +128,14 @@ namespace alexis
 		// Serialize the root signature
 		Microsoft::WRL::ComPtr<ID3DBlob> rootSignatureBlob;
 		Microsoft::WRL::ComPtr<ID3DBlob> errorBlob;
+
 		ThrowIfFailed(D3DX12SerializeVersionedRootSignature(&versionRootSignatureDesc, rootSignatureVersion, &rootSignatureBlob, &errorBlob));
+
+		if (errorBlob)
+		{
+			char* msg = static_cast<char*>(errorBlob->GetBufferPointer());
+			__debugbreak();
+		}
 
 		// Create the root signature
 		ThrowIfFailed(device->CreateRootSignature(0, rootSignatureBlob->GetBufferPointer(), rootSignatureBlob->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature)));

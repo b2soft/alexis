@@ -59,6 +59,11 @@ namespace alexis
 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
 	}
 
+	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, DynamicConstantBuffer& resource)
+	{
+		List->SetGraphicsRootConstantBufferView(rootParameterIdx, resource.GetGPUPtr());
+	}
+
 	void CommandContext::TransitionResource(GpuBuffer& resource, D3D12_RESOURCE_STATES newState, bool flushImmediately /*= false*/, D3D12_RESOURCE_STATES oldState /*= D3D12_RESOURCE_STATE_COMMON*/)
 	{
 		D3D12_RESOURCE_BARRIER& BarrierDesc = m_resourceBarrierBuffer[m_numBarriersToFlush++];

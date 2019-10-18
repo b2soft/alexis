@@ -61,13 +61,13 @@ void SampleApp::OnUpdate(float dt)
 	const float translationSpeed = 1.f;
 	const float offsetBounds = 1.25f;
 
-	//m_constantBufferData.offset.x += translationSpeed * dt;
-	//if (m_constantBufferData.offset.x > offsetBounds)
-	//{
-	//	m_constantBufferData.offset.x = -offsetBounds;
-	//}
+	m_constantBufferData.offset.x += translationSpeed * dt;
+	if (m_constantBufferData.offset.x > offsetBounds)
+	{
+		m_constantBufferData.offset.x = -offsetBounds;
+	}
 
-	//memcpy(m_pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
+	memcpy(m_triangleCB.GetCPUPtr(), &m_constantBufferData, sizeof(m_constantBufferData));
 }
 
 void SampleApp::OnRender()
@@ -89,19 +89,11 @@ void SampleApp::LoadPipeline()
 
 	// Create Descriptor Heaps
 	{
-		// Create CBV Descriptors Heap for texture
-		//D3D12_DESCRIPTOR_HEAP_DESC cbvHeapDesc = {};
-		//cbvHeapDesc.NumDescriptors = 2;
-		//cbvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		//cbvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		//ThrowIfFailed(device->CreateDescriptorHeap(&cbvHeapDesc, IID_PPV_ARGS(&m_baseHeap)));
-
 		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
 		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
 		desc.NumDescriptors = 1;
 		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		ThrowIfFailed(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_imguiSrvHeap)));
-
 	}
 
 	// Create Bundle Allocator
@@ -123,13 +115,14 @@ void SampleApp::LoadAssets()
 			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
 		}
 
-		CD3DX12_DESCRIPTOR_RANGE1 ranges[2];
-		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
-		ranges[1].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+		CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
+		//ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
+		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 
 		CD3DX12_ROOT_PARAMETER1 rootParameters[2];
-		rootParameters[0].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_VERTEX);
-		rootParameters[1].InitAsDescriptorTable(1, &ranges[1], D3D12_SHADER_VISIBILITY_PIXEL);
+		rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_VOLATILE, D3D12_SHADER_VISIBILITY_VERTEX);
+		rootParameters[1].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
+		
 
 		// Sampler
 		D3D12_STATIC_SAMPLER_DESC sampler = {};
@@ -208,14 +201,14 @@ void SampleApp::LoadAssets()
 	const UINT vertexBufferSize = sizeof(triangleVertices);
 
 	m_triangleVB.Create(3, sizeof(Vertex));
-	commandContext->CopyBuffer(m_triangleVB , &triangleVertices, 3, sizeof(Vertex));
+	commandContext->CopyBuffer(m_triangleVB, &triangleVertices, 3, sizeof(Vertex));
 	commandContext->TransitionResource(m_triangleVB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	// Constant Buffer
 
 	m_triangleCB.Create(1, sizeof(SceneConstantBuffer));
-	commandContext->CopyBuffer(m_triangleCB, &m_constantBufferData, 1, sizeof(SceneConstantBuffer));
-	commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
+	//commandContext->CopyBuffer(m_triangleCB, &m_constantBufferData, 1, sizeof(SceneConstantBuffer));
+	//commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	// Create Bundle
 	{
@@ -318,7 +311,8 @@ void SampleApp::PopulateCommandList()
 
 	commandList->OMSetRenderTargets(1, &backBufferRTV, FALSE, nullptr);
 
-	commandContext->SetCBV(0, 0, m_triangleCB);
+	//commandContext->SetCBV(0, 0, m_triangleCB);
+	commandContext->SetDynamicCBV(0, m_triangleCB);
 	commandContext->SetSRV(1, 0, m_checkerTexture);
 
 	// Record actual commands

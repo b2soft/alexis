@@ -36,6 +36,7 @@ namespace alexis
 
 		void SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, TextureBuffer& resource);
 		void SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, ConstantBuffer& resource);
+		void SetDynamicCBV(uint32_t rootParameterIdx, DynamicConstantBuffer& resource);
 
 		void TransitionResource(GpuBuffer& resource, D3D12_RESOURCE_STATES newState, bool flushImmediately = false, D3D12_RESOURCE_STATES oldState = D3D12_RESOURCE_STATE_COMMON);
 

@@ -16,7 +16,7 @@ public:
 
 	struct SceneConstantBuffer
 	{
-		DirectX::XMFLOAT4 test{ 1.0f, 0.0f, 1.0f, 1.0f };
+		DirectX::XMFLOAT4 offset{ 1.0f, 0.0f, 1.0f, 1.0f };
 	};
 
 	virtual bool Initialize() override;
@@ -47,7 +47,8 @@ private:
 
 	alexis::TextureBuffer m_checkerTexture;
 	alexis::VertexBuffer m_triangleVB;
-	alexis::ConstantBuffer m_triangleCB;
+	alexis::DynamicConstantBuffer m_triangleCB;
+	//alexis::ConstantBuffer m_triangleCB; static
 	alexis::RootSignature m_rootSignature;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;

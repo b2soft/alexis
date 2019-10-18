@@ -6,7 +6,7 @@
 
 namespace alexis
 {
-	void GpuBuffer::Create(std::size_t numElements, std::size_t elementsSize, const void* initialData)
+	void GpuBuffer::Create(std::size_t numElements, std::size_t elementsSize)
 	{
 		m_numElements = numElements;
 		m_elementsSize = elementsSize;
@@ -51,7 +51,7 @@ namespace alexis
 		m_view.SizeInBytes = static_cast<UINT>(m_bufferSize);
 	}
 
-	void ConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize, const void* initialData /*= nullptr*/)
+	void ConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize)
 	{
 		m_numElements = numElements;
 		m_elementsSize = elementsSize;
@@ -139,6 +139,50 @@ namespace alexis
 		m_srv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
 
 		device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetDescriptorHandle());
+	}
+
+	void DynamicConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize)
+	{
+		m_numElements = numElements;
+		m_elementsSize = elementsSize;
+
+		m_bufferSize = Math::AlignUp(m_numElements * m_elementsSize, 256);
+
+		D3D12_RESOURCE_DESC Desc = {};
+		Desc.Alignment = 0;
+		Desc.DepthOrArraySize = 1;
+		Desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
+		Desc.Format = DXGI_FORMAT_UNKNOWN;
+		Desc.Height = 1;
+		Desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
+		Desc.MipLevels = 1;
+		Desc.SampleDesc.Count = 1;
+		Desc.SampleDesc.Quality = 0;
+		Desc.Width = m_bufferSize;
+
+		auto device = Render::GetInstance()->GetDevice();
+
+		ThrowIfFailed(device->CreateCommittedResource(
+			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			D3D12_HEAP_FLAG_NONE,
+			&CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize),
+			D3D12_RESOURCE_STATE_GENERIC_READ,
+			nullptr,
+			IID_PPV_ARGS(&m_resource)
+		));
+
+		m_resource->Map(0, nullptr, &m_cpuPtr);
+		m_gpuPtr = m_resource->GetGPUVirtualAddress();
+
+		auto resDesc = m_resource->GetDesc();
+
+		m_cbv = Render::GetInstance()->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+
+		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
+		cbvDesc.BufferLocation = m_gpuPtr;
+		cbvDesc.SizeInBytes = static_cast<UINT>(m_bufferSize);
+
+		device->CreateConstantBufferView(&cbvDesc, m_cbv.GetDescriptorHandle());
 	}
 
 }
