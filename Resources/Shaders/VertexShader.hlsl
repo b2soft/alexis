@@ -1,22 +1,35 @@
-struct PSInput
+struct Mat
 {
-	float2 uv : TEXCOORD0;
-	float4 position : SV_POSITION;
+	matrix mMatrix;
+	matrix mvMatrix;
+	matrix mvpMatrix;
 };
 
-struct SceneOffset
+ConstantBuffer<Mat> MatCB : register(b0);
+
+struct VSInput
 {
-	float4 test;
+	float3 position : POSITION;
+	float3 normal : NORMAL;
+	float3 tangent : TANGENT;
+	float3 bitangent : BITANGENT;
+	float2 uv0 : TEXCOORD;
 };
 
-ConstantBuffer<SceneOffset> cb : register(b0);
-
-PSInput main(float4 position : POSITION, float4 uv : TEXCOORD)
+struct VSOutput
 {
-	PSInput result;
+	//float4 normal : NORMAL;
+	float2 uv0 : TEXCOORD;
+	float4 position : SV_Position;
+};
 
-    result.position = position + cb.test * 0.5;
-	result.uv = uv;
+VSOutput main(VSInput input)
+{
+	VSOutput output;
 
-	return result;
+	output.position = mul(MatCB.mvpMatrix, float4(input.position, 1.0f));
+	//output.normal = mul(MatCB.mvpMatrix, float4(input.normal, 1.0f));
+	output.uv0 = input.uv0;
+
+	return output;
 }

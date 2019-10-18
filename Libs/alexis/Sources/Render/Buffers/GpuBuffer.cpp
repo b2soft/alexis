@@ -9,9 +9,9 @@ namespace alexis
 	void GpuBuffer::Create(std::size_t numElements, std::size_t elementsSize)
 	{
 		m_numElements = numElements;
-		m_elementsSize = elementsSize;
+		m_elementSize = elementsSize;
 
-		m_bufferSize = m_numElements * m_elementsSize;
+		m_bufferSize = m_numElements * m_elementSize;
 
 		D3D12_RESOURCE_DESC Desc = {};
 		Desc.Alignment = 0;
@@ -46,24 +46,26 @@ namespace alexis
 		CreateViews();
 	}
 
-	D3D12_VERTEX_BUFFER_VIEW VertexBuffer::GetVertexBufferView() const
-	{
-		return m_view;
-	}
-
 	void VertexBuffer::CreateViews()
 	{
 		m_view.BufferLocation = m_resource->GetGPUVirtualAddress();
-		m_view.StrideInBytes = static_cast<UINT>(m_elementsSize);//TODO
+		m_view.StrideInBytes = static_cast<UINT>(m_elementSize);//TODO
 		m_view.SizeInBytes = static_cast<UINT>(m_bufferSize);
 	}
 
-	void ConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize)
+	void IndexBuffer::CreateViews()
+	{
+		m_view.BufferLocation = m_resource->GetGPUVirtualAddress();
+		m_view.Format = (m_elementSize == 2) ? DXGI_FORMAT_R16_UINT : DXGI_FORMAT_R32_UINT;
+		m_view.SizeInBytes = static_cast<UINT>(m_bufferSize);
+	}
+
+	void ConstantBuffer::Create(std::size_t numElements, std::size_t elementSize)
 	{
 		m_numElements = numElements;
-		m_elementsSize = elementsSize;
+		m_elementSize = elementSize;
 
-		m_bufferSize = Math::AlignUp(m_numElements * m_elementsSize, 256);
+		m_bufferSize = Math::AlignUp(m_numElements * m_elementSize, 256);
 
 		D3D12_RESOURCE_DESC Desc = {};
 		Desc.Alignment = 0;
@@ -151,9 +153,9 @@ namespace alexis
 	void DynamicConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize)
 	{
 		m_numElements = numElements;
-		m_elementsSize = elementsSize;
+		m_elementSize = elementsSize;
 
-		m_bufferSize = Math::AlignUp(m_numElements * m_elementsSize, 256);
+		m_bufferSize = Math::AlignUp(m_numElements * m_elementSize, 256);
 
 		D3D12_RESOURCE_DESC Desc = {};
 		Desc.Alignment = 0;

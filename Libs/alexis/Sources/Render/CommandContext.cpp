@@ -23,6 +23,16 @@ namespace alexis
 		List->DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 	}
 
+	void CommandContext::DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount, UINT startIndexLocation, INT baseVertexLocation, UINT startInstanceLocation)
+	{
+		for (auto& descriptor : DynamicDescriptors)
+		{
+			descriptor->CommitStagedDescriptorsForDraw(this);
+		}
+
+		List->DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+	}
+
 	void CommandContext::SetRootSignature(const RootSignature& rootSignature)
 	{
 		auto resource = rootSignature.GetRootSignature().Get();
@@ -147,9 +157,7 @@ namespace alexis
 			}
 			else
 			{
-				ThrowIfFailed(
-					LoadFromWICFile(filename.c_str(), WIC_FLAGS_FORCE_RGB, &metadata, scratchImage)
-				);
+				LoadFromWICFile(filename.c_str(), WIC_FLAGS_FORCE_RGB, &metadata, scratchImage);
 			}
 
 			D3D12_RESOURCE_DESC textureDesc = {};

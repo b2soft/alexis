@@ -64,6 +64,9 @@
     <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp">
       <Filter>Sources\Render\Buffers</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Mesh.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -113,6 +116,9 @@
     </ClInclude>
     <ClInclude Include="Sources\Render\CommandContext.h">
       <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Mesh.h">
+      <Filter>Sources\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

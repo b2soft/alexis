@@ -33,6 +33,7 @@
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
     <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h" />
+    <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\RootSignature.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
   </ItemGroup>
@@ -52,6 +53,7 @@
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp" />
+    <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />
   </ItemGroup>
   <ItemGroup>

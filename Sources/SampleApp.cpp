@@ -16,16 +16,16 @@
 using namespace alexis;
 using namespace DirectX;
 
-struct Vertex
+struct Mat
 {
-	XMFLOAT3 position;
-	XMFLOAT2 uv;
+	XMMATRIX ModelMatrix;
+	XMMATRIX ModelViewMatrix;
+	XMMATRIX ModelViewProjectionMatrix;
 };
 
 SampleApp::SampleApp() :
 	m_viewport(0.0f, 0.0f, static_cast<float>(alexis::g_clientWidth), static_cast<float>(alexis::g_clientHeight)),
-	m_scissorRect(0, 0, static_cast<LONG>(alexis::g_clientWidth), static_cast<LONG>(alexis::g_clientHeight))//,
-	//m_constantBufferData{}
+	m_scissorRect(0, 0, static_cast<LONG>(alexis::g_clientWidth), static_cast<LONG>(alexis::g_clientHeight))
 {
 	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 }
@@ -61,13 +61,19 @@ void SampleApp::OnUpdate(float dt)
 	const float translationSpeed = 1.f;
 	const float offsetBounds = 1.25f;
 
-	m_constantBufferData.offset.x += translationSpeed * dt;
-	if (m_constantBufferData.offset.x > offsetBounds)
-	{
-		m_constantBufferData.offset.x = -offsetBounds;
-	}
+	// Update the model matrix
+	float angle = 45.0;
+	const XMVECTOR rotationAxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
+	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
 
-	memcpy(m_triangleCB.GetCPUPtr(), &m_constantBufferData, sizeof(m_constantBufferData));
+	// Update view matrix
+	const XMVECTOR eyePosition = XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f);
+	const XMVECTOR focusPoint = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+	const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
+	m_viewMatrix = XMMatrixLookAtLH(eyePosition, focusPoint, upDirection);
+
+	// Update proj matrix
+	m_projectionMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(75.0f), m_aspectRatio, 0.1f, 100.0f);
 }
 
 void SampleApp::OnRender()
@@ -95,9 +101,6 @@ void SampleApp::LoadPipeline()
 		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
 		ThrowIfFailed(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_imguiSrvHeap)));
 	}
-
-	// Create Bundle Allocator
-	ThrowIfFailed(device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_BUNDLE, IID_PPV_ARGS(&m_bundleAllocator)));
 }
 
 void SampleApp::LoadAssets()
@@ -116,32 +119,24 @@ void SampleApp::LoadAssets()
 		}
 
 		CD3DX12_DESCRIPTOR_RANGE1 ranges[1];
-		//ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_CBV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 		ranges[0].Init(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0, 0, D3D12_DESCRIPTOR_RANGE_FLAG_DESCRIPTORS_VOLATILE);
 
 		CD3DX12_ROOT_PARAMETER1 rootParameters[2];
 		rootParameters[0].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_DATA_VOLATILE, D3D12_SHADER_VISIBILITY_VERTEX);
 		rootParameters[1].InitAsDescriptorTable(1, &ranges[0], D3D12_SHADER_VISIBILITY_PIXEL);
-		
 
 		// Sampler
-		D3D12_STATIC_SAMPLER_DESC sampler = {};
-		sampler.Filter = D3D12_FILTER_MIN_MAG_MIP_POINT;
-		sampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		sampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		sampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		sampler.MipLODBias = 0;
-		sampler.MaxAnisotropy = 0;
-		sampler.ComparisonFunc = D3D12_COMPARISON_FUNC_NEVER;
-		sampler.BorderColor = D3D12_STATIC_BORDER_COLOR_TRANSPARENT_BLACK;
-		sampler.MinLOD = 0.0f;
-		sampler.MaxLOD = D3D12_FLOAT32_MAX;
-		sampler.ShaderRegister = 0;
-		sampler.RegisterSpace = 0;
-		sampler.ShaderVisibility = D3D12_SHADER_VISIBILITY_PIXEL;
+		CD3DX12_STATIC_SAMPLER_DESC anisotropicSampler(0, D3D12_FILTER_ANISOTROPIC);
+
+		// Allow input layout and deny unnecessary access to certain pipeline stages
+		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
+			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
+			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDesc;
-		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &sampler, D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT);
+		rootSignatureDesc.Init_1_1(_countof(rootParameters), rootParameters, 1, &anisotropicSampler, rootSignatureFlags);
 
 		m_rootSignature.SetRootSignatureDesc(rootSignatureDesc.Desc_1_1, featureData.HighestVersion);
 	}
@@ -159,15 +154,9 @@ void SampleApp::LoadAssets()
 		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PixelShader.cso", &pixelShader));
 #endif
 
-		D3D12_INPUT_ELEMENT_DESC inputElementDesc[] =
-		{
-			{ "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 },
-			{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 }
-		};
-
 		// Create PSO
 		D3D12_GRAPHICS_PIPELINE_STATE_DESC psoDesc = {};
-		psoDesc.InputLayout = { inputElementDesc, _countof(inputElementDesc) };
+		psoDesc.InputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
 		psoDesc.pRootSignature = m_rootSignature.GetRootSignature().Get();
 		psoDesc.VS = CD3DX12_SHADER_BYTECODE(vertexShader.Get());
 		psoDesc.PS = CD3DX12_SHADER_BYTECODE(pixelShader.Get());
@@ -189,53 +178,18 @@ void SampleApp::LoadAssets()
 	auto commandList = commandContext->List.Get();
 	//------
 
-	// Create Vertex Buffer
-
-	Vertex triangleVertices[] =
-	{
-		{ {0.0f, 0.25f * m_aspectRatio, 0.0f}, {0.5f, 0.0f,} },
-		{ {0.25f, -0.25f * m_aspectRatio, 0.0f}, {1.0f, 1.0f} },
-		{ {-0.25f, -0.25f * m_aspectRatio, 0.0f}, {0.0, 1.0f} },
-	};
-
-	const UINT vertexBufferSize = sizeof(triangleVertices);
-
-	m_triangleVB.Create(3, sizeof(Vertex));
-	commandContext->CopyBuffer(m_triangleVB, &triangleVertices, 3, sizeof(Vertex));
-	commandContext->TransitionResource(m_triangleVB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
-
 	// Constant Buffer
 
-	m_triangleCB.Create(1, sizeof(SceneConstantBuffer));
+	m_triangleCB.Create(1, sizeof(Mat));
 	//commandContext->CopyBuffer(m_triangleCB, &m_constantBufferData, 1, sizeof(SceneConstantBuffer));
 	//commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
-	// Create Bundle
-	{
-		//ThrowIfFailed(device->CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_BUNDLE, m_bundleAllocator.Get(), m_pipelineState.Get(), IID_PPV_ARGS(&m_bundle)));
-		//m_bundle->SetGraphicsRootSignature(m_rootSignature.Get());
-		//m_bundle->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		//m_bundle->IASetVertexBuffers(0, 1, &m_vertexBufferView);
-		//m_bundle->DrawInstanced(3, 1, 0, 0);
-		//ThrowIfFailed(m_bundle->Close());
-	}
-
-	commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.png");
+	commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.dds");
 	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, true, D3D12_RESOURCE_STATE_COPY_DEST);
+
+	m_cubeMesh = Mesh::LoadFBXFromFile(commandContext, L"Resources/Models/Cube.fbx");
 	commandManager->ExecuteCommandContext(commandContext, true);
 
-	//std::vector<UINT8> texture = GenerateTextureData();
-
-	//D3D12_SUBRESOURCE_DATA textureData = {};
-	//textureData.pData = &texture[0];
-	//textureData.RowPitch = k_textureSize * k_texturePixelSize;
-	//textureData.SlicePitch = textureData.RowPitch * k_textureSize;
-
-	//m_checkerTexture.Create(k_textureSize, k_textureSize, DXGI_FORMAT_R8G8B8A8_UNORM, 1);
-	//commandContext->InitializeTexture(m_checkerTexture, 1, &textureData);
-	//commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, true, D3D12_RESOURCE_STATE_COPY_DEST);
-
-	//commandManager->ExecuteCommandContext(commandContext, true);
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
@@ -257,42 +211,6 @@ void SampleApp::LoadAssets()
 
 }
 
-std::vector<UINT8> SampleApp::GenerateTextureData()
-{
-	const UINT rowPitch = k_textureSize * k_texturePixelSize;
-	const UINT cellPitch = rowPitch >> 3;        // The width of a cell in the checkboard texture.
-	const UINT cellHeight = k_textureSize >> 3;    // The height of a cell in the checkerboard texture.
-	const UINT textureSize = rowPitch * k_textureSize;
-
-	std::vector<UINT8> data(textureSize);
-	UINT8* pData = &data[0];
-
-	for (UINT n = 0; n < textureSize; n += k_texturePixelSize)
-	{
-		UINT x = n % rowPitch;
-		UINT y = n / rowPitch;
-		UINT i = x / cellPitch;
-		UINT j = y / cellHeight;
-
-		if (i % 2 == j % 2)
-		{
-			pData[n] = 0x00;        // R
-			pData[n + 1] = 0x00;    // G
-			pData[n + 2] = 0x00;    // B
-			pData[n + 3] = 0xff;    // A
-		}
-		else
-		{
-			pData[n] = 0xff;        // R
-			pData[n + 1] = 0xff;    // G
-			pData[n + 2] = 0xff;    // B
-			pData[n + 3] = 0xff;    // A
-		}
-	}
-
-	return data;
-}
-
 void SampleApp::PopulateCommandList()
 {
 	auto render = alexis::Render::GetInstance();
@@ -312,22 +230,25 @@ void SampleApp::PopulateCommandList()
 	auto backBufferRTV = render->GetCurrentBackBufferRTV();
 	//// Transition back buffer -> RT
 	commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(backbufferResource, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET));
-
 	commandList->OMSetRenderTargets(1, &backBufferRTV, FALSE, nullptr);
-
-	//commandContext->SetCBV(0, 0, m_triangleCB);
-	commandContext->SetDynamicCBV(0, m_triangleCB);
-	commandContext->SetSRV(1, 0, m_checkerTexture);
 
 	// Record actual commands
 	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 	commandList->ClearRenderTargetView(backBufferRTV, clearColor, 0, nullptr);
 
-	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-	commandList->IASetVertexBuffers(0, 1, &m_triangleVB.GetVertexBufferView());
-	commandContext->DrawInstanced(3, 1, 0, 0);
+	// Update the MVP matrix
+	XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
+	mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
 
-	//commandList->ExecuteBundle(m_bundle.Get());
+	Mat matrices;
+	matrices.ModelViewProjectionMatrix = mvpMatrix;
+
+	memcpy(m_triangleCB.GetCPUPtr(), &matrices, sizeof(Mat));
+	commandContext->SetDynamicCBV(0, m_triangleCB);
+	commandContext->SetSRV(1, 0, m_checkerTexture);
+
+	m_cubeMesh->Draw(commandContext);
+
 
 	// GUI
 	ID3D12DescriptorHeap* imguiHeap[] = { m_imguiSrvHeap.Get() };

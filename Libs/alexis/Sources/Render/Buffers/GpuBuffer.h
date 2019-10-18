@@ -24,19 +24,36 @@ namespace alexis
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
 
 		std::size_t m_numElements{ 0 };
-		std::size_t m_elementsSize{ 0 };
+		std::size_t m_elementSize{ 0 };
 		std::size_t m_bufferSize{ 0 };
 	};
 
 	class VertexBuffer : public GpuBuffer
 	{
 	public:
-		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const;
+		D3D12_VERTEX_BUFFER_VIEW GetVertexBufferView() const
+		{
+			return m_view;
+		}
 
 	private:
 		virtual void CreateViews() override;
 
 		D3D12_VERTEX_BUFFER_VIEW m_view;
+	};
+
+	class IndexBuffer : public GpuBuffer
+	{
+	public:
+		D3D12_INDEX_BUFFER_VIEW GetIndexBufferView() const
+		{
+			return m_view;
+		}
+
+	private:
+		virtual void CreateViews() override;
+
+		D3D12_INDEX_BUFFER_VIEW m_view;
 	};
 
 	class ConstantBuffer : public GpuBuffer
@@ -97,7 +114,7 @@ namespace alexis
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
 
 		std::size_t m_numElements{ 0 };
-		std::size_t m_elementsSize{ 0 };
+		std::size_t m_elementSize{ 0 };
 		std::size_t m_bufferSize{ 0 };
 
 		D3D12_GPU_VIRTUAL_ADDRESS m_gpuPtr;
