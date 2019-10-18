@@ -107,6 +107,89 @@ namespace alexis
 		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
 	}
 
+	void CommandContext::LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename)
+	{
+		fs::path filePath(filename);
+
+		if (!fs::exists(filePath))
+		{
+			throw std::exception("File not found!");
+		}
+
+		std::lock_guard<std::mutex> lock(s_textureCacheMutex);
+		auto it = s_textureCache.find(filename);
+		if (it != s_textureCache.end())
+		{
+			destination.SetFromResource(it->second);
+		}
+		else
+		{
+			TexMetadata metadata;
+			ScratchImage scratchImage;
+
+			if (filePath.extension() == ".dds")
+			{
+				ThrowIfFailed(
+					LoadFromDDSFile(filename.c_str(), DDS_FLAGS_FORCE_RGB, &metadata, scratchImage)
+				);
+			}
+			else if (filePath.extension() == ".hdr")
+			{
+				ThrowIfFailed(
+					LoadFromHDRFile(filename.c_str(), &metadata, scratchImage)
+				);
+			}
+			else if (filePath.extension() == ".tga")
+			{
+				ThrowIfFailed(
+					LoadFromTGAFile(filename.c_str(), &metadata, scratchImage)
+				);
+			}
+			else
+			{
+				ThrowIfFailed(
+					LoadFromWICFile(filename.c_str(), WIC_FLAGS_FORCE_RGB, &metadata, scratchImage)
+				);
+			}
+
+			D3D12_RESOURCE_DESC textureDesc = {};
+			switch (metadata.dimension)
+			{
+			case TEX_DIMENSION_TEXTURE1D:
+				textureDesc = CD3DX12_RESOURCE_DESC::Tex1D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT16>(metadata.arraySize));
+				break;
+			case TEX_DIMENSION_TEXTURE2D:
+				textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.height), static_cast<UINT16>(metadata.arraySize));
+				break;
+			case TEX_DIMENSION_TEXTURE3D:
+				textureDesc = CD3DX12_RESOURCE_DESC::Tex3D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.height), static_cast<UINT16>(metadata.depth));
+				break;
+			default:
+				throw std::exception("Invalid texture dimension!");
+				break;
+			}
+
+			auto device = Render::GetInstance()->GetDevice();
+
+			std::vector<D3D12_SUBRESOURCE_DATA> subresources(scratchImage.GetImageCount());
+			const Image* images = scratchImage.GetImages();
+			for (int i = 0; i < scratchImage.GetImageCount(); ++i)
+			{
+				auto& subresource = subresources[i];
+				subresource.RowPitch = images[i].rowPitch;
+				subresource.SlicePitch = images[i].slicePitch;
+				subresource.pData = images[i].pixels;
+			}
+
+			destination.Create(metadata.width, metadata.height, metadata.format, metadata.mipLevels);
+
+			InitializeTexture(destination, subresources.size(), subresources.data());
+
+			// Add texture to the cache
+			s_textureCache[filename] = destination.GetResource();
+		}
+	}
+
 	void CommandContext::BindDescriptorHeaps()
 	{
 		UINT numDescriptorHeaps = 0;
@@ -137,5 +220,9 @@ namespace alexis
 
 		m_rootSignature = nullptr;
 	}
+
+	std::mutex CommandContext::s_textureCacheMutex;
+
+	std::map<std::wstring, ID3D12Resource*> CommandContext::s_textureCache;
 
 }

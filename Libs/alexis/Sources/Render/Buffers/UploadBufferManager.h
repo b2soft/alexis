@@ -18,7 +18,7 @@ namespace alexis
 			ID3D12Resource* Resource;
 		};
 
-		explicit UploadBufferManager(std::size_t pageSize = 2 * 1024 * 1024); //2 MB
+		explicit UploadBufferManager(std::size_t pageSize = 32 * 1024 * 1024); //32 MB
 		~UploadBufferManager();
 
 		std::size_t GetPageSize() const

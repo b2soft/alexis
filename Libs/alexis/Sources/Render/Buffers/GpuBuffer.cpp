@@ -39,6 +39,13 @@ namespace alexis
 		CreateViews();
 	}
 
+	void GpuBuffer::SetFromResource(ID3D12Resource* resource)
+	{
+		m_resource = resource;
+
+		CreateViews();
+	}
+
 	D3D12_VERTEX_BUFFER_VIEW VertexBuffer::GetVertexBufferView() const
 	{
 		return m_view;

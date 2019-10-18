@@ -16,6 +16,8 @@ namespace alexis
 			return m_resource.Get();
 		}
 
+		void SetFromResource(ID3D12Resource* other);
+
 	protected:
 		virtual void CreateViews() = 0;
 

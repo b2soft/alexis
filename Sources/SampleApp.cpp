@@ -220,18 +220,22 @@ void SampleApp::LoadAssets()
 		//ThrowIfFailed(m_bundle->Close());
 	}
 
-	std::vector<UINT8> texture = GenerateTextureData();
-
-	D3D12_SUBRESOURCE_DATA textureData = {};
-	textureData.pData = &texture[0];
-	textureData.RowPitch = k_textureSize * k_texturePixelSize;
-	textureData.SlicePitch = textureData.RowPitch * k_textureSize;
-
-	m_checkerTexture.Create(k_textureSize, k_textureSize, DXGI_FORMAT_R8G8B8A8_UNORM, 1);
-	commandContext->InitializeTexture(m_checkerTexture, 1, &textureData);
+	commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.png");
 	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, true, D3D12_RESOURCE_STATE_COPY_DEST);
-
 	commandManager->ExecuteCommandContext(commandContext, true);
+
+	//std::vector<UINT8> texture = GenerateTextureData();
+
+	//D3D12_SUBRESOURCE_DATA textureData = {};
+	//textureData.pData = &texture[0];
+	//textureData.RowPitch = k_textureSize * k_texturePixelSize;
+	//textureData.SlicePitch = textureData.RowPitch * k_textureSize;
+
+	//m_checkerTexture.Create(k_textureSize, k_textureSize, DXGI_FORMAT_R8G8B8A8_UNORM, 1);
+	//commandContext->InitializeTexture(m_checkerTexture, 1, &textureData);
+	//commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, true, D3D12_RESOURCE_STATE_COPY_DEST);
+
+	//commandManager->ExecuteCommandContext(commandContext, true);
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();

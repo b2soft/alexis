@@ -1,6 +1,8 @@
 #pragma once
 
 #include <array>
+#include <map>
+#include <mutex>
 
 #include <Render/RootSignature.h>
 #include <Render/Buffers/GpuBuffer.h>
@@ -44,6 +46,7 @@ namespace alexis
 
 		void InitializeTexture(TextureBuffer& destination, UINT numSubresources, D3D12_SUBRESOURCE_DATA subData[]);
 
+		void LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename);
 
 		void BindDescriptorHeaps();
 
@@ -60,6 +63,9 @@ namespace alexis
 		ID3D12RootSignature* m_rootSignature{ nullptr };
 		D3D12_RESOURCE_BARRIER m_resourceBarrierBuffer[16];
 		UINT m_numBarriersToFlush{ 0 };
+
+		static std::mutex s_textureCacheMutex;
+		static std::map<std::wstring, ID3D12Resource*> s_textureCache;
 	};
 
 	inline void CommandContext::FlushResourceBarriers()
