@@ -45,7 +45,7 @@ private:
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 	ComPtr<ID3D12GraphicsCommandList> m_bundle;
 
-	alexis::ColorBuffer m_checkerTexture;
+	alexis::TextureBuffer m_checkerTexture;
 	alexis::VertexBuffer m_triangleVB;
 	alexis::ConstantBuffer m_triangleCB;
 	alexis::RootSignature m_rootSignature;

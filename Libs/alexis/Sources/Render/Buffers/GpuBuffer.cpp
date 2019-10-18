@@ -47,8 +47,8 @@ namespace alexis
 	void VertexBuffer::CreateViews()
 	{
 		m_view.BufferLocation = m_resource->GetGPUVirtualAddress();
-		m_view.StrideInBytes = m_elementsSize;
-		m_view.SizeInBytes = m_bufferSize;
+		m_view.StrideInBytes = static_cast<UINT>(m_elementsSize);//TODO
+		m_view.SizeInBytes = static_cast<UINT>(m_bufferSize);
 	}
 
 	void ConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize, const void* initialData /*= nullptr*/)
@@ -98,7 +98,7 @@ namespace alexis
 		device->CreateConstantBufferView(&cbvDesc, m_cbv.GetDescriptorHandle());
 	}
 
-	void ColorBuffer::Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips /*= 1*/)
+	void TextureBuffer::Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips /*= 1*/)
 	{
 		D3D12_RESOURCE_DESC textureDesc = {};
 		textureDesc.MipLevels = numMips;
@@ -124,7 +124,7 @@ namespace alexis
 		CreateViews();
 	}
 
-	void ColorBuffer::CreateViews()
+	void TextureBuffer::CreateViews()
 	{
 		auto resDesc = m_resource->GetDesc();
 

@@ -14,6 +14,7 @@ namespace alexis
 		{
 			void* Cpu;
 			D3D12_GPU_VIRTUAL_ADDRESS Gpu;
+			std::size_t Offset;
 			ID3D12Resource* Resource;
 		};
 

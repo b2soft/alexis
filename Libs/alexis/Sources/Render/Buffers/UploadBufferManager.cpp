@@ -116,6 +116,7 @@ namespace alexis
 		allocation.Cpu = static_cast<uint8_t*>(m_cpuPtr) + m_offset;
 		allocation.Gpu = m_gpuPtr + m_offset;
 		allocation.Resource = m_resource.Get();
+		allocation.Offset = m_offset;
 
 		m_offset += alignedSize;
 

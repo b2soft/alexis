@@ -49,14 +49,14 @@ namespace alexis
 		}
 	}
 
-	void CommandContext::SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, ColorBuffer& resource)
+	void CommandContext::SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, TextureBuffer& resource)
 	{
 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetSRV());
 	}
 
 	void CommandContext::SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, ConstantBuffer& resource)
 	{
- 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
+		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
 	}
 
 	void CommandContext::TransitionResource(GpuBuffer& resource, D3D12_RESOURCE_STATES newState, bool flushImmediately /*= false*/, D3D12_RESOURCE_STATES oldState /*= D3D12_RESOURCE_STATE_COMMON*/)
@@ -88,7 +88,7 @@ namespace alexis
 		auto allocation = bufferManager->Allocate(sizeInBytes, elementSize);
 		memcpy(allocation.Cpu, data, sizeInBytes);
 
-		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, 0, sizeInBytes);
+		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, allocation.Offset, sizeInBytes);
 	}
 
 	void CommandContext::BindDescriptorHeaps()

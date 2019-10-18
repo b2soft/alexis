@@ -34,7 +34,7 @@ namespace alexis
 
 		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 
-		void SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, ColorBuffer& resource);
+		void SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, TextureBuffer& resource);
 		void SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, ConstantBuffer& resource);
 
 		void TransitionResource(GpuBuffer& resource, D3D12_RESOURCE_STATES newState, bool flushImmediately = false, D3D12_RESOURCE_STATES oldState = D3D12_RESOURCE_STATE_COMMON);

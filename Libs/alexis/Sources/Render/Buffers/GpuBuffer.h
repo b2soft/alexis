@@ -53,7 +53,7 @@ namespace alexis
 		DescriptorAllocation m_cbv;
 	};
 
-	class ColorBuffer :public GpuBuffer
+	class TextureBuffer :public GpuBuffer
 	{
 	public:
 		void Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips = 1);
