@@ -2,6 +2,9 @@
 
 #include "CommandContext.h"
 
+#include <Core/Render.h>
+#include <Render/Buffers/UploadBufferManager.h>
+
 namespace alexis
 {
 
@@ -74,6 +77,18 @@ namespace alexis
 		{
 			FlushResourceBarriers();
 		}
+	}
+
+	void CommandContext::CopyBuffer(const void* data, std::size_t numElements, std::size_t elementSize, GpuBuffer& destination)
+	{
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		const std::size_t sizeInBytes = numElements * elementSize;
+
+		auto allocation = bufferManager->Allocate(sizeInBytes, elementSize);
+		memcpy(allocation.Cpu, data, sizeInBytes);
+
+		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, 0, sizeInBytes);
 	}
 
 	void CommandContext::BindDescriptorHeaps()

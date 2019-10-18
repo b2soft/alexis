@@ -9,13 +9,12 @@
 #include <Utils/Singleton.h>
 #include <Render/Descriptors/DescriptorAllocation.h>
 #include <Render/Descriptors/DescriptorAllocator.h>
+#include <Render/Buffers/UploadBufferManager.h>
 
 using Microsoft::WRL::ComPtr;
 
 namespace alexis
 {
-	class DescriptorAllocator;
-
 	class Render : public alexis::Singleton<Render>
 	{
 	public:
@@ -48,6 +47,11 @@ namespace alexis
 			return m_device.Get();
 		}
 
+		UploadBufferManager* GetUploadBufferManager() const
+		{
+			return m_uploadBufferManager.get();
+		}
+
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors);
 
 	private:
@@ -69,6 +73,7 @@ namespace alexis
 		UINT m_rtvDescriptorSize{ 0 };
 
 		std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
+		std::unique_ptr<UploadBufferManager> m_uploadBufferManager;
 
 		// Sync objects
 		UINT m_frameIndex{ 0 };

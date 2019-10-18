@@ -39,6 +39,7 @@ namespace alexis
 
 		void TransitionResource(GpuBuffer& resource, D3D12_RESOURCE_STATES newState, bool flushImmediately = false, D3D12_RESOURCE_STATES oldState = D3D12_RESOURCE_STATE_COMMON);
 
+		void CopyBuffer(const void* data, std::size_t numElements, std::size_t elementSize, GpuBuffer& destination);
 
 		void BindDescriptorHeaps();
 

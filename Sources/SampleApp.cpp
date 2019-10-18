@@ -190,6 +190,12 @@ void SampleApp::LoadAssets()
 		ThrowIfFailed(device->CreateGraphicsPipelineState(&psoDesc, IID_PPV_ARGS(&m_pipelineState)));
 	}
 
+	//----- Loading
+	auto commandManager = CommandManager::GetInstance();
+	auto commandContext = commandManager->CreateCommandContext();
+	auto commandList = commandContext->List.Get();
+	//------
+
 	// Create Vertex Buffer
 
 	Vertex triangleVertices[] =
@@ -202,67 +208,14 @@ void SampleApp::LoadAssets()
 	const UINT vertexBufferSize = sizeof(triangleVertices);
 
 	m_triangleVB.Create(3, sizeof(Vertex));
+	commandContext->CopyBuffer(&triangleVertices, 3, sizeof(Vertex), m_triangleVB);
+	commandContext->TransitionResource(m_triangleVB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
-	{
-		ComPtr<ID3D12Resource> uploadBuffer;
+	// Constant Buffer
 
-		// Copy CPU data to buffer
-		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(vertexBufferSize),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&uploadBuffer)
-		));
-
-		UINT8* pVertexDataBegin;
-		CD3DX12_RANGE readRange(0, 0); // disable reading
-		ThrowIfFailed(uploadBuffer->Map(0, &readRange, reinterpret_cast<void**>(&pVertexDataBegin)));
-		memcpy(pVertexDataBegin, triangleVertices, sizeof(triangleVertices));
-		uploadBuffer->Unmap(0, nullptr);
-
-		auto commandManager = CommandManager::GetInstance();
-		auto commandContext = commandManager->CreateCommandContext();
-		auto commandList = commandContext->List.Get();
-
-		commandList->CopyBufferRegion(m_triangleVB.GetResource(), 0, uploadBuffer.Get(), 0, vertexBufferSize);
-		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_triangleVB.GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
-
-		commandManager->ExecuteCommandContext(commandContext, true);
-	}
-
-	// Create Constant Buffer stuff
-	{
-		auto commandManager = CommandManager::GetInstance();
-		auto commandContext = commandManager->CreateCommandContext();
-		auto commandList = commandContext->List.Get();
-
-		m_triangleCB.Create(1, sizeof(SceneConstantBuffer));
-
-		ComPtr<ID3D12Resource> uploadBuffer2;
-		// Buffer
-		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(1024 * 64),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&uploadBuffer2)));
-
-		UINT8* pCbvDataBegin;
-		// Map + init the CB. Will be mapped for whole app life
-		CD3DX12_RANGE readRange(0, 0); // won't read from it
-		ThrowIfFailed(uploadBuffer2->Map(0, &readRange, reinterpret_cast<void**>(&pCbvDataBegin)));
-		memcpy(pCbvDataBegin, &m_constantBufferData, sizeof(m_constantBufferData));
-		uploadBuffer2->Unmap(0, nullptr);
-
-		const UINT vertexBufferSize = sizeof(m_constantBufferData);
-		commandList->CopyBufferRegion(m_triangleCB.GetResource(), 0, uploadBuffer2.Get(), 0, vertexBufferSize);
-		commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_triangleCB.GetResource(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
-
-		commandManager->ExecuteCommandContext(commandContext, true);
-	}
+	m_triangleCB.Create(1, sizeof(SceneConstantBuffer));
+	commandContext->CopyBuffer(&m_constantBufferData, 1, sizeof(SceneConstantBuffer), m_triangleCB);
+	commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	// Create Bundle
 	{
@@ -275,6 +228,8 @@ void SampleApp::LoadAssets()
 	}
 
 	ComPtr<ID3D12Resource> textureUploadResource;
+
+	commandManager->ExecuteCommandContext(commandContext, true);
 
 	// Create Texture
 	{

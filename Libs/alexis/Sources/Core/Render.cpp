@@ -25,6 +25,8 @@ namespace alexis
 		{
 			m_descriptorAllocators[i] = std::make_unique<DescriptorAllocator>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
 		}
+
+		m_uploadBufferManager = std::make_unique<UploadBufferManager>();
 	}
 
 	void Render::Destroy()

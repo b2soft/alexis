@@ -46,6 +46,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp" />
+    <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp" />
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />

@@ -61,6 +61,9 @@
     <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp">
+      <Filter>Sources\Render\Buffers</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
