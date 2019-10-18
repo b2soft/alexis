@@ -208,13 +208,13 @@ void SampleApp::LoadAssets()
 	const UINT vertexBufferSize = sizeof(triangleVertices);
 
 	m_triangleVB.Create(3, sizeof(Vertex));
-	commandContext->CopyBuffer(&triangleVertices, 3, sizeof(Vertex), m_triangleVB);
+	commandContext->CopyBuffer(m_triangleVB , &triangleVertices, 3, sizeof(Vertex));
 	commandContext->TransitionResource(m_triangleVB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	// Constant Buffer
 
 	m_triangleCB.Create(1, sizeof(SceneConstantBuffer));
-	commandContext->CopyBuffer(&m_constantBufferData, 1, sizeof(SceneConstantBuffer), m_triangleCB);
+	commandContext->CopyBuffer(m_triangleCB, &m_constantBufferData, 1, sizeof(SceneConstantBuffer));
 	commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	// Create Bundle
@@ -227,40 +227,18 @@ void SampleApp::LoadAssets()
 		//ThrowIfFailed(m_bundle->Close());
 	}
 
-	ComPtr<ID3D12Resource> textureUploadResource;
+	std::vector<UINT8> texture = GenerateTextureData();
+
+	D3D12_SUBRESOURCE_DATA textureData = {};
+	textureData.pData = &texture[0];
+	textureData.RowPitch = k_textureSize * k_texturePixelSize;
+	textureData.SlicePitch = textureData.RowPitch * k_textureSize;
+
+	m_checkerTexture.Create(k_textureSize, k_textureSize, DXGI_FORMAT_R8G8B8A8_UNORM, 1);
+	commandContext->InitializeTexture(m_checkerTexture, 1, &textureData);
+	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	commandManager->ExecuteCommandContext(commandContext, true);
-
-	// Create Texture
-	{
-		std::vector<UINT8> texture = GenerateTextureData();
-
-		D3D12_SUBRESOURCE_DATA textureData = {};
-		textureData.pData = &texture[0];
-		textureData.RowPitch = k_textureSize * k_texturePixelSize;
-		textureData.SlicePitch = textureData.RowPitch * k_textureSize;
-
-		m_checkerTexture.Create(k_textureSize, k_textureSize, DXGI_FORMAT_R8G8B8A8_UNORM, 1);
-
-		const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_checkerTexture.GetResource(), 0, 1);
-
-		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
-			D3D12_RESOURCE_STATE_GENERIC_READ,
-			nullptr,
-			IID_PPV_ARGS(&textureUploadResource)));
-
-		auto commandManager = CommandManager::GetInstance();
-		auto commandContext = commandManager->CreateCommandContext();
-		auto commandList = commandContext->List.Get();
-
-		UpdateSubresources(commandList, m_checkerTexture.GetResource(), textureUploadResource.Get(), 0, 0, 1, &textureData);
-		commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, true, D3D12_RESOURCE_STATE_COPY_DEST);
-
-		commandManager->ExecuteCommandContext(commandContext, true);
-	}
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();

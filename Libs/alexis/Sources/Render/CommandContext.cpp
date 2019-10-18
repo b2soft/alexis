@@ -79,7 +79,7 @@ namespace alexis
 		}
 	}
 
-	void CommandContext::CopyBuffer(const void* data, std::size_t numElements, std::size_t elementSize, GpuBuffer& destination)
+	void CommandContext::CopyBuffer(GpuBuffer& destination, const void* data, std::size_t numElements, std::size_t elementSize)
 	{
 		auto device = Render::GetInstance()->GetDevice();
 		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
@@ -89,6 +89,17 @@ namespace alexis
 		memcpy(allocation.Cpu, data, sizeInBytes);
 
 		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, allocation.Offset, sizeInBytes);
+	}
+
+	void CommandContext::InitializeTexture(TextureBuffer& destination, UINT numSubresources, D3D12_SUBRESOURCE_DATA subData[])
+	{
+		UINT64 uploadBufferSize = GetRequiredIntermediateSize(destination.GetResource(), 0, numSubresources);
+
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		auto allocation = bufferManager->Allocate(uploadBufferSize, 512);
+
+		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
 	}
 
 	void CommandContext::BindDescriptorHeaps()

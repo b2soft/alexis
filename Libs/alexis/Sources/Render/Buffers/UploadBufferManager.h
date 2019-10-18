@@ -26,7 +26,7 @@ namespace alexis
 			return m_pageSize;
 		}
 
-		Allocation Allocate(std::size_t sizeInBytes, std::size_t alignment);
+		Allocation Allocate(std::size_t sizeInBytes, std::size_t alignment = 256);
 		void Reset();
 	private:
 		struct Page

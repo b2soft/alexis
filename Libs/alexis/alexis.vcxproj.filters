@@ -58,10 +58,10 @@
     <ClCompile Include="Sources\Render\CommandContext.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp">
-      <Filter>Sources\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp">
+      <Filter>Sources\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp">
       <Filter>Sources\Render\Buffers</Filter>
     </ClCompile>
   </ItemGroup>
