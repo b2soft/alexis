@@ -67,6 +67,9 @@
     <ClCompile Include="Sources\Render\Mesh.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\RenderTarget.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -118,6 +121,9 @@
       <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Mesh.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\RenderTarget.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
   </ItemGroup>

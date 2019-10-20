@@ -16,6 +16,16 @@ namespace alexis
 			return m_resource.Get();
 		}
 
+		bool IsValid() const
+		{
+			return (m_resource != nullptr);
+		}
+
+		D3D12_RESOURCE_DESC GetResourceDesc() const
+		{
+			return m_resource->GetDesc();
+		}
+
 		void SetFromResource(ID3D12Resource* other);
 
 	protected:
