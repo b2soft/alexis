@@ -27,6 +27,8 @@ namespace alexis
 		}
 
 		m_uploadBufferManager = std::make_unique<UploadBufferManager>();
+
+		UpdateRenderTargetViews();
 	}
 
 	void Render::Destroy()
@@ -56,21 +58,38 @@ namespace alexis
 
 	void Render::OnResize(int width, int height)
 	{
-		m_windowWidth = width;
-		m_windowHeight = height;
+		if (m_windowWidth != width ||
+			m_windowHeight != height)
+		{
+			m_windowWidth = std::max(1, width);
+			m_windowHeight = std::max(1, height);
+
+			CommandManager::GetInstance()->WaitForGpu();
+
+			m_backbufferRT.AttachTexture(TextureBuffer(), RenderTarget::Slot0);
+			for (int i = 0; i < k_frameCount; ++i)
+			{
+				m_backbufferTextures[i].Reset();
+			}
+
+			DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
+			ThrowIfFailed(m_swapChain->GetDesc(&swapChainDesc));
+			ThrowIfFailed(m_swapChain->ResizeBuffers(k_frameCount, m_windowWidth, m_windowHeight, swapChainDesc.BufferDesc.Format, swapChainDesc.Flags));
+
+			m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+			UpdateRenderTargetViews();
+		}
+
 	}
 
-	ID3D12Resource* Render::GetCurrentBackBufferResource() const
+	const RenderTarget& Render::GetBackbufferRT() const
 	{
-		return m_backbufferTextures[m_frameIndex].Get();
+		m_backbufferRT.AttachTexture(m_backbufferTextures[m_frameIndex], RenderTarget::Slot::Slot0);
+		return m_backbufferRT;
 	}
 
-	CD3DX12_CPU_DESCRIPTOR_HANDLE Render::GetCurrentBackBufferRTV() const
-	{
-		return CD3DX12_CPU_DESCRIPTOR_HANDLE(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_frameIndex, m_rtvDescriptorSize);
-	}
-
-	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors)
+	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
 	{
 		return m_descriptorAllocators[type]->Allocate(numDescriptors);
 	}
@@ -118,6 +137,44 @@ namespace alexis
 				IID_PPV_ARGS(&m_device)));
 		}
 
+		// Enable debug messages in debug mode
+#if defined(_DEBUG)
+		ComPtr<ID3D12InfoQueue> infoQueue;
+		if (SUCCEEDED(m_device.As(&infoQueue)))
+		{
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_CORRUPTION, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_ERROR, TRUE);
+			infoQueue->SetBreakOnSeverity(D3D12_MESSAGE_SEVERITY_WARNING, TRUE);
+		}
+
+		// Suppress whole message categories
+		//D3D12_MESSAGE_CATEGORY suppressedCategories[] = {};
+
+		// Suppress messages based on severity
+		D3D12_MESSAGE_SEVERITY suppressedSeverities[] =
+		{
+			D3D12_MESSAGE_SEVERITY_INFO
+		};
+
+		// Suppress messages by specific ID
+		D3D12_MESSAGE_ID suppressedIds[] =
+		{
+			D3D12_MESSAGE_ID_CLEARRENDERTARGETVIEW_MISMATCHINGCLEARVALUE,
+			D3D12_MESSAGE_ID_CLEARDEPTHSTENCILVIEW_MISMATCHINGCLEARVALUE,
+			D3D12_MESSAGE_ID_RESOURCE_BARRIER_BEFORE_AFTER_MISMATCH
+		};
+
+		D3D12_INFO_QUEUE_FILTER newFilter = {};
+		//newFilter.DenyList.NumCategories = _countof(suppressedCategories);
+		//newFilter.DenyList.pCategoryList = suppressedCategories;
+		newFilter.DenyList.NumSeverities = _countof(suppressedSeverities);
+		newFilter.DenyList.pSeverityList = suppressedSeverities;
+		newFilter.DenyList.NumIDs = _countof(suppressedIds);
+		newFilter.DenyList.pIDList = suppressedIds;
+
+		ThrowIfFailed(infoQueue->PushStorageFilter(&newFilter));
+#endif
+
 		// Init command manager to have command queue needed for swapchain
 		CommandManager::GetInstance()->Initialize();
 
@@ -157,32 +214,8 @@ namespace alexis
 
 	void Render::InitPipeline()
 	{
-		// Create RTV Descriptors Heap for backbuffers
-		{
-			// Create RTV Descriptors Heap for backbuffers
-			D3D12_DESCRIPTOR_HEAP_DESC rtvHeapDesc = {};
-			rtvHeapDesc.NumDescriptors = k_frameCount;
-			rtvHeapDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
-			rtvHeapDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
-			ThrowIfFailed(m_device->CreateDescriptorHeap(&rtvHeapDesc, IID_PPV_ARGS(&m_rtvHeap)));
 
-			m_rtvDescriptorSize = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-		}
-
-		// Create Frame Resources
-		{
-			CD3DX12_CPU_DESCRIPTOR_HANDLE rtvHandle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart());
-
-			// Create RTV + alloc per back buffer
-			for (UINT i = 0; i < k_frameCount; ++i)
-			{
-				ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&m_backbufferTextures[i])));
-				m_device->CreateRenderTargetView(m_backbufferTextures[i].Get(), nullptr, rtvHandle);
-				rtvHandle.Offset(1, m_rtvDescriptorSize);
-			}
-		}
 	}
-
 	void Render::ReleaseStaleDescriptors(uint64_t fenceValue)
 	{
 		for (auto& allocator : m_descriptorAllocators)
@@ -231,4 +264,15 @@ namespace alexis
 		return dxgiAdapter4;
 	}
 
+	void Render::UpdateRenderTargetViews()
+	{
+		for (int i = 0; i < k_frameCount; ++i)
+		{
+			ComPtr<ID3D12Resource> backBuffer;
+			ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
+
+			m_backbufferTextures[i].SetFromResource(backBuffer.Get());
+		}
+	}
 }
+

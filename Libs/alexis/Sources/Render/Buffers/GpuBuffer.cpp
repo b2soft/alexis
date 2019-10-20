@@ -37,18 +37,27 @@ namespace alexis
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize),
-			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_COMMON,
 			clearValue,
 			IID_PPV_ARGS(&m_resource)));
 
 		CreateViews();
 	}
 
+	void GpuBuffer::Reset()
+	{
+		m_resource.Reset();
+		m_clearValue.reset();
+	}
+
 	void GpuBuffer::SetFromResource(ID3D12Resource* resource)
 	{
 		m_resource = resource;
 
-		CreateViews();
+		if (m_resource)
+		{
+			CreateViews();
+		}
 	}
 
 	void VertexBuffer::CreateViews()
@@ -90,7 +99,7 @@ namespace alexis
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize),
-			D3D12_RESOURCE_STATE_COPY_DEST,
+			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
 			IID_PPV_ARGS(&m_resource)));
 
@@ -114,33 +123,43 @@ namespace alexis
 
 	void TextureBuffer::Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips /*= 1*/, const D3D12_CLEAR_VALUE* clearValue /*= nullptr*/)
 	{
-		if (m_clearValue)
-		{
-			m_clearValue = std::make_unique<D3D12_CLEAR_VALUE>(*clearValue);
-		}
-
 		D3D12_RESOURCE_DESC textureDesc = {};
 		textureDesc.MipLevels = numMips;
 		textureDesc.Format = format;
 		textureDesc.Width = width;
 		textureDesc.Height = height;
-		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
+		textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 		textureDesc.DepthOrArraySize = 1;
 		textureDesc.SampleDesc.Count = 1;
 		textureDesc.SampleDesc.Quality = 0;
 		textureDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+		Create(textureDesc, clearValue);
+	}
+
+	void TextureBuffer::Create(const D3D12_RESOURCE_DESC& resourceDesc, const D3D12_CLEAR_VALUE* clearValue /*= nullptr*/)
+	{
+		if (m_clearValue)
+		{
+			m_clearValue = std::make_unique<D3D12_CLEAR_VALUE>(*clearValue);
+		}
 
 		auto device = Render::GetInstance()->GetDevice();
 
 		ThrowIfFailed(device->CreateCommittedResource(
 			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
 			D3D12_HEAP_FLAG_NONE,
-			&textureDesc,
-			D3D12_RESOURCE_STATE_COPY_DEST,
-			nullptr,
+			&resourceDesc,
+			D3D12_RESOURCE_STATE_COMMON,
+			clearValue,
 			IID_PPV_ARGS(&m_resource)));
 
 		CreateViews();
+	}
+
+	void TextureBuffer::CreateFromSwapchain(ID3D12Resource* resource)
+	{
+		m_resource.Attach(resource);
 	}
 
 	void TextureBuffer::Resize(uint32_t width, uint32_t height, uint32_t depthOrArraySize /*= 1*/)
@@ -180,9 +199,31 @@ namespace alexis
 
 		auto render = Render::GetInstance();
 		auto device = render->GetDevice();
-		m_srv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
 
-		device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetDescriptorHandle());
+		D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport{ resDesc.Format };
+		device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
+
+		const bool rtFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_RENDER_TARGET) != 0;
+		const bool dsFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL) != 0;
+		const bool srvFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE) != 0;
+
+		if (srvFormatSupport)
+		{
+			m_srv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+			device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetDescriptorHandle());
+		}
+
+		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 && rtFormatSupport)
+		{
+			m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+			device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
+		}
+
+		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 && dsFormatSupport)
+		{
+			m_dsv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+			device->CreateDepthStencilView(m_resource.Get(), nullptr, m_dsv.GetDescriptorHandle());
+		}
 	}
 
 	void DynamicConstantBuffer::Create(std::size_t numElements, std::size_t elementsSize)

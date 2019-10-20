@@ -7,6 +7,8 @@
 #include <wrl.h>
 
 #include <Utils/Singleton.h>
+
+#include <Render/RenderTarget.h>
 #include <Render/Descriptors/DescriptorAllocation.h>
 #include <Render/Descriptors/DescriptorAllocator.h>
 #include <Render/Buffers/UploadBufferManager.h>
@@ -29,8 +31,7 @@ namespace alexis
 
 		void OnResize(int width, int height);
 
-		ID3D12Resource* GetCurrentBackBufferResource() const;
-		CD3DX12_CPU_DESCRIPTOR_HANDLE GetCurrentBackBufferRTV() const;
+		const RenderTarget& GetBackbufferRT() const;
 
 		const CD3DX12_VIEWPORT& GetDefaultViewport() const
 		{
@@ -42,7 +43,7 @@ namespace alexis
 			return m_scissorRect;
 		}
 
-		ID3D12Device* GetDevice() const
+		ID3D12Device2* GetDevice() const
 		{
 			return m_device.Get();
 		}
@@ -52,11 +53,13 @@ namespace alexis
 			return m_uploadBufferManager.get();
 		}
 
-		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors);
+		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
 
 	private:
 		void InitDevice();
 		void InitPipeline();
+
+		void UpdateRenderTargetViews();
 
 		void ReleaseStaleDescriptors(uint64_t fenceValue);
 
@@ -66,11 +69,11 @@ namespace alexis
 		CD3DX12_VIEWPORT m_viewport;
 		CD3DX12_RECT m_scissorRect;
 
-		ComPtr<ID3D12Device> m_device;
+		ComPtr<ID3D12Device2> m_device;
 		ComPtr<IDXGISwapChain4> m_swapChain;
-		ComPtr<ID3D12Resource> m_backbufferTextures[k_frameCount];
-		ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
-		UINT m_rtvDescriptorSize{ 0 };
+		
+		TextureBuffer m_backbufferTextures[k_frameCount];
+		mutable RenderTarget m_backbufferRT;
 
 		std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		std::unique_ptr<UploadBufferManager> m_uploadBufferManager;

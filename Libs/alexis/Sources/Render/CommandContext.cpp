@@ -59,12 +59,12 @@ namespace alexis
 		}
 	}
 
-	void CommandContext::SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, TextureBuffer& resource)
+	void CommandContext::SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const TextureBuffer& resource)
 	{
 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetSRV());
 	}
 
-	void CommandContext::SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, ConstantBuffer& resource)
+	void CommandContext::SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const ConstantBuffer& resource)
 	{
 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
 	}
@@ -74,24 +74,63 @@ namespace alexis
 		List->SetGraphicsRootConstantBufferView(rootParameterIdx, resource.GetGPUPtr());
 	}
 
-	void CommandContext::TransitionResource(GpuBuffer& resource, D3D12_RESOURCE_STATES newState, bool flushImmediately /*= false*/, D3D12_RESOURCE_STATES oldState /*= D3D12_RESOURCE_STATE_COMMON*/)
+	void CommandContext::ClearTexture(const TextureBuffer& texture, const float clearColor[4])
 	{
-		D3D12_RESOURCE_BARRIER& BarrierDesc = m_resourceBarrierBuffer[m_numBarriersToFlush++];
+		List->ClearRenderTargetView(texture.GetRTV(), clearColor, 0, nullptr);
+	}
 
-		BarrierDesc.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;
-		BarrierDesc.Transition.pResource = resource.GetResource();
-		BarrierDesc.Transition.Subresource = D3D12_RESOURCE_BARRIER_ALL_SUBRESOURCES;
-		BarrierDesc.Transition.StateBefore = oldState;
-		BarrierDesc.Transition.StateAfter = newState;
-		BarrierDesc.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;
+	void CommandContext::ClearDepthStencil(const TextureBuffer& texture, D3D12_CLEAR_FLAGS clearFlags, float depth /*= 1.0f*/, uint8_t stencil /*= 0*/)
+	{
+		List->ClearDepthStencilView(texture.GetDSV(), clearFlags, depth, stencil, 0, nullptr);
+	}
 
-		//else if (NewState == D3D12_RESOURCE_STATE_UNORDERED_ACCESS)
-			//	InsertUAVBarrier(Resource, FlushImmediate);
+	void CommandContext::SetRenderTarget(const RenderTarget& renderTarget)
+	{
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetDescriptors;
+		renderTargetDescriptors.reserve(RenderTarget::Slot::NumAttachmentPoints);
 
-		if (flushImmediately || m_numBarriersToFlush == 16)
+		// Bind color slots
+		const auto& textures = renderTarget.GetTextures();
+
+		for (int i = 0; i < RenderTarget::Slot::DepthStencil; ++i)
 		{
-			FlushResourceBarriers();
+			auto& texture = textures[i];
+
+			if (texture.IsValid())
+			{
+				renderTargetDescriptors.push_back(texture.GetRTV());
+			}
 		}
+
+		// Bind depth stencil
+		const auto& depthTexture = renderTarget.GetTexture(RenderTarget::DepthStencil);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsDescriptor(D3D12_DEFAULT);
+		if (depthTexture.IsValid())
+		{
+			dsDescriptor = depthTexture.GetDSV();
+		}
+
+		D3D12_CPU_DESCRIPTOR_HANDLE* dsv = dsDescriptor.ptr != 0 ? &dsDescriptor : nullptr;
+
+		List->OMSetRenderTargets(static_cast<UINT>(renderTargetDescriptors.size()), renderTargetDescriptors.data(), FALSE, dsv);
+	}
+
+	void CommandContext::SetViewport(const D3D12_VIEWPORT& viewport)
+	{
+		SetViewports({ viewport });
+	}
+
+	void CommandContext::SetViewports(const std::vector<D3D12_VIEWPORT>& viewports)
+	{
+		assert(viewports.size() < D3D12_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE);
+		List->RSSetViewports(static_cast<UINT>(viewports.size()),
+			viewports.data());
+	}
+
+	void CommandContext::TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES newState, D3D12_RESOURCE_STATES oldState /*= D3D12_RESOURCE_STATE_COMMON*/)
+	{
+		List->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(resource.GetResource(), oldState, newState));
 	}
 
 	void CommandContext::CopyBuffer(GpuBuffer& destination, const void* data, std::size_t numElements, std::size_t elementSize)
@@ -103,7 +142,9 @@ namespace alexis
 		auto allocation = bufferManager->Allocate(sizeInBytes, elementSize);
 		memcpy(allocation.Cpu, data, sizeInBytes);
 
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
 		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, allocation.Offset, sizeInBytes);
+		TransitionResource(destination, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
 	}
 
 	void CommandContext::InitializeTexture(TextureBuffer& destination, UINT numSubresources, D3D12_SUBRESOURCE_DATA subData[])
@@ -114,7 +155,9 @@ namespace alexis
 		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
 		auto allocation = bufferManager->Allocate(uploadBufferSize, 512);
 
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
 		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
+		TransitionResource(destination, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
 	}
 
 	void CommandContext::LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename)

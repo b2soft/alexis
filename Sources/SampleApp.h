@@ -7,6 +7,7 @@
 #include <Render/RootSignature.h>
 #include <Render/Buffers/GpuBuffer.h>
 #include <Render/Mesh.h>
+#include <Render/RenderTarget.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -40,12 +41,30 @@ private:
 
 	ComPtr<ID3D12PipelineState> m_pipelineState;
 
+	ComPtr<ID3D12PipelineState> m_pbsObjectPSO;
+	ComPtr<ID3D12PipelineState> m_lightingPSO;
+	ComPtr<ID3D12PipelineState> m_hdr2sdrPSO;
+
+	alexis::RenderTarget m_gbufferRT;
+	alexis::RenderTarget m_hdrRT;
+
+	// Signatures
+	alexis::RootSignature m_pbsObjectSig;
+	alexis::RootSignature m_lightingSig;
+	alexis::RootSignature m_hdr2sdrSig;
+
+	// Textures
 	alexis::TextureBuffer m_checkerTexture;
+	alexis::TextureBuffer m_normalTex;
+	alexis::TextureBuffer m_metalTex;
+	alexis::TextureBuffer m_concreteTex;
+
 	alexis::VertexBuffer m_triangleVB;
 	alexis::DynamicConstantBuffer m_triangleCB;
 	//alexis::ConstantBuffer m_triangleCB; static
 	alexis::RootSignature m_rootSignature;
 	std::unique_ptr<alexis::Mesh> m_cubeMesh;
+	std::unique_ptr<alexis::Mesh> m_fsQuad;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
 	ImGuiContext* m_context{ nullptr };
@@ -57,6 +76,7 @@ private:
 	float m_timeCount{ 0.f };
 	int m_frameCount{ 0 };
 	int m_fps{ 0 };
+	float m_totalTime{ 0.f };
 
 	DirectX::XMMATRIX m_modelMatrix;
 	DirectX::XMMATRIX m_viewMatrix;

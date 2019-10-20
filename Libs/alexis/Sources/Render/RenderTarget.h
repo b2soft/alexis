@@ -9,6 +9,7 @@ namespace alexis
 {
 	class RenderTarget
 	{
+	public:
 		enum Slot
 		{
 			Slot0 = 0,
@@ -20,7 +21,6 @@ namespace alexis
 			NumAttachmentPoints
 		};
 
-	public:
 		RenderTarget();
 
 		RenderTarget(const RenderTarget&) = default;
