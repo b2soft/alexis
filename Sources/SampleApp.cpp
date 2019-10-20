@@ -81,6 +81,11 @@ void SampleApp::OnRender()
 	PopulateCommandList();
 }
 
+void SampleApp::OnResize(int width, int height)
+{
+	// resize RT
+}
+
 void SampleApp::Destroy()
 {
 	ImGui_ImplDX12_Shutdown();

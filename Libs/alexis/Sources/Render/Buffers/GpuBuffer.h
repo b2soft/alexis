@@ -9,7 +9,7 @@ namespace alexis
 	class GpuBuffer
 	{
 	public:
-		void Create(std::size_t numElements, std::size_t elementsSize);
+		void Create(std::size_t numElements, std::size_t elementsSize, const D3D12_CLEAR_VALUE* clearValue = nullptr);
 
 		ID3D12Resource* GetResource() const
 		{
@@ -32,6 +32,7 @@ namespace alexis
 		virtual void CreateViews() = 0;
 
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
+		std::unique_ptr<D3D12_CLEAR_VALUE> m_clearValue;
 
 		std::size_t m_numElements{ 0 };
 		std::size_t m_elementSize{ 0 };
@@ -85,12 +86,14 @@ namespace alexis
 	class TextureBuffer :public GpuBuffer
 	{
 	public:
-		void Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips = 1);
+		void Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips = 1, const D3D12_CLEAR_VALUE* clearValue = nullptr);
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetSRV() const
 		{
 			return m_srv.GetDescriptorHandle();
 		}
+
+		void Resize(uint32_t width, uint32_t height, uint32_t depthOrArraySize = 1);
 
 	private:
 		virtual void CreateViews() override;
@@ -118,7 +121,6 @@ namespace alexis
 		{
 			return m_cpuPtr;
 		}
-
 
 	private:
 		Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;

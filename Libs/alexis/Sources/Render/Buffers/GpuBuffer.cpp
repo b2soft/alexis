@@ -6,8 +6,13 @@
 
 namespace alexis
 {
-	void GpuBuffer::Create(std::size_t numElements, std::size_t elementsSize)
+	void GpuBuffer::Create(std::size_t numElements, std::size_t elementsSize, const D3D12_CLEAR_VALUE* clearValue)
 	{
+		if (m_clearValue)
+		{
+			m_clearValue = std::make_unique<D3D12_CLEAR_VALUE>(*clearValue);
+		}
+
 		m_numElements = numElements;
 		m_elementSize = elementsSize;
 
@@ -33,7 +38,7 @@ namespace alexis
 			D3D12_HEAP_FLAG_NONE,
 			&CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize),
 			D3D12_RESOURCE_STATE_COPY_DEST,
-			nullptr,
+			clearValue,
 			IID_PPV_ARGS(&m_resource)));
 
 		CreateViews();
@@ -107,8 +112,13 @@ namespace alexis
 		device->CreateConstantBufferView(&cbvDesc, m_cbv.GetDescriptorHandle());
 	}
 
-	void TextureBuffer::Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips /*= 1*/)
+	void TextureBuffer::Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips /*= 1*/, const D3D12_CLEAR_VALUE* clearValue /*= nullptr*/)
 	{
+		if (m_clearValue)
+		{
+			m_clearValue = std::make_unique<D3D12_CLEAR_VALUE>(*clearValue);
+		}
+
 		D3D12_RESOURCE_DESC textureDesc = {};
 		textureDesc.MipLevels = numMips;
 		textureDesc.Format = format;
@@ -131,6 +141,31 @@ namespace alexis
 			IID_PPV_ARGS(&m_resource)));
 
 		CreateViews();
+	}
+
+	void TextureBuffer::Resize(uint32_t width, uint32_t height, uint32_t depthOrArraySize /*= 1*/)
+	{
+		if (m_resource)
+		{
+			CD3DX12_RESOURCE_DESC resDesc(m_resource->GetDesc());
+
+			resDesc.Width = std::max(width, 1u);
+			resDesc.Height = std::max(height, 1u);
+			resDesc.DepthOrArraySize = depthOrArraySize;
+
+			auto device = Render::GetInstance()->GetDevice();
+
+			ThrowIfFailed(device->CreateCommittedResource(
+				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+				D3D12_HEAP_FLAG_NONE,
+				&resDesc,
+				D3D12_RESOURCE_STATE_COMMON,
+				m_clearValue.get(),
+				IID_PPV_ARGS(&m_resource)
+			));
+
+			CreateViews();
+		}
 	}
 
 	void TextureBuffer::CreateViews()

@@ -41,8 +41,7 @@ namespace alexis
 		m_size = size;
 		for (auto& texture : m_textures)
 		{
-			//TODO
-			//texture.Resize(m_size.x, m_size.y);
+			texture.Resize(m_size.x, m_size.y);
 		}
 	}
 

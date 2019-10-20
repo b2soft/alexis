@@ -27,6 +27,7 @@ public:
 
 	virtual void OnUpdate(float dt) override;
 	virtual void OnRender() override;
+	virtual void OnResize(int width, int height) override;
 
 	virtual void Destroy() override;
 
