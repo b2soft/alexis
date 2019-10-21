@@ -241,8 +241,8 @@
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
-      <AdditionalLibraryDirectories>..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>assimp-vc142-mt.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
