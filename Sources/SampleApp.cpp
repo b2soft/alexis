@@ -45,9 +45,9 @@ enum Hdr2SdrParameters
 
 SampleApp::SampleApp() :
 	m_viewport(0.0f, 0.0f, static_cast<float>(alexis::g_clientWidth), static_cast<float>(alexis::g_clientHeight)),
-	m_scissorRect(0, 0, LONG_MAX, LONG_MAX)
+	m_scissorRect(0, 0, LONG_MAX, LONG_MAX),
+	m_aspectRatio(static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight))
 {
-	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 }
 
 bool SampleApp::Initialize()
@@ -73,9 +73,6 @@ void SampleApp::OnUpdate(float dt)
 		m_fps = m_frameCount;
 		m_timeCount = 0.f;
 		m_frameCount = 0;
-
-		std::wstring fpsString = L"FPS: " + std::to_wstring(m_fps) + L"\n";
-		OutputDebugString(fpsString.c_str());
 	}
 
 	const float translationSpeed = 1.f;
@@ -152,16 +149,16 @@ void SampleApp::LoadAssets()
 
 	// Textures
 	commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.dds");
-	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	commandContext->LoadTextureFromFile(m_concreteTex, L"Resources/Textures/metal_base.dds");
-	commandContext->TransitionResource(m_concreteTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	commandContext->TransitionResource(m_concreteTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	commandContext->LoadTextureFromFile(m_normalTex, L"Resources/Textures/metal_normal.dds");
-	commandContext->TransitionResource(m_normalTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	commandContext->TransitionResource(m_normalTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	commandContext->LoadTextureFromFile(m_metalTex, L"Resources/Textures/metal_mero.dds");
-	commandContext->TransitionResource(m_metalTex, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_GENERIC_READ);
+	commandContext->TransitionResource(m_metalTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Models 
 	m_cubeMesh = Mesh::LoadFBXFromFile(commandContext, L"Resources/Models/Cube.fbx");
@@ -454,15 +451,15 @@ void SampleApp::PopulateCommandList()
 			auto& texture = m_gbufferRT.GetTexture(static_cast<RenderTarget::Slot>(i));
 			if (texture.IsValid())
 			{
-				commandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_RENDER_TARGET);
+				commandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 				commandContext->ClearTexture(texture, clearColor);
 			}
 		}
 
-		commandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+		commandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 		commandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
 
-		commandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET);
+		commandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 		commandContext->ClearTexture(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), clearColor);
 	}
 
@@ -495,9 +492,9 @@ void SampleApp::PopulateCommandList()
 
 	// Resolve lighting
 	{
-		commandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		commandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		commandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		commandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		commandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		commandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		commandContext->SetRenderTarget(m_hdrRT);
 		commandContext->SetViewport(m_hdrRT.GetViewport());
@@ -515,11 +512,11 @@ void SampleApp::PopulateCommandList()
 	// Setup render to backbuffer
 	const auto& backbuffer = render->GetBackbufferRT();
 	const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
-	commandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+	commandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	// Hdr to Sdr conversion
 	{
-		commandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		commandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		commandContext->SetRenderTarget(backbuffer);
 		commandContext->SetViewport(backbuffer.GetViewport());
@@ -540,7 +537,7 @@ void SampleApp::PopulateCommandList()
 
 	// Transit back buffer back to Present state
 
-	commandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	commandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
 
 	commandManager->ExecuteCommandContext(commandContext);
 }

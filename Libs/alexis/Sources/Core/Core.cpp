@@ -24,7 +24,7 @@ namespace alexis
 
 	HWND Core::s_hwnd = nullptr;
 	uint64_t Core::s_frameCount = 0;
-	std::shared_ptr<IGame> Core::s_game;
+	IGame* Core::s_game;
 	HighResolutionClock Core::s_updateClock;
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
@@ -112,7 +112,7 @@ namespace alexis
 		return *s_singleton;
 	}
 
-	int Core::Run(std::shared_ptr<IGame> game)
+	int Core::Run(IGame* game)
 	{
 		s_game = game;
 
@@ -139,7 +139,7 @@ namespace alexis
 		//Graphics Flush
 		s_game->UnloadContent();
 		s_game->Destroy();
-		s_game.reset();
+		s_game = nullptr;
 
 		return static_cast<int>(msg.wParam);
 	}

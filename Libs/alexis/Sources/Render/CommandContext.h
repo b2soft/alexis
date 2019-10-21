@@ -49,7 +49,7 @@ namespace alexis
 		void SetViewport(const D3D12_VIEWPORT& viewport);
 		void SetViewports(const std::vector<D3D12_VIEWPORT>& viewports);
 
-		void TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES newState, D3D12_RESOURCE_STATES oldState = D3D12_RESOURCE_STATE_COMMON);
+		void TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES oldState, D3D12_RESOURCE_STATES newState);
 
 		void CopyBuffer(GpuBuffer& destination, const void* data, std::size_t numElements, std::size_t elementSize);
 

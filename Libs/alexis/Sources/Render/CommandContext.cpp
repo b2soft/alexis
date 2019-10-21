@@ -128,7 +128,7 @@ namespace alexis
 			viewports.data());
 	}
 
-	void CommandContext::TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES newState, D3D12_RESOURCE_STATES oldState /*= D3D12_RESOURCE_STATE_COMMON*/)
+	void CommandContext::TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES oldState, D3D12_RESOURCE_STATES newState)
 	{
 		List->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(resource.GetResource(), oldState, newState));
 	}
@@ -142,9 +142,9 @@ namespace alexis
 		auto allocation = bufferManager->Allocate(sizeInBytes, elementSize);
 		memcpy(allocation.Cpu, data, sizeInBytes);
 
-		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, allocation.Offset, sizeInBytes);
-		TransitionResource(destination, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	void CommandContext::InitializeTexture(TextureBuffer& destination, UINT numSubresources, D3D12_SUBRESOURCE_DATA subData[])
@@ -155,9 +155,9 @@ namespace alexis
 		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
 		auto allocation = bufferManager->Allocate(uploadBufferSize, 512);
 
-		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_COMMON);
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
-		TransitionResource(destination, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_COPY_DEST);
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	void CommandContext::LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename)

@@ -141,14 +141,14 @@ namespace alexis
 
 		m_vertexBuffer.Create(vertices.size(), sizeof(VertexDef));
 		m_indexBuffer.Create(m_indexCount, sizeof(uint16_t));
-		
+
 		//Todo : remove element size duplication?
 
 		commandContext->CopyBuffer(m_vertexBuffer, vertices.data(), vertices.size(), sizeof(VertexDef));
 		commandContext->CopyBuffer(m_indexBuffer, indices.data(), m_indexCount, sizeof(uint16_t));
 
-		commandContext->TransitionResource(m_vertexBuffer, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER, D3D12_RESOURCE_STATE_GENERIC_READ);
-		commandContext->TransitionResource(m_indexBuffer, D3D12_RESOURCE_STATE_INDEX_BUFFER, D3D12_RESOURCE_STATE_GENERIC_READ);
+		commandContext->TransitionResource(m_vertexBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_VERTEX_AND_CONSTANT_BUFFER);
+		commandContext->TransitionResource(m_indexBuffer, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_INDEX_BUFFER);
 	}
 
 }

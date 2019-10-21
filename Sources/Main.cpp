@@ -38,8 +38,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 	int returnCode = 0;
 	alexis::Core::Create(hInstance);
 	{
-		std::shared_ptr<SampleApp> sample = std::make_shared<SampleApp>();
-		returnCode = alexis::Core::Get().Run(sample);
+		SampleApp sample;
+		returnCode = alexis::Core::Get().Run(&sample);
 	}
 	alexis::Core::Destroy();
 

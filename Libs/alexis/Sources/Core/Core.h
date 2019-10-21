@@ -50,7 +50,7 @@ namespace alexis
 		// Get the Core singleton
 		static Core& Get();
 
-		int Run(std::shared_ptr<IGame> game);
+		int Run(IGame* game);
 
 		void Quit(int returnCode = 0);
 
@@ -85,6 +85,6 @@ namespace alexis
 
 		static HWND s_hwnd;
 		static uint64_t s_frameCount;
-		static std::shared_ptr<IGame> s_game;
+		static IGame* s_game;
 	};
 }
