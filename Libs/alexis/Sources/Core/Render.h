@@ -33,35 +33,18 @@ namespace alexis
 
 		const RenderTarget& GetBackbufferRT() const;
 
-		const CD3DX12_VIEWPORT& GetDefaultViewport() const
-		{
-			return m_viewport;
-		}
+		const CD3DX12_VIEWPORT& GetDefaultViewport() const;
+		const CD3DX12_RECT& GetDefaultScrissorRect() const;
 
-		const CD3DX12_RECT& GetDefaultScrissorRect() const
-		{
-			return m_scissorRect;
-		}
+		ID3D12Device2* GetDevice() const;
 
-		ID3D12Device2* GetDevice() const
-		{
-			return m_device.Get();
-		}
+		UploadBufferManager* GetUploadBufferManager() const;
 
-		UploadBufferManager* GetUploadBufferManager() const
-		{
-			return m_uploadBufferManager.get();
-		}
+		bool IsVSync() const;
+		void SetVSync(bool vSync);
 
-		bool IsVSync() const
-		{
-			return m_vSync;
-		}
-
-		void SetVSync(bool vSync)
-		{
-			m_vSync = vSync;
-		}
+		bool IsFullscreen() const;
+		void SetFullscreen(bool fullscreen);
 
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
 
@@ -93,9 +76,15 @@ namespace alexis
 		UINT64 m_fenceValues[k_frameCount]{};
 
 		HANDLE m_swapChainEvent;
+
+		// Needed to restore window rect after transition fullscreen->windowed
+		RECT m_windowRect; 
+
 		int m_windowWidth{ 1 };
 		int m_windowHeight{ 1 };
+
 		bool m_vSync{ false };
+		bool m_fullscreen{ false };
 		bool m_isTearingSupported{ false };
 		bool m_useWarpDevice{ false };
 	};

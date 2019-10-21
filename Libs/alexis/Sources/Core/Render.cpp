@@ -89,6 +89,88 @@ namespace alexis
 		return m_backbufferRT;
 	}
 
+	const CD3DX12_VIEWPORT& Render::GetDefaultViewport() const
+	{
+		return m_viewport;
+	}
+
+	const CD3DX12_RECT& Render::GetDefaultScrissorRect() const
+	{
+		return m_scissorRect;
+	}
+
+	ID3D12Device2* Render::GetDevice() const
+	{
+		return m_device.Get();
+	}
+
+	alexis::UploadBufferManager* Render::GetUploadBufferManager() const
+	{
+		return m_uploadBufferManager.get();
+	}
+
+	bool Render::IsVSync() const
+	{
+		return m_vSync;
+	}
+
+	void Render::SetVSync(bool vSync)
+	{
+		m_vSync = vSync;
+	}
+
+	bool Render::IsFullscreen() const
+	{
+		return m_fullscreen;
+	}
+
+	void Render::SetFullscreen(bool fullscreen)
+	{
+		if (m_fullscreen != fullscreen)
+		{
+			m_fullscreen = fullscreen;
+
+			if (m_fullscreen)
+			{
+				GetWindowRect(Core::s_hwnd, &m_windowRect);
+
+				UINT windowStyle = WS_OVERLAPPEDWINDOW & ~(WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX);
+
+				SetWindowLongW(Core::s_hwnd, GWL_STYLE, windowStyle);
+
+				// Query the name of the nearest display device for the window
+				// This is required to set the fullscreen dimensions of the window when using a multi-monitor setup
+				HMONITOR hMonitor = ::MonitorFromWindow(Core::s_hwnd, MONITOR_DEFAULTTONEAREST);
+				MONITORINFOEX monitorInfo = {};
+				monitorInfo.cbSize = sizeof(MONITORINFOEX);
+				GetMonitorInfo(hMonitor, &monitorInfo);
+
+				SetWindowPos(Core::s_hwnd, HWND_TOP,
+					monitorInfo.rcMonitor.left,
+					monitorInfo.rcMonitor.top,
+					monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left,
+					monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top,
+					SWP_FRAMECHANGED | SWP_NOACTIVATE);
+
+				ShowWindow(Core::s_hwnd, SW_MAXIMIZE);
+			}
+			else
+			{
+				// Restore all the window decorators
+				SetWindowLong(Core::s_hwnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
+
+				SetWindowPos(Core::s_hwnd, HWND_NOTOPMOST,
+					m_windowRect.left,
+					m_windowRect.top,
+					m_windowRect.right - m_windowRect.left,
+					m_windowRect.bottom - m_windowRect.top,
+					SWP_FRAMECHANGED | SWP_NOACTIVATE);
+
+				ShowWindow(Core::s_hwnd, SW_NORMAL);
+			}
+		}
+	}
+
 	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
 	{
 		return m_descriptorAllocators[type]->Allocate(numDescriptors);

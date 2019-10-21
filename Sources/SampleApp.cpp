@@ -572,10 +572,10 @@ void SampleApp::UpdateGUI()
 				Render::GetInstance()->SetVSync(vSync);
 			}
 
-			bool fullscreen = false;// m_pWindow->IsFullScreen();
+			bool fullscreen = Render::GetInstance()->IsFullscreen();
 			if (ImGui::MenuItem("Full screen", "Alt+Enter", &fullscreen))
 			{
-				//m_pWindow->SetFullscreen(fullscreen);
+				Render::GetInstance()->SetFullscreen(fullscreen);
 			}
 
 			ImGui::EndMenu();
