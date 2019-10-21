@@ -86,7 +86,7 @@ namespace alexis
 		int m_windowWidth{ 1 };
 		int m_windowHeight{ 1 };
 		bool m_vSync{ false };
-		bool m_isTearingSupported{ false };// TODO: faked, need to obtain real value
+		bool m_isTearingSupported{ false };
 		bool m_useWarpDevice{ false };
 	};
 

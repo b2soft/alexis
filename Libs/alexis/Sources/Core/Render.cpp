@@ -178,9 +178,28 @@ namespace alexis
 		// Init command manager to have command queue needed for swapchain
 		CommandManager::GetInstance()->Initialize();
 
-		HWND hwnd = Core::s_hwnd;
+
+		// Check for G-Sync / FreeSync is available
+		{
+			BOOL allowTearing = FALSE;
+
+			if (SUCCEEDED(CreateDXGIFactory1(IID_PPV_ARGS(&factory))))
+			{
+				ComPtr<IDXGIFactory5> factory5;
+				if (SUCCEEDED(factory.As(&factory5)))
+				{
+					factory5->CheckFeatureSupport(DXGI_FEATURE_PRESENT_ALLOW_TEARING,
+						&allowTearing, sizeof(allowTearing));
+				}
+			}
+
+			m_isTearingSupported = (allowTearing == TRUE);
+		}
 
 		// Create Swap Chain
+
+		HWND hwnd = Core::s_hwnd;
+
 		{
 			DXGI_SWAP_CHAIN_DESC1 swapChainDesc = {};
 			swapChainDesc.BufferCount = k_frameCount;
@@ -191,6 +210,7 @@ namespace alexis
 			swapChainDesc.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 			swapChainDesc.SampleDesc.Count = 1;
 			swapChainDesc.Flags = DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+			swapChainDesc.Flags |= m_isTearingSupported ? DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING : 0;
 
 			ComPtr<IDXGISwapChain1> swapChain;
 			ThrowIfFailed(factory->CreateSwapChainForHwnd(
