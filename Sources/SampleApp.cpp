@@ -70,7 +70,7 @@ void SampleApp::OnUpdate(float dt)
 
 	if (m_timeCount > 1.f)
 	{
-		m_fps = m_frameCount;
+		m_fps = m_frameCount / m_timeCount;
 		m_timeCount = 0.f;
 		m_frameCount = 0;
 	}
@@ -585,7 +585,7 @@ void SampleApp::UpdateGUI()
 
 
 		{
-			sprintf_s(buffer, _countof(buffer), "FPS: %i (%.2f ms) Frame: %I64i  ", m_fps, 1.0 / m_fps * 1000.0, alexis::Core::GetFrameCount());
+			sprintf_s(buffer, _countof(buffer), "FPS: %.2f (%.2f ms) Frame: %I64i  ", m_fps, 1.0 / m_fps * 1000.0, alexis::Core::GetFrameCount());
 			auto fpsTextSize = ImGui::CalcTextSize(buffer);
 			ImGui::SameLine(ImGui::GetWindowWidth() - fpsTextSize.x);
 			ImGui::Text(buffer);

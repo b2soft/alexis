@@ -75,7 +75,7 @@ private:
 
 	float m_timeCount{ 0.f };
 	int m_frameCount{ 0 };
-	int m_fps{ 0 };
+	float m_fps{ 0.f };
 	float m_totalTime{ 0.f };
 
 	DirectX::XMMATRIX m_modelMatrix;
