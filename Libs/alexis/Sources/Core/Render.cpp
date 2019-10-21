@@ -119,6 +119,11 @@ namespace alexis
 		m_vSync = vSync;
 	}
 
+	void Render::ToggleVSync()
+	{
+		SetVSync(!m_vSync);
+	}
+
 	bool Render::IsFullscreen() const
 	{
 		return m_fullscreen;
@@ -169,6 +174,11 @@ namespace alexis
 				ShowWindow(Core::s_hwnd, SW_NORMAL);
 			}
 		}
+	}
+
+	void Render::ToggleFullscreen()
+	{
+		SetFullscreen(!m_fullscreen);
 	}
 
 	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)

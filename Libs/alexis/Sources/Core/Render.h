@@ -42,9 +42,11 @@ namespace alexis
 
 		bool IsVSync() const;
 		void SetVSync(bool vSync);
+		void ToggleVSync();
 
 		bool IsFullscreen() const;
 		void SetFullscreen(bool fullscreen);
+		void ToggleFullscreen();
 
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
 

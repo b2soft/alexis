@@ -4,6 +4,8 @@
 #include <DirectXMath.h>
 
 #include <Core/Core.h>
+#include <Core/Events.h>
+
 #include <Render/RootSignature.h>
 #include <Render/Buffers/GpuBuffer.h>
 #include <Render/Mesh.h>
@@ -30,6 +32,12 @@ public:
 	virtual void OnUpdate(float dt) override;
 	virtual void OnRender() override;
 	virtual void OnResize(int width, int height) override;
+
+	virtual void OnKeyPressed(alexis::KeyEventArgs& e) override;
+	virtual void OnKeyReleased(alexis::KeyEventArgs& e) override;
+
+	virtual void OnMouseMoved(alexis::MouseMotionEventArgs& e) override;
+	virtual void OnMouseButtonPressed(alexis::MouseButtonEventArgs& e) override;
 
 	virtual void Destroy() override;
 
@@ -82,6 +90,22 @@ private:
 	DirectX::XMMATRIX m_modelMatrix;
 
 	alexis::Camera m_sceneCamera;
+
+
+	// Input system 
+
+	float m_fwdMovement{ 0.0f };
+	float m_aftMovement{ 0.0f };
+	float m_leftMovement{ 0.0f };
+	float m_rightMovement{ 0.0f };
+	float m_upMovement{ 0.0f };
+	float m_downMovement{ 0.0f };
+
+	float m_pitch{ 0.0f };
+	float m_yaw{ 0.0f };
+
+	int m_prevMouseX{ 0 };
+	int m_prevMouseY{ 0 };
 
 	void LoadPipeline();
 	void LoadAssets();

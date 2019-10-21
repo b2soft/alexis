@@ -21,7 +21,9 @@
   <ItemGroup>
     <ClInclude Include="Sources\Core\CommandManager.h" />
     <ClInclude Include="Sources\Core\Core.h" />
+    <ClInclude Include="Sources\Core\Events.h" />
     <ClInclude Include="Sources\Core\HighResolutionClock.h" />
+    <ClInclude Include="Sources\Core\KeyCodes.h" />
     <ClInclude Include="Sources\Core\Render.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />

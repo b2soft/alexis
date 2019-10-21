@@ -4,6 +4,7 @@
 #include <d3d12.h>
 
 #include "HighResolutionClock.h"
+#include "Events.h"
 
 #include <imgui.h>
 #include <imgui_impl_win32.h>
@@ -26,14 +27,14 @@ namespace alexis
 
 		virtual void OnUpdate(float dt) = 0;
 		virtual void OnRender() = 0;
-		//
-		//virtual void OnKeyPressed(KeyEventArgs& e);
-		//virtual void OnKeyReleased(KeyEventArgs& e);
-		//virtual void OnMouseMoved(MouseMotionEventArgs& e);
-		//virtual void OnMouseButtonPressed(MouseButtonEventArgs& e);
-		//virtual void OnMouseButtonReleased(MouseButtonEventArgs& e);
-		//virtual void OnMouseWheel(MouseWheelEventArgs& e);
-		//
+
+		virtual void OnKeyPressed(KeyEventArgs& e) {};
+		virtual void OnKeyReleased(KeyEventArgs& e) {};
+		virtual void OnMouseMoved(MouseMotionEventArgs& e) {};
+		virtual void OnMouseButtonPressed(MouseButtonEventArgs& e) {};
+		virtual void OnMouseButtonReleased(MouseButtonEventArgs& e) {};
+		virtual void OnMouseWheel(MouseWheelEventArgs& e) {};
+
 		virtual void OnResize(int width, int height) {};
 		//virtual void OnWindowDestroy();
 	};
@@ -61,7 +62,7 @@ namespace alexis
 		{
 			return s_hwnd;
 		}
-		
+
 		static uint64_t GetFrameCount()
 		{
 			return s_frameCount;

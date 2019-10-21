@@ -7,6 +7,8 @@
 #include <stdexcept>
 #include <wrl.h>
 
+#include <Core/Events.h>
+
 using Microsoft::WRL::ComPtr;
 
 template<class T>

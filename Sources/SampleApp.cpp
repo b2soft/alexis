@@ -17,6 +17,8 @@
 using namespace alexis;
 using namespace DirectX;
 
+static const float k_cameraSpeed = 20.0f;
+
 struct Mat
 {
 	XMMATRIX ModelMatrix;
@@ -76,8 +78,11 @@ void SampleApp::OnUpdate(float dt)
 		m_frameCount = 0;
 	}
 
-	const float translationSpeed = 1.f;
-	const float offsetBounds = 1.25f;
+	XMVECTOR posOffset = XMVectorSet(m_rightMovement - m_leftMovement, m_upMovement - m_downMovement, m_fwdMovement - m_aftMovement, 1.0f) * k_cameraSpeed * static_cast<float>(dt);
+	m_sceneCamera.Translate(posOffset, true);
+
+	XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
+	m_sceneCamera.SetRotation(cameraRotationQuat);
 
 	// Update the model matrix
 	float angle = static_cast<float>(m_totalTime * 90.0);
@@ -100,6 +105,157 @@ void SampleApp::OnResize(int width, int height)
 
 	m_gbufferRT.Resize(width, height);
 	m_hdrRT.Resize(width, height);
+}
+
+void SampleApp::OnKeyPressed(alexis::KeyEventArgs& e)
+{
+	IGame::OnKeyPressed(e);
+
+	switch (e.Key)
+	{
+
+	case KeyCode::Escape:
+	{
+		alexis::Core::Get().Quit();
+	}
+	break;
+
+	case KeyCode::Enter:
+	{
+		if (e.Alt)
+		{
+			alexis::Render::GetInstance()->ToggleFullscreen();
+		}
+	}
+	break;
+
+	case KeyCode::F11:
+	{
+		alexis::Render::GetInstance()->ToggleFullscreen();
+	}
+	break;
+
+	case KeyCode::V:
+	{
+		alexis::Render::GetInstance()->ToggleVSync();
+	}
+
+	case KeyCode::W:
+	{
+		m_fwdMovement = 1.0f;
+	}
+	break;
+
+	case KeyCode::S:
+	{
+		m_aftMovement = 1.0f;
+	}
+	break;
+
+	case KeyCode::A:
+	{
+		m_leftMovement = 1.0f;
+	}
+	break;
+
+	case KeyCode::D:
+	{
+		m_rightMovement = 1.0f;
+	}
+	break;
+
+	case KeyCode::R:
+	{
+		m_upMovement = 1.0f;
+	}
+	break;
+
+	case KeyCode::F:
+	{
+		m_downMovement = 1.0f;
+	}
+	break;
+
+
+	}
+}
+
+void SampleApp::OnKeyReleased(KeyEventArgs& e)
+{
+	IGame::OnKeyReleased(e);
+
+	switch (e.Key)
+	{
+
+	case KeyCode::W:
+	{
+		m_fwdMovement = 0.0f;
+	}
+	break;
+
+	case KeyCode::S:
+	{
+		m_aftMovement = 0.0f;
+	}
+	break;
+
+	case KeyCode::A:
+	{
+		m_leftMovement = 0.0f;
+	}
+	break;
+
+	case KeyCode::D:
+	{
+		m_rightMovement = 0.0f;
+	}
+	break;
+
+	case KeyCode::R:
+	{
+		m_upMovement = 0.0f;
+	}
+	break;
+
+	case KeyCode::F:
+	{
+		m_downMovement = 0.0f;
+	}
+	break;
+
+	}
+}
+
+void SampleApp::OnMouseMoved(MouseMotionEventArgs& e)
+{
+	IGame::OnMouseMoved(e);
+
+	e.RelX = e.X - m_prevMouseX;
+	e.RelY = e.Y - m_prevMouseY;
+
+	m_prevMouseX = e.X;
+	m_prevMouseY = e.Y;
+
+	const float mouseSpeed = 0.1f;
+
+	if (!ImGui::GetIO().WantCaptureMouse)
+	{
+		if (e.LeftButton)
+		{
+			m_pitch -= e.RelY * mouseSpeed;
+			m_pitch = std::clamp(m_pitch, -90.0f, 90.0f);
+
+			m_yaw -= e.RelX * mouseSpeed;
+		}
+	}
+}
+
+void SampleApp::OnMouseButtonPressed(alexis::MouseButtonEventArgs& e)
+{
+	IGame::OnMouseButtonPressed(e);
+
+	m_prevMouseX = e.X;
+	m_prevMouseY = e.Y;
 }
 
 void SampleApp::Destroy()

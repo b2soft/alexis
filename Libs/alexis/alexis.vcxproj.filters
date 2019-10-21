@@ -132,6 +132,12 @@
     <ClInclude Include="Sources\Render\Camera.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Core\Events.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\KeyCodes.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">

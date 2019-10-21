@@ -5,6 +5,8 @@
 #include <string>
 
 #include "Render.h"
+#include "CoreHelpers.h"
+
 
 // TODO: rework it! Needed to get app's icon
 #include "../../Resources/resource.h"
@@ -13,6 +15,8 @@ extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam
 
 namespace alexis
 {
+	static MouseButtonEventArgs::MouseButton DecodeMouseButton(UINT messageID);
+
 	static Core* s_singleton = nullptr;
 	static HINSTANCE s_hInstance;
 
@@ -212,57 +216,57 @@ namespace alexis
 		case WM_SYSKEYDOWN:
 		case WM_KEYDOWN:
 		{
-			//MSG charMsg;
-			//// Get the Unicode utf-16 char
-			//unsigned int c = 0;
+			MSG charMsg;
+			// Get the Unicode utf-16 char
+			unsigned int c = 0;
 
-			//// For printable characters, the next message will be WM_CHAR.
-			//// This message contains the character code we need to send the KeyPressed event.
-			//// Inspired by the SDL 1.2 implementation.
-			//if (PeekMessageW(&charMsg, hWnd, 0, 0, PM_NOREMOVE) && charMsg.message == WM_CHAR)
-			//{
-			//	GetMessage(&charMsg, hWnd, 0, 0);
-			//	c = static_cast<unsigned int>(charMsg.wParam);
+			// For printable characters, the next message will be WM_CHAR.
+			// This message contains the character code we need to send the KeyPressed event.
+			// Inspired by the SDL 1.2 implementation.
+			if (PeekMessageW(&charMsg, hWnd, 0, 0, PM_NOREMOVE) && charMsg.message == WM_CHAR)
+			{
+				GetMessage(&charMsg, hWnd, 0, 0);
+				c = static_cast<unsigned int>(charMsg.wParam);
 
-			//	if (charMsg.wParam > 0 && charMsg.wParam < 0x10000)
-			//	{
-			//		ImGui::GetIO().AddInputCharacter((unsigned short)charMsg.wParam);
-			//	}
-			//}
+				if (charMsg.wParam > 0 && charMsg.wParam < 0x10000)
+				{
+					ImGui::GetIO().AddInputCharacter((unsigned short)charMsg.wParam);
+				}
+			}
 
-			//bool shift = (GetAsyncKeyState(VK_SHIFT & 0x8000) != 0);
-			//bool control = (GetAsyncKeyState(VK_CONTROL & 0x8000) != 0);
-			//bool alt = (GetAsyncKeyState(VK_MENU & 0x8000) != 0);
-			//KeyCode::Key key = (KeyCode::Key)wParam;
-			//unsigned int scanCode = (lParam & 0x00FF0000) >> 16;
-			//KeyEventArgs keyEventArgs(key, c, KeyEventArgs::Pressed, shift, control, alt);
-			//window->OnKeyPressed(keyEventArgs);
+			bool shift = (GetAsyncKeyState(VK_SHIFT & 0x8000) != 0);
+			bool control = (GetAsyncKeyState(VK_CONTROL & 0x8000) != 0);
+			bool alt = (GetAsyncKeyState(VK_MENU & 0x8000) != 0);
+			KeyCode::Key key = (KeyCode::Key)wParam;
+			unsigned int scanCode = (lParam & 0x00FF0000) >> 16;
+			KeyEventArgs keyEventArgs(key, c, KeyEventArgs::Pressed, shift, control, alt);
+			Core::s_game->OnKeyPressed(keyEventArgs);
 		}
 		break;
 
 		case WM_SYSKEYUP:
 		case WM_KEYUP:
 		{
-			//bool shift = (GetAsyncKeyState(VK_SHIFT & 0x8000) != 0);
-			//bool control = (GetAsyncKeyState(VK_CONTROL & 0x8000) != 0);
-			//bool alt = (GetAsyncKeyState(VK_MENU & 0x8000) != 0);
-			//KeyCode::Key key = (KeyCode::Key)wParam;
-			//unsigned int c = 0;
-			//unsigned int scanCode = (lParam & 0x00FF0000) >> 16;
+			bool shift = (GetAsyncKeyState(VK_SHIFT & 0x8000) != 0);
+			bool control = (GetAsyncKeyState(VK_CONTROL & 0x8000) != 0);
+			bool alt = (GetAsyncKeyState(VK_MENU & 0x8000) != 0);
+			KeyCode::Key key = (KeyCode::Key)wParam;
+			unsigned int c = 0;
+			unsigned int scanCode = (lParam & 0x00FF0000) >> 16;
 
-			//// Determine which key was released by converting the key code and the scan code
-			//// to a printable character (if possible).
-			//// Inspired by the SDL 1.2 implementation.
-			//unsigned char keyboardState[256];
-			//GetKeyboardState(keyboardState);
-			//wchar_t translatedCharacters[4];
-			//if (ToUnicodeEx(static_cast<UINT>(wParam), scanCode, keyboardState, translatedCharacters, 4, 0, NULL) > 0)
-			//{
-			//	c = translatedCharacters[0];
-			//}
+			// Determine which key was released by converting the key code and the scan code
+			// to a printable character (if possible).
+			// Inspired by the SDL 1.2 implementation.
+			unsigned char keyboardState[256];
+			GetKeyboardState(keyboardState);
+			wchar_t translatedCharacters[4];
+			if (ToUnicodeEx(static_cast<UINT>(wParam), scanCode, keyboardState, translatedCharacters, 4, 0, NULL) > 0)
+			{
+				c = translatedCharacters[0];
+			}
 
-			//KeyEventArgs keyEventArgs(key, c, KeyEventArgs::Released, shift, control, alt);
-			//window->OnKeyReleased(keyEventArgs);
+			KeyEventArgs keyEventArgs(key, c, KeyEventArgs::Released, shift, control, alt);
+			Core::s_game->OnKeyReleased(keyEventArgs);
 		}
 		break;
 
@@ -273,17 +277,17 @@ namespace alexis
 
 		case WM_MOUSEMOVE:
 		{
-			//bool lButton = (wParam & MK_LBUTTON) != 0;
-			//bool rButton = (wParam & MK_RBUTTON) != 0;
-			//bool mButton = (wParam & MK_MBUTTON) != 0;
-			//bool shift = (wParam & MK_SHIFT) != 0;
-			//bool control = (wParam & MK_CONTROL) != 0;
+			bool lButton = (wParam & MK_LBUTTON) != 0;
+			bool rButton = (wParam & MK_RBUTTON) != 0;
+			bool mButton = (wParam & MK_MBUTTON) != 0;
+			bool shift = (wParam & MK_SHIFT) != 0;
+			bool control = (wParam & MK_CONTROL) != 0;
 
-			//int x = ((int)(short)LOWORD(lParam));
-			//int y = ((int)(short)HIWORD(lParam));
+			int x = ((int)(short)LOWORD(lParam));
+			int y = ((int)(short)HIWORD(lParam));
 
-			//MouseMotionEventArgs mouseMotionEventArgs(lButton, mButton, rButton, control, shift, x, y);
-			//window->OnMouseMoved(mouseMotionEventArgs);
+			MouseMotionEventArgs mouseMotionEventArgs(lButton, mButton, rButton, control, shift, x, y);
+			Core::s_game->OnMouseMoved(mouseMotionEventArgs);
 		}
 		break;
 
@@ -291,17 +295,17 @@ namespace alexis
 		case WM_RBUTTONDOWN:
 		case WM_MBUTTONDOWN:
 		{
-			//bool lButton = (wParam & MK_LBUTTON) != 0;
-			//bool rButton = (wParam & MK_RBUTTON) != 0;
-			//bool mButton = (wParam & MK_MBUTTON) != 0;
-			//bool shift = (wParam & MK_SHIFT) != 0;
-			//bool control = (wParam & MK_CONTROL) != 0;
+			bool lButton = (wParam & MK_LBUTTON) != 0;
+			bool rButton = (wParam & MK_RBUTTON) != 0;
+			bool mButton = (wParam & MK_MBUTTON) != 0;
+			bool shift = (wParam & MK_SHIFT) != 0;
+			bool control = (wParam & MK_CONTROL) != 0;
 
-			//int x = ((int)(short)LOWORD(lParam));
-			//int y = ((int)(short)HIWORD(lParam));
+			int x = ((int)(short)LOWORD(lParam));
+			int y = ((int)(short)HIWORD(lParam));
 
-			//MouseButtonEventArgs mouseButtonEventArgs(DecodeMouseButton(message), MouseButtonEventArgs::Pressed, lButton, mButton, rButton, control, shift, x, y);
-			//window->OnMouseButtonPressed(mouseButtonEventArgs);
+			MouseButtonEventArgs mouseButtonEventArgs(DecodeMouseButton(message), MouseButtonEventArgs::Pressed, lButton, mButton, rButton, control, shift, x, y);
+			Core::s_game->OnMouseButtonPressed(mouseButtonEventArgs);
 		}
 		break;
 
@@ -309,17 +313,17 @@ namespace alexis
 		case WM_RBUTTONUP:
 		case WM_MBUTTONUP:
 		{
-			//bool lButton = (wParam & MK_LBUTTON) != 0;
-			//bool rButton = (wParam & MK_RBUTTON) != 0;
-			//bool mButton = (wParam & MK_MBUTTON) != 0;
-			//bool shift = (wParam & MK_SHIFT) != 0;
-			//bool control = (wParam & MK_CONTROL) != 0;
+			bool lButton = (wParam & MK_LBUTTON) != 0;
+			bool rButton = (wParam & MK_RBUTTON) != 0;
+			bool mButton = (wParam & MK_MBUTTON) != 0;
+			bool shift = (wParam & MK_SHIFT) != 0;
+			bool control = (wParam & MK_CONTROL) != 0;
 
-			//int x = ((int)(short)LOWORD(lParam));
-			//int y = ((int)(short)HIWORD(lParam));
+			int x = ((int)(short)LOWORD(lParam));
+			int y = ((int)(short)HIWORD(lParam));
 
-			//MouseButtonEventArgs mouseButtonEventArgs(DecodeMouseButton(message), MouseButtonEventArgs::Released, lButton, mButton, rButton, control, shift, x, y);
-			//window->OnMouseButtonReleased(mouseButtonEventArgs);
+			MouseButtonEventArgs mouseButtonEventArgs(DecodeMouseButton(message), MouseButtonEventArgs::Released, lButton, mButton, rButton, control, shift, x, y);
+			Core::s_game->OnMouseButtonReleased(mouseButtonEventArgs);
 		}
 		break;
 
@@ -328,26 +332,26 @@ namespace alexis
 			// The distance the mouse wheel is rotated.
 			// A positive value indicates the wheel was rotated to the right.
 			// A negative value indicates the wheel was rotated to the left.
-			//float zDelta = ((int)(short)HIWORD(wParam)) / (float)WHEEL_DELTA;
-			//short keyStates = (short)LOWORD(wParam);
+			float zDelta = ((int)(short)HIWORD(wParam)) / (float)WHEEL_DELTA;
+			short keyStates = (short)LOWORD(wParam);
 
-			//bool lButton = (wParam & MK_LBUTTON) != 0;
-			//bool rButton = (wParam & MK_RBUTTON) != 0;
-			//bool mButton = (wParam & MK_MBUTTON) != 0;
-			//bool shift = (wParam & MK_SHIFT) != 0;
-			//bool control = (wParam & MK_CONTROL) != 0;
+			bool lButton = (wParam & MK_LBUTTON) != 0;
+			bool rButton = (wParam & MK_RBUTTON) != 0;
+			bool mButton = (wParam & MK_MBUTTON) != 0;
+			bool shift = (wParam & MK_SHIFT) != 0;
+			bool control = (wParam & MK_CONTROL) != 0;
 
-			//int x = ((int)(short)LOWORD(lParam));
-			//int y = ((int)(short)HIWORD(lParam));
+			int x = ((int)(short)LOWORD(lParam));
+			int y = ((int)(short)HIWORD(lParam));
 
-			//// Convert the screen coordinates to client coordinates
-			//POINT clientToScreenPoint;
-			//clientToScreenPoint.x = x;
-			//clientToScreenPoint.y = y;
-			//ScreenToClient(hWnd, &clientToScreenPoint);
+			// Convert the screen coordinates to client coordinates
+			POINT clientToScreenPoint;
+			clientToScreenPoint.x = x;
+			clientToScreenPoint.y = y;
+			ScreenToClient(hWnd, &clientToScreenPoint);
 
-			//MouseWheelEventArgs mouseWheelEventArgs(zDelta, lButton, mButton, rButton, control, shift, (int)clientToScreenPoint.x, (int)clientToScreenPoint.y);
-			//window->OnMouseWheel(mouseWheelEventArgs);
+			MouseWheelEventArgs mouseWheelEventArgs(zDelta, lButton, mButton, rButton, control, shift, (int)clientToScreenPoint.x, (int)clientToScreenPoint.y);
+			Core::s_game->OnMouseWheel(mouseWheelEventArgs);
 		}
 		break;
 
@@ -376,6 +380,37 @@ namespace alexis
 		}
 
 		return 0;
+	}
+
+	MouseButtonEventArgs::MouseButton DecodeMouseButton(UINT messageID)
+	{
+		MouseButtonEventArgs::MouseButton mouseButton = MouseButtonEventArgs::None;
+		switch (messageID)
+		{
+		case WM_LBUTTONDOWN:
+		case WM_LBUTTONUP:
+		case WM_LBUTTONDBLCLK:
+		{
+			mouseButton = MouseButtonEventArgs::Left;
+		}
+		break;
+		case WM_RBUTTONDOWN:
+		case WM_RBUTTONUP:
+		case WM_RBUTTONDBLCLK:
+		{
+			mouseButton = MouseButtonEventArgs::Right;
+		}
+		break;
+		case WM_MBUTTONDOWN:
+		case WM_MBUTTONUP:
+		case WM_MBUTTONDBLCLK:
+		{
+			mouseButton = MouseButtonEventArgs::Middle;
+		}
+		break;
+		}
+
+		return mouseButton;
 	}
 
 }
