@@ -188,7 +188,6 @@ namespace alexis
 			ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
 
 			debugInterface->EnableDebugLayer();
-
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
 			//debugInterface->SetEnableGPUBasedValidation(TRUE);

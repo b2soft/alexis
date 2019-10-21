@@ -77,6 +77,43 @@ namespace alexis
 		return fenceValue;
 	}
 
+	uint64_t CommandManager::ExecuteCommandContexts(const std::vector<CommandContext*>& contexts, bool waitForCompletion /*= false*/)
+	{
+		std::vector<ID3D12CommandList*> lists;
+		lists.reserve(contexts.size());
+
+		for (auto context : contexts)
+		{
+			context->List.Get()->Close();
+
+			lists.push_back(context->List.Get());
+		}
+
+		m_directCommandQueue->ExecuteCommandLists(lists.size(), lists.data());
+
+		uint64_t fenceValue = m_nextFenceValue;
+
+		m_directCommandQueue->Signal(m_fence.Get(), fenceValue);
+
+		{
+			std::lock_guard<std::mutex> lock(m_allocatorMutex);
+
+			for (auto context : contexts)
+			{
+				m_cachedContexts.push(std::make_pair(fenceValue, context));
+			}
+		}
+
+		if (waitForCompletion)
+		{
+			WaitForFence(fenceValue);
+		}
+
+		m_nextFenceValue++;
+
+		return fenceValue;
+	}
+
 	void CommandManager::WaitForFence(uint64_t fenceValue)
 	{
 		if (IsFenceCompleted(fenceValue))

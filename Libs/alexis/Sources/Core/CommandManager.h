@@ -20,6 +20,7 @@ namespace alexis
 
 		CommandContext* CreateCommandContext();
 		uint64_t ExecuteCommandContext(CommandContext* context, bool waitForCompletion = false);
+		uint64_t ExecuteCommandContexts(const std::vector<CommandContext*>& contexts, bool waitForCompletion = false);
 
 		void WaitForFence(uint64_t fenceValue);
 		bool IsFenceCompleted(uint64_t fenceValue);
