@@ -9,6 +9,13 @@
 
 using Microsoft::WRL::ComPtr;
 
+template<class T>
+std::enable_if_t<std::is_floating_point<T>::value, bool>
+IsEqual(const T a, const T b)
+{
+	return (std::abs(a - b) < std::numeric_limits<T>::epsilon());
+}
+
 inline std::string HrToString(HRESULT hr)
 {
 	char str[64] = {};

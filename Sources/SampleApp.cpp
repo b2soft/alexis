@@ -83,15 +83,6 @@ void SampleApp::OnUpdate(float dt)
 	float angle = static_cast<float>(m_totalTime * 90.0);
 	const XMVECTOR rotationAxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
 	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
-
-	// Update view matrix
-	const XMVECTOR eyePosition = XMVectorSet(0.0f, 0.0f, -3.0f, 1.0f);
-	const XMVECTOR focusPoint = XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
-	const XMVECTOR upDirection = XMVectorSet(0.0f, 1.0f, 0.0f, 1.0f);
-	m_viewMatrix = XMMatrixLookAtLH(eyePosition, focusPoint, upDirection);
-
-	// Update proj matrix
-	m_projectionMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(75.0f), m_aspectRatio, 0.1f, 100.0f);
 }
 
 void SampleApp::OnRender()
@@ -102,10 +93,13 @@ void SampleApp::OnRender()
 
 void SampleApp::OnResize(int width, int height)
 {
+	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
+
+	float fov = m_sceneCamera.GetVerticalFov();
+	m_sceneCamera.SetProjectionParams(fov, m_aspectRatio, 0.1f, 100.0f);
+
 	m_gbufferRT.Resize(width, height);
 	m_hdrRT.Resize(width, height);
-
-	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 }
 
 void SampleApp::Destroy()
@@ -448,72 +442,72 @@ void SampleApp::PopulateCommandList()
 	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 
 	auto pbsTask = std::async([this, pbsCommandContext, clearColor]()
-	{
 		{
-			auto& gbDepthStencil = m_gbufferRT.GetTexture(RenderTarget::DepthStencil);
-
-			for (int i = RenderTarget::Slot::Slot0; i < RenderTarget::Slot::DepthStencil; ++i)
 			{
-				auto& texture = m_gbufferRT.GetTexture(static_cast<RenderTarget::Slot>(i));
-				if (texture.IsValid())
+				auto& gbDepthStencil = m_gbufferRT.GetTexture(RenderTarget::DepthStencil);
+
+				for (int i = RenderTarget::Slot::Slot0; i < RenderTarget::Slot::DepthStencil; ++i)
 				{
-					pbsCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-					pbsCommandContext->ClearTexture(texture, clearColor);
+					auto& texture = m_gbufferRT.GetTexture(static_cast<RenderTarget::Slot>(i));
+					if (texture.IsValid())
+					{
+						pbsCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+						pbsCommandContext->ClearTexture(texture, clearColor);
+					}
 				}
+
+				pbsCommandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				pbsCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
 			}
 
-			pbsCommandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			pbsCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
-		}
+			pbsCommandContext->SetRenderTarget(m_gbufferRT);
+			pbsCommandContext->SetViewport(m_gbufferRT.GetViewport());
+			pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
-		pbsCommandContext->SetRenderTarget(m_gbufferRT);
-		pbsCommandContext->SetViewport(m_gbufferRT.GetViewport());
-		pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
+			// Update the MVP matrix
+			XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_sceneCamera.GetViewMatrix());
+			mvpMatrix = XMMatrixMultiply(mvpMatrix, m_sceneCamera.GetProjMatrix());
 
-		// Update the MVP matrix
-		XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_viewMatrix);
-		mvpMatrix = XMMatrixMultiply(mvpMatrix, m_projectionMatrix);
+			Mat matrices;
+			matrices.ModelViewProjectionMatrix = mvpMatrix;
+			memcpy(m_triangleCB.GetCPUPtr(), &matrices, sizeof(Mat));
 
-		Mat matrices;
-		matrices.ModelViewProjectionMatrix = mvpMatrix;
-		memcpy(m_triangleCB.GetCPUPtr(), &matrices, sizeof(Mat));
+			pbsCommandContext->List->SetPipelineState(m_pbsObjectPSO.Get());
+			pbsCommandContext->SetRootSignature(m_pbsObjectSig);
 
-		pbsCommandContext->List->SetPipelineState(m_pbsObjectPSO.Get());
-		pbsCommandContext->SetRootSignature(m_pbsObjectSig);
+			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, m_checkerTexture);
+			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, m_normalTex);
+			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, m_metalTex);
 
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, m_checkerTexture);
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, m_normalTex);
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, m_metalTex);
+			pbsCommandContext->SetDynamicCBV(0, m_triangleCB);
 
-		pbsCommandContext->SetDynamicCBV(0, m_triangleCB);
-
-		m_cubeMesh->Draw(pbsCommandContext);
-	});
+			m_cubeMesh->Draw(pbsCommandContext);
+		});
 
 	auto resolveLightingTask = std::async([this, lightingCommandContext, clearColor]
-	{
 		{
-			lightingCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			lightingCommandContext->ClearTexture(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), clearColor);
-		}
+			{
+				lightingCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+				lightingCommandContext->ClearTexture(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), clearColor);
+			}
 
-		lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-		lightingCommandContext->SetRenderTarget(m_hdrRT);
-		lightingCommandContext->SetViewport(m_hdrRT.GetViewport());
-		lightingCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
+			lightingCommandContext->SetRenderTarget(m_hdrRT);
+			lightingCommandContext->SetViewport(m_hdrRT.GetViewport());
+			lightingCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
-		lightingCommandContext->List->SetPipelineState(m_lightingPSO.Get());
-		lightingCommandContext->SetRootSignature(m_lightingSig);
+			lightingCommandContext->List->SetPipelineState(m_lightingPSO.Get());
+			lightingCommandContext->SetRootSignature(m_lightingSig);
 
-		lightingCommandContext->SetSRV(LightingParameters::GBuffer, 0, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0));
-		lightingCommandContext->SetSRV(LightingParameters::GBuffer, 1, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1));
-		lightingCommandContext->SetSRV(LightingParameters::GBuffer, 2, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2));
+			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 0, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0));
+			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 1, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1));
+			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 2, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2));
 
-		m_fsQuad->Draw(lightingCommandContext);
-	});
+			m_fsQuad->Draw(lightingCommandContext);
+		});
 
 
 	// Setup render to backbuffer
@@ -521,42 +515,43 @@ void SampleApp::PopulateCommandList()
 	const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
 
 	auto hdr2sdrTask = std::async([this, hdrCommandContext, &backbuffer, &backTexture]
-	{
-		hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		{
+			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-		hdrCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			hdrCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-		hdrCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
+			hdrCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
-		hdrCommandContext->SetRenderTarget(backbuffer);
-		hdrCommandContext->SetViewport(backbuffer.GetViewport());
+			hdrCommandContext->SetRenderTarget(backbuffer);
+			hdrCommandContext->SetViewport(backbuffer.GetViewport());
 
-		hdrCommandContext->List->SetPipelineState(m_hdr2sdrPSO.Get());
-		hdrCommandContext->SetRootSignature(m_hdr2sdrSig);
+			hdrCommandContext->List->SetPipelineState(m_hdr2sdrPSO.Get());
+			hdrCommandContext->SetRootSignature(m_hdr2sdrSig);
 
-		hdrCommandContext->SetSRV(Hdr2SdrParameters::HDR, 0, m_hdrRT.GetTexture(RenderTarget::Slot::Slot0));
+			hdrCommandContext->SetSRV(Hdr2SdrParameters::HDR, 0, m_hdrRT.GetTexture(RenderTarget::Slot::Slot0));
 
-		m_fsQuad->Draw(hdrCommandContext);
+			m_fsQuad->Draw(hdrCommandContext);
 
-		//hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	});
+			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+			//hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		});
 
 	auto imguiTask = std::async([this, imguiContext, &backbuffer, &backTexture]
-	{
-		//imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		{
+			imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
-		imguiContext->SetRenderTarget(backbuffer);
-		imguiContext->SetViewport(backbuffer.GetViewport());
-		imguiContext->List->RSSetScissorRects(1, &m_scissorRect);
+			imguiContext->SetRenderTarget(backbuffer);
+			imguiContext->SetViewport(backbuffer.GetViewport());
+			imguiContext->List->RSSetScissorRects(1, &m_scissorRect);
 
 
-		ID3D12DescriptorHeap* imguiHeap[] = { m_imguiSrvHeap.Get() };
-		imguiContext->List->SetDescriptorHeaps(_countof(imguiHeap), imguiHeap);
-		ImGui::Render();
-		ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), imguiContext->List.Get());
+			ID3D12DescriptorHeap* imguiHeap[] = { m_imguiSrvHeap.Get() };
+			imguiContext->List->SetDescriptorHeaps(_countof(imguiHeap), imguiHeap);
+			ImGui::Render();
+			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), imguiContext->List.Get());
 
-		imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-	});
+			imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
+		});
 
 	pbsTask.wait();
 	resolveLightingTask.wait();
@@ -631,6 +626,10 @@ bool SampleApp::LoadContent()
 {
 	LoadPipeline();
 	LoadAssets();
+
+	XMVECTOR cameraPos = XMVectorSet(0.f, 5.f, -20.f, 1.0f);
+	m_sceneCamera.SetTranslation(cameraPos);
+	m_sceneCamera.SetProjectionParams(45.0f, m_aspectRatio, 0.1f, 100.0f);
 
 	return true;
 }

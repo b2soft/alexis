@@ -8,6 +8,7 @@
 #include <Render/Buffers/GpuBuffer.h>
 #include <Render/Mesh.h>
 #include <Render/RenderTarget.h>
+#include <Render/Camera.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -79,8 +80,8 @@ private:
 	float m_totalTime{ 0.f };
 
 	DirectX::XMMATRIX m_modelMatrix;
-	DirectX::XMMATRIX m_viewMatrix;
-	DirectX::XMMATRIX m_projectionMatrix;
+
+	alexis::Camera m_sceneCamera;
 
 	void LoadPipeline();
 	void LoadAssets();

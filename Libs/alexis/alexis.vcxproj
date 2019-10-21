@@ -28,6 +28,7 @@
     <ClInclude Include="Sources\Precompiled.h" />
     <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h" />
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />
+    <ClInclude Include="Sources\Render\Camera.h" />
     <ClInclude Include="Sources\Render\CommandContext.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
@@ -49,6 +50,7 @@
     </ClCompile>
     <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp" />
     <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp" />
+    <ClCompile Include="Sources\Render\Camera.cpp" />
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />

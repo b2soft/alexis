@@ -70,6 +70,9 @@
     <ClCompile Include="Sources\Render\RenderTarget.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Camera.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -124,6 +127,9 @@
       <Filter>Sources\Render</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\RenderTarget.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Camera.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
   </ItemGroup>
