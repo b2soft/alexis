@@ -566,10 +566,10 @@ void SampleApp::UpdateGUI()
 
 		if (ImGui::BeginMenu("Options"))
 		{
-			bool vSync = false;// m_pWindow->IsVSync();
+			bool vSync = Render::GetInstance()->IsVSync();
 			if (ImGui::MenuItem("V-Sync", "V", &vSync))
 			{
-				//m_pWindow->SetVSync(vSync);
+				Render::GetInstance()->SetVSync(vSync);
 			}
 
 			bool fullscreen = false;// m_pWindow->IsFullScreen();

@@ -53,6 +53,16 @@ namespace alexis
 			return m_uploadBufferManager.get();
 		}
 
+		bool IsVSync() const
+		{
+			return m_vSync;
+		}
+
+		void SetVSync(bool vSync)
+		{
+			m_vSync = vSync;
+		}
+
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
 
 	private:
