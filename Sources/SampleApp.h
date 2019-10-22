@@ -36,8 +36,8 @@ public:
 	virtual void OnKeyPressed(alexis::KeyEventArgs& e) override;
 	virtual void OnKeyReleased(alexis::KeyEventArgs& e) override;
 
-	virtual void OnMouseMoved(alexis::MouseMotionEventArgs& e) override;
 	virtual void OnMouseButtonPressed(alexis::MouseButtonEventArgs& e) override;
+	virtual void OnMouseMoved(alexis::MouseMotionEventArgs& e) override;
 
 	virtual void Destroy() override;
 
@@ -104,12 +104,15 @@ private:
 	float m_pitch{ 0.0f };
 	float m_yaw{ 0.0f };
 
-	int m_prevMouseX{ 0 };
-	int m_prevMouseY{ 0 };
-
 	void LoadPipeline();
 	void LoadAssets();
 	void PopulateCommandList();
 
 	void UpdateGUI();
+
+	void ToggleFixedCamera();
+	void ResetMousePos();
+	int m_deltaMouseX{ 0 };
+	int m_deltaMouseY{ 0 };
+	bool m_isCameraFixed{ true };
 };

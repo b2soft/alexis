@@ -18,6 +18,7 @@ using namespace alexis;
 using namespace DirectX;
 
 static const float k_cameraSpeed = 20.0f;
+static const float k_cameraTurnSpeed = 20.0f;
 
 struct Mat
 {
@@ -55,6 +56,12 @@ SampleApp::SampleApp() :
 
 bool SampleApp::Initialize()
 {
+	POINT p;
+	GetCursorPos(&p);
+	ScreenToClient(Core::GetHwnd(), &p);
+
+	ResetMousePos();
+
 	return true;
 }
 
@@ -78,14 +85,23 @@ void SampleApp::OnUpdate(float dt)
 		m_frameCount = 0;
 	}
 
-	XMVECTOR posOffset = XMVectorSet(m_rightMovement - m_leftMovement, m_upMovement - m_downMovement, m_fwdMovement - m_aftMovement, 1.0f) * k_cameraSpeed * static_cast<float>(dt);
-	m_sceneCamera.Translate(posOffset, true);
+	if (!m_isCameraFixed)
+	{
+		m_yaw += m_deltaMouseX * dt * k_cameraTurnSpeed;
+		m_pitch += m_deltaMouseY * dt * k_cameraTurnSpeed;
 
-	XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
-	m_sceneCamera.SetRotation(cameraRotationQuat);
+		m_deltaMouseX = 0;
+		m_deltaMouseY = 0;
+
+		XMVECTOR posOffset = XMVectorSet(m_rightMovement - m_leftMovement, m_upMovement - m_downMovement, m_fwdMovement - m_aftMovement, 1.0f) * k_cameraSpeed * static_cast<float>(dt);
+		m_sceneCamera.Translate(posOffset, true);
+
+		XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
+		m_sceneCamera.SetRotation(cameraRotationQuat);
+	}
 
 	// Update the model matrix
-	float angle = static_cast<float>(m_totalTime * 90.0);
+	float angle = 0.0f;
 	const XMVECTOR rotationAxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
 	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
 }
@@ -166,16 +182,16 @@ void SampleApp::OnKeyPressed(alexis::KeyEventArgs& e)
 
 	case KeyCode::R:
 	{
-		m_upMovement = 1.0f;
+		m_yaw = 0.0f;
+		m_pitch = 0.0f;
 	}
 	break;
 
 	case KeyCode::F:
 	{
-		m_downMovement = 1.0f;
+		ToggleFixedCamera();
 	}
 	break;
-
 
 	}
 }
@@ -226,36 +242,32 @@ void SampleApp::OnKeyReleased(KeyEventArgs& e)
 	}
 }
 
-void SampleApp::OnMouseMoved(MouseMotionEventArgs& e)
-{
-	IGame::OnMouseMoved(e);
-
-	e.RelX = e.X - m_prevMouseX;
-	e.RelY = e.Y - m_prevMouseY;
-
-	m_prevMouseX = e.X;
-	m_prevMouseY = e.Y;
-
-	const float mouseSpeed = 0.1f;
-
-	if (!ImGui::GetIO().WantCaptureMouse)
-	{
-		if (e.LeftButton)
-		{
-			m_pitch -= e.RelY * mouseSpeed;
-			m_pitch = std::clamp(m_pitch, -90.0f, 90.0f);
-
-			m_yaw -= e.RelX * mouseSpeed;
-		}
-	}
-}
-
 void SampleApp::OnMouseButtonPressed(alexis::MouseButtonEventArgs& e)
 {
 	IGame::OnMouseButtonPressed(e);
 
-	m_prevMouseX = e.X;
-	m_prevMouseY = e.Y;
+	//m_prevMouseX = e.X;
+	//m_prevMouseY = e.Y;
+}
+
+void SampleApp::OnMouseMoved(alexis::MouseMotionEventArgs& e)
+{
+	if (!m_isCameraFixed)
+	{
+		int windowCenterX = alexis::g_clientWidth / 2;
+		int windowCenterY = alexis::g_clientHeight / 2;
+
+		if (e.X == windowCenterX &&
+			e.Y == windowCenterY)
+		{
+			return;
+		}
+
+		m_deltaMouseX = e.X - windowCenterX;
+		m_deltaMouseY = e.Y - windowCenterY;
+
+		ResetMousePos();
+	}
 }
 
 void SampleApp::Destroy()
@@ -776,6 +788,25 @@ void SampleApp::UpdateGUI()
 	{
 		ImGui::ShowDemoWindow(&showDemoWindow);
 	}
+}
+
+void SampleApp::ToggleFixedCamera()
+{
+	m_isCameraFixed = !m_isCameraFixed;
+
+	ResetMousePos();
+
+	ShowCursor(m_isCameraFixed);
+}
+
+void SampleApp::ResetMousePos()
+{
+	POINT p;
+	p.x = alexis::g_clientWidth / 2;
+	p.y = alexis::g_clientHeight / 2;
+
+	ClientToScreen(Core::GetHwnd(), &p);
+	SetCursorPos(p.x, p.y);
 }
 
 bool SampleApp::LoadContent()
