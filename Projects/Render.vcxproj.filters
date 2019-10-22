@@ -16,22 +16,22 @@
     <ClCompile Include="..\Sources\Main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Sources\b2Game.cpp">
+    <ClCompile Include="..\Sources\Precompiled.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\Sources\Precompiled.cpp">
+    <ClCompile Include="..\Sources\SampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sources\b2Game.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\Sources\Precompiled.h">
       <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\Resources\resource.h">
       <Filter>Resources</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\SampleApp.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -45,10 +45,28 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Resources\Shaders\PixelShader.hlsl">
+    <FxCompile Include="..\Resources\Shaders\PBS_object_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_object_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Lighting_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Lighting_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\VertexShader.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PixelShader.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

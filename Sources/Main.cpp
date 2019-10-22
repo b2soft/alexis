@@ -1,26 +1,29 @@
 #include "Precompiled.h"
-
+//
 #include <Shlwapi.h>
-#include <dxgidebug.h>
+//#include <dxgidebug.h>
+//
+//#include <Application.h>
+//#include "b2Game.h"
+//
+//void ReportLiveObjects()
+//{
+//#if defined(_DEBUG)
+//	IDXGIDebug1* dxgiDebug;
+//	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
+//
+//	dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
+//	dxgiDebug->Release();
+//#endif
+//}
 
-#include <Application.h>
-#include "b2Game.h"
+#include "SampleApp.h"
 
-void ReportLiveObjects()
+#include <Core/Core.h>
+#include <Core/Render.h>
+
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
-#if defined(_DEBUG)
-	IDXGIDebug1* dxgiDebug;
-	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
-
-	dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
-	dxgiDebug->Release();
-#endif
-}
-
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd)
-{
-	int retCode = 0;
-
 	// Set the working directory to the path of the executable
 	WCHAR path[MAX_PATH];
 	HMODULE hModule = GetModuleHandle(NULL);
@@ -30,15 +33,18 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nShowCmd)
 		SetCurrentDirectoryW(path);
 	}
 
-	Application::Create(hInstance);
+	//atexit(&ReportLiveObjects);
+
+	int returnCode = 0;
+	alexis::Core::Create(hInstance);
 	{
-		std::shared_ptr<b2Game> game = std::make_shared<b2Game>(L"b2Game Sample", 1280, 720);
-		retCode = Application::Get().Run(game);
+		SampleApp sample;
+		returnCode = alexis::Core::Get().Run(&sample);
 	}
+	alexis::Core::Destroy();
 
-	Application::Destroy();
+	return returnCode;
 
-	atexit(&ReportLiveObjects);
-
-	return retCode;
+	//SampleApp sample(1280, 720, L"Alexis Sample App");
+	//return alexis::Win32Application::Run(&sample, hInstance, nCmdShow);
 }

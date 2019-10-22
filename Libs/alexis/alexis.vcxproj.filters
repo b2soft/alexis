@@ -1,0 +1,150 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Resources">
+      <UniqueIdentifier>{fe6d7368-cc68-4e9c-a9da-0f8f2cac0b31}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Sources\Utils">
+      <UniqueIdentifier>{9b32f743-ae3d-4e34-881a-5712eb5b0ecb}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Core">
+      <UniqueIdentifier>{63d984d8-9dc0-4da4-b0e7-73ff5c7bbb54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Render">
+      <UniqueIdentifier>{4e92aeb6-9b96-4796-b46a-2664775cf086}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Render\Descriptors">
+      <UniqueIdentifier>{3ecf5158-7518-4930-8a16-e67d73ceef9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Render\Buffers">
+      <UniqueIdentifier>{86550b38-517d-4247-88a9-e05607dfcd70}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Sources\Precompiled.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Core\Core.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Core\Render.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Core\CommandManager.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Core\HighResolutionClock.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\RootSignature.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\CommandContext.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp">
+      <Filter>Sources\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp">
+      <Filter>Sources\Render\Buffers</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Mesh.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\RenderTarget.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Camera.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Sources\d3dx12.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Precompiled.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\CoreHelpers.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Utils\Singleton.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\Core.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\Render.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\CommandManager.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\HighResolutionClock.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h">
+      <Filter>Sources\Render\Descriptors</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\RootSignature.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h">
+      <Filter>Sources\Render\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h">
+      <Filter>Sources\Render\Buffers</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\CommandContext.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Mesh.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\RenderTarget.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Camera.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\Events.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\KeyCodes.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Resources\ImGui_ps.hlsl">
+      <Filter>Resources</Filter>
+    </FxCompile>
+    <FxCompile Include="Resources\ImGui_vs.hlsl">
+      <Filter>Resources</Filter>
+    </FxCompile>
+  </ItemGroup>
+</Project>
