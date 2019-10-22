@@ -20,6 +20,7 @@ namespace alexis
 		}
 
 		ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
+		m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
 	}
 
 	void CommandManager::Destroy()
@@ -122,7 +123,7 @@ namespace alexis
 		}
 
 		m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
-		WaitForSingleObject(m_fenceEvent, INFINITE);
+		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
 		m_lastCompletedFenceValue = fenceValue;
 	}
 
