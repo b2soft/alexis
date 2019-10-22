@@ -20,7 +20,9 @@ namespace alexis
 		}
 
 		ThrowIfFailed(device->CreateFence(0, D3D12_FENCE_FLAG_NONE, IID_PPV_ARGS(&m_fence)));
-		m_fenceEvent = CreateEvent(NULL, FALSE, FALSE, NULL);
+		m_fence->Signal(m_lastCompletedFenceValue);
+
+		m_fenceEvent = CreateEventEx(NULL, FALSE, FALSE, EVENT_ALL_ACCESS);
 	}
 
 	void CommandManager::Destroy()
@@ -59,23 +61,19 @@ namespace alexis
 		ID3D12CommandList* ppCommandLists[] = { context->List.Get() };
 		m_directCommandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
-		uint64_t fenceValue = m_nextFenceValue;
-
-		m_directCommandQueue->Signal(m_fence.Get(), fenceValue);
+		m_directCommandQueue->Signal(m_fence.Get(), m_nextFenceValue);
 
 		{
 			std::lock_guard<std::mutex> lock(m_allocatorMutex);
-			m_cachedContexts.push(std::make_pair(fenceValue, context));
+			m_cachedContexts.push(std::make_pair(m_nextFenceValue, context));
 		}
 
 		if (waitForCompletion)
 		{
-			WaitForFence(fenceValue);
+			WaitForFence(m_nextFenceValue);
 		}
 
-		m_nextFenceValue++;
-
-		return fenceValue;
+		return m_nextFenceValue++;
 	}
 
 	uint64_t CommandManager::ExecuteCommandContexts(const std::vector<CommandContext*>& contexts, bool waitForCompletion /*= false*/)
@@ -122,9 +120,11 @@ namespace alexis
 			return;
 		}
 
-		m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
-		WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
-		m_lastCompletedFenceValue = fenceValue;
+		{
+			m_fence->SetEventOnCompletion(fenceValue, m_fenceEvent);
+			WaitForSingleObjectEx(m_fenceEvent, INFINITE, FALSE);
+			m_lastCompletedFenceValue = fenceValue;
+		}
 	}
 
 	bool CommandManager::IsFenceCompleted(uint64_t fenceValue)

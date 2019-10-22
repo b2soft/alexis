@@ -325,8 +325,6 @@ void SampleApp::LoadAssets()
 
 	// Models 
 	m_cubeMesh = Mesh::LoadFBXFromFile(commandContext, L"Resources/Models/Cube.fbx");
-	commandManager->ExecuteCommandContext(commandContext, true);
-
 
 	// Check is root signature version 1.1 is available.
 	// Version 1.1 is preferred over 1.0 because it allows GPU to optimize some stuff
@@ -365,17 +363,27 @@ void SampleApp::LoadAssets()
 		TextureBuffer gb0;
 		gb0.Create(colorDesc, &colorClearValue); // Base color
 		m_gbufferRT.AttachTexture(gb0, RenderTarget::Slot::Slot0);
+		gb0.GetResource()->SetName(L"GB 0");
+		commandContext->TransitionResource(gb0, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		TextureBuffer gb1;
 		gb1.Create(colorDesc, &colorClearValue); // Base color
 		m_gbufferRT.AttachTexture(gb1, RenderTarget::Slot::Slot1);
+		gb1.GetResource()->SetName(L"GB 1");
+		commandContext->TransitionResource(gb1, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		TextureBuffer gb2;
 		gb2.Create(colorDesc, &colorClearValue); // Base color
 		m_gbufferRT.AttachTexture(gb2, RenderTarget::Slot::Slot2);
+		gb2.GetResource()->SetName(L"GB 2");
+		commandContext->TransitionResource(gb2, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		m_gbufferRT.AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+		depthTexture.GetResource()->SetName(L"GB Depth");
+		commandContext->TransitionResource(depthTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	}
+
+	
 
 	// Create an HDR RT
 	{
@@ -393,8 +401,10 @@ void SampleApp::LoadAssets()
 
 		TextureBuffer hdrTexture;
 		hdrTexture.Create(colorDesc, &colorClearValue);
+		hdrTexture.GetResource()->SetName(L"HDR Texture");
 
 		m_hdrRT.AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
+		commandContext->TransitionResource(hdrTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		m_hdrRT.AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 	}
 
@@ -578,6 +588,9 @@ void SampleApp::LoadAssets()
 	}
 
 
+	commandManager->ExecuteCommandContext(commandContext, true);
+
+
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -619,12 +632,11 @@ void SampleApp::PopulateCommandList()
 					auto& texture = m_gbufferRT.GetTexture(static_cast<RenderTarget::Slot>(i));
 					if (texture.IsValid())
 					{
-						pbsCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+						pbsCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 						pbsCommandContext->ClearTexture(texture, clearColor);
 					}
 				}
 
-				pbsCommandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 				pbsCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
 			}
 
@@ -655,7 +667,7 @@ void SampleApp::PopulateCommandList()
 	auto resolveLightingTask = std::async([this, lightingCommandContext, clearColor]
 		{
 			{
-				lightingCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+				lightingCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
 				lightingCommandContext->ClearTexture(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), clearColor);
 			}
 
@@ -726,7 +738,12 @@ void SampleApp::PopulateCommandList()
 	hdr2sdrTask.wait();
 	imguiTask.wait();
 
-	commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext, imguiContext });
+	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext, imguiContext });
+	commandManager->ExecuteCommandContext(pbsCommandContext);
+	commandManager->ExecuteCommandContext(lightingCommandContext);
+	commandManager->ExecuteCommandContext(hdrCommandContext);
+	//commandManager->WaitForGpu();
+	commandManager->ExecuteCommandContext(imguiContext);
 	//TODO: Flickers if debug layer is enabled. Wait for DX team to be fixed
 	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext });
 	//commandManager->ExecuteCommandContext(imguiContext);
