@@ -5,6 +5,8 @@
 #include "Core.h"
 #include "CommandManager.h"
 
+//#define ENABLE_DEBUG_LAYER
+
 namespace alexis
 {
 	const UINT Render::k_frameCount;
@@ -198,16 +200,18 @@ namespace alexis
 #if defined(_DEBUG)
 		// Enable debug layer
 		// Note, that enabling the debug layer after device creation will invalidate the active device
+#if defined(ENABLE_DEBUG_LAYER)
 		{
 			ComPtr<ID3D12Debug1> debugInterface;
 			ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
 
-			//debugInterface->EnableDebugLayer();
+			debugInterface->EnableDebugLayer();
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
 			//debugInterface->SetEnableGPUBasedValidation(TRUE);
 			//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
 		}
+#endif
 #endif
 
 		ComPtr<IDXGIFactory4> factory;
@@ -235,6 +239,9 @@ namespace alexis
 
 		// Enable debug messages in debug mode
 #if defined(_DEBUG)
+
+#if defined(ENABLE_DEBUG_LAYER)
+
 		ComPtr<ID3D12InfoQueue> infoQueue;
 		if (SUCCEEDED(m_device.As(&infoQueue)))
 		{
@@ -269,6 +276,9 @@ namespace alexis
 		newFilter.DenyList.pIDList = suppressedIds;
 
 		ThrowIfFailed(infoQueue->PushStorageFilter(&newFilter));
+
+#endif
+
 #endif
 
 		// Init command manager to have command queue needed for swapchain
