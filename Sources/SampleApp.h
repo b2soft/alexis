@@ -42,7 +42,7 @@ public:
 	virtual void Destroy() override;
 
 private:
-	static const UINT k_frameCount = 2;
+	static const UINT k_frameCount = 4;
 
 	// Pipeline objects
 	CD3DX12_VIEWPORT m_viewport;
@@ -90,7 +90,6 @@ private:
 	DirectX::XMMATRIX m_modelMatrix;
 
 	alexis::Camera m_sceneCamera;
-
 
 	// Input system 
 

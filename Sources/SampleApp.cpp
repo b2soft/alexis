@@ -155,6 +155,7 @@ void SampleApp::OnKeyPressed(alexis::KeyEventArgs& e)
 	{
 		alexis::Render::GetInstance()->ToggleVSync();
 	}
+	break;
 
 	case KeyCode::W:
 	{

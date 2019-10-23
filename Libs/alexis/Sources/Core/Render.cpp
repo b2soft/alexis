@@ -51,9 +51,14 @@ namespace alexis
 		UINT presetFlags = m_isTearingSupported && !m_vSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
 		ThrowIfFailed(m_swapChain->Present(syncInterval, presetFlags));
 
-		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+		auto fv = CommandManager::GetInstance()->SignalFence();
+		m_fenceValues[m_frameIndex] = fv;
 
 		ReleaseStaleDescriptors(CommandManager::GetInstance()->GetLastCompletedFence());
+
+		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
+
+		CommandManager::GetInstance()->WaitForFence(m_fenceValues[m_frameIndex]);
 	}
 
 	void Render::OnResize(int width, int height)
@@ -197,7 +202,7 @@ namespace alexis
 			ComPtr<ID3D12Debug1> debugInterface;
 			ThrowIfFailed(D3D12GetDebugInterface(IID_PPV_ARGS(&debugInterface)));
 
-			debugInterface->EnableDebugLayer();
+			//debugInterface->EnableDebugLayer();
 			dxgiFactoryFlags |= DXGI_CREATE_FACTORY_DEBUG;
 
 			//debugInterface->SetEnableGPUBasedValidation(TRUE);

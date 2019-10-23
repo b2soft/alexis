@@ -66,7 +66,7 @@ namespace alexis
 
 		ComPtr<ID3D12Device2> m_device;
 		ComPtr<IDXGISwapChain4> m_swapChain;
-		
+
 		TextureBuffer m_backbufferTextures[k_frameCount];
 		mutable RenderTarget m_backbufferRT;
 
@@ -80,7 +80,7 @@ namespace alexis
 		HANDLE m_swapChainEvent;
 
 		// Needed to restore window rect after transition fullscreen->windowed
-		RECT m_windowRect; 
+		RECT m_windowRect;
 
 		int m_windowWidth{ 1 };
 		int m_windowHeight{ 1 };
