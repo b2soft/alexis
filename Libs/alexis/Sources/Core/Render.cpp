@@ -212,6 +212,7 @@ namespace alexis
 			//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
 		}
 #endif
+
 #endif
 
 		ComPtr<IDXGIFactory4> factory;
