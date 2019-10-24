@@ -27,6 +27,9 @@
     <ClInclude Include="Sources\Core\Render.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />
+    <ClInclude Include="Sources\ECS\ModelComponent.h" />
+    <ClInclude Include="Sources\ECS\ModelSystem.h" />
+    <ClInclude Include="Sources\ECS\TransformComponent.h" />
     <ClInclude Include="Sources\Precompiled.h" />
     <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h" />
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />

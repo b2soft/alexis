@@ -23,6 +23,9 @@
     <Filter Include="Sources\Render\Buffers">
       <UniqueIdentifier>{86550b38-517d-4247-88a9-e05607dfcd70}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\ECS">
+      <UniqueIdentifier>{774e1729-7fb0-4a05-ab26-b2f1b938ae7f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Precompiled.cpp">
@@ -137,6 +140,15 @@
     </ClInclude>
     <ClInclude Include="Sources\Core\KeyCodes.h">
       <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\TransformComponent.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\ModelSystem.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\ModelComponent.h">
+      <Filter>Sources\ECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

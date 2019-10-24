@@ -1,0 +1,21 @@
+{
+    "entities" : {
+        "name" : "TestCube",
+        "components" : {
+            "ModelComponent" : {
+                "model" : "Resources/Models/Cube.fbx",
+                "baseTexture" : "Resources/Textures/metal_base.dds",
+                "normalTexture" : "Resources/Textures/metal_base.dds",
+                "metalglossTexture" : "Resources/Textures/metal_base.dds"
+            },
+
+            "TransformComponent" : {
+                "position" : {
+                    "x" : 10.0,
+                    "y" : 0.0,
+                    "z" : 0.0
+                }
+            }
+        }
+    }
+}
