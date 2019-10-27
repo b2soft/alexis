@@ -76,6 +76,9 @@
     <ClCompile Include="Sources\Render\Camera.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\ECS\ModelSystem.cpp">
+      <Filter>Sources\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -141,13 +144,10 @@
     <ClInclude Include="Sources\Core\KeyCodes.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\ECS\TransformComponent.h">
+    <ClInclude Include="Sources\ECS\ECS.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Sources\ECS\ModelSystem.h">
-      <Filter>Sources\ECS</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\ECS\ModelComponent.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
   </ItemGroup>

@@ -2,6 +2,8 @@
 
 #include "Core.h"
 
+#include <ECS/ECS.h>
+
 #include <string>
 
 #include "Render.h"
@@ -177,6 +179,8 @@ namespace alexis
 
 		Render::GetInstance()->Initialize(g_clientWidth, g_clientHeight);
 		s_frameCount = 0;
+
+		m_ecs = std::make_unique<ecs::World>();
 	}
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

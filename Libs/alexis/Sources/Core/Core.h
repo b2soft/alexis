@@ -39,6 +39,11 @@ namespace alexis
 		//virtual void OnWindowDestroy();
 	};
 
+	namespace ecs
+	{
+		class World;
+	}
+
 	class Core
 	{
 	public:
@@ -68,6 +73,11 @@ namespace alexis
 			return s_frameCount;
 		}
 
+		inline ecs::World* GetECS()
+		{
+			return m_ecs.get();
+		}
+
 	protected:
 		// Create app instance
 		Core(HINSTANCE hInstance);
@@ -81,6 +91,8 @@ namespace alexis
 
 		void CreateRenderWindow();
 		void InitImgui();
+
+		std::unique_ptr<ecs::World> m_ecs;
 
 		static HighResolutionClock s_updateClock;
 

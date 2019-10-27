@@ -1,24 +1,33 @@
 #pragma once
 
-#include <vector>
+#include <DirectXMath.h>
 
-#include "TransformComponent.h"
-#include "ModelComponent.h"
+#include <ECS/ECS.h>
 
 namespace alexis
 {
+	class Mesh;
+	class CommandContext;
+
 	namespace ecs
 	{
-		class ModelSystem
+		struct TransformComponent
+		{
+			DirectX::XMVECTOR Position;
+			DirectX::XMVECTOR Rotation;
+		};
+
+		struct ModelComponent
+		{
+			Mesh* Mesh;
+			DirectX::XMMATRIX ModelMatrix;
+		};
+
+		class ModelSystem : public ecs::System
 		{
 		public:
-			void Draw();
-
-			void AddModel(std:unique_ptr<ModelComponent> model);
-			void RemoveAllModels();
-
-		private:
-			std::vector<std:unique_ptr<ModelComponent>> m_models;
+			void Render(CommandContext* context);
 		};
+
 	}
 }

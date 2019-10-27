@@ -12,6 +12,8 @@
 #include <Render/RenderTarget.h>
 #include <Render/Camera.h>
 
+#include <ECS/ModelSystem.h>
+
 using Microsoft::WRL::ComPtr;
 
 class SampleApp : public alexis::IGame
@@ -114,4 +116,7 @@ private:
 	int m_deltaMouseX{ 0 };
 	int m_deltaMouseY{ 0 };
 	bool m_isCameraFixed{ true };
+
+	std::shared_ptr<alexis::ecs::ModelSystem> m_modelSystem;
+	std::vector<alexis::ecs::Entity> m_sceneEntities;
 };
