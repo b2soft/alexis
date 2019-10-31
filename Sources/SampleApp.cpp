@@ -21,7 +21,7 @@ using namespace alexis;
 using namespace DirectX;
 
 static const float k_cameraSpeed = 20.0f;
-static const float k_cameraTurnSpeed = 20.0f;
+static const float k_cameraTurnSpeed = 0.1f;
 
 struct Mat
 {
@@ -114,8 +114,8 @@ void SampleApp::OnUpdate(float dt)
 
 	if (!m_isCameraFixed)
 	{
-		m_yaw += m_deltaMouseX * dt * k_cameraTurnSpeed;
-		m_pitch += m_deltaMouseY * dt * k_cameraTurnSpeed;
+		m_yaw += m_deltaMouseX * k_cameraTurnSpeed;
+		m_pitch += m_deltaMouseY * k_cameraTurnSpeed;
 
 		m_deltaMouseX = 0;
 		m_deltaMouseY = 0;
@@ -793,7 +793,6 @@ void SampleApp::PopulateCommandList()
 	commandManager->ExecuteCommandContext(pbsCommandContext);
 	commandManager->ExecuteCommandContext(lightingCommandContext);
 	commandManager->ExecuteCommandContext(hdrCommandContext);
-	//commandManager->WaitForGpu();
 	commandManager->ExecuteCommandContext(imguiContext);
 	//TODO: Flickers if debug layer is enabled. Wait for DX team to be fixed
 	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext });
