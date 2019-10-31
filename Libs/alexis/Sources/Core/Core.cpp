@@ -203,6 +203,9 @@ namespace alexis
 
 			Core::s_updateClock.Tick();
 
+			float dt = Core::s_updateClock.GetDeltaSeconds();
+			OutputDebugString(std::wstring(std::to_wstring(dt) + L"\n").c_str());
+
 			Core::s_game->OnUpdate(Core::s_updateClock.GetDeltaSeconds());
 
 			auto render = Render::GetInstance();

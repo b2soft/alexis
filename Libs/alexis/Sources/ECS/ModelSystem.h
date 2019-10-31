@@ -3,6 +3,7 @@
 #include <DirectXMath.h>
 
 #include <ECS/ECS.h>
+#include <ECS/TransformComponent.h>
 
 namespace alexis
 {
@@ -11,12 +12,6 @@ namespace alexis
 
 	namespace ecs
 	{
-		struct TransformComponent
-		{
-			DirectX::XMVECTOR Position;
-			DirectX::XMVECTOR Rotation;
-		};
-
 		struct ModelComponent
 		{
 			Mesh* Mesh;

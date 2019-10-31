@@ -73,10 +73,10 @@
     <ClCompile Include="Sources\Render\RenderTarget.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Camera.cpp">
-      <Filter>Sources\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\ECS\ModelSystem.cpp">
+      <Filter>Sources\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\CameraSystem.cpp">
       <Filter>Sources\ECS</Filter>
     </ClCompile>
   </ItemGroup>
@@ -135,9 +135,6 @@
     <ClInclude Include="Sources\Render\RenderTarget.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Render\Camera.h">
-      <Filter>Sources\Render</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Core\Events.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
@@ -148,6 +145,15 @@
       <Filter>Sources\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Sources\ECS\ModelSystem.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\TransformComponent.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\CameraComponent.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\CameraSystem.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
   </ItemGroup>

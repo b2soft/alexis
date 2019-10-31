@@ -15,6 +15,7 @@
 #include <Core/CommandManager.h>
 
 #include <ECS/ECS.h>
+#include <ECS/CameraComponent.h>
 
 using namespace alexis;
 using namespace DirectX;
@@ -70,8 +71,23 @@ bool SampleApp::Initialize()
 
 	ecsWorld->RegisterComponent<ecs::ModelComponent>();
 	ecsWorld->RegisterComponent<ecs::TransformComponent>();
+	ecsWorld->RegisterComponent<ecs::CameraComponent>();
 
+	// Model System
 	m_modelSystem = ecsWorld->RegisterSystem<ecs::ModelSystem>();
+
+	ecs::ComponentMask modelSystemMask;
+	modelSystemMask.set(ecsWorld->GetComponentType<ecs::ModelComponent>());
+	modelSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
+	ecsWorld->SetSystemComponentMask<ecs::ModelSystem>(modelSystemMask);
+
+	// Camera System
+	m_cameraSystem = ecsWorld->RegisterSystem<ecs::CameraSystem>();
+
+	ecs::ComponentMask cameraSystemMask;
+	cameraSystemMask.set(ecsWorld->GetComponentType<ecs::CameraComponent>());
+	cameraSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
+	ecsWorld->SetSystemComponentMask<ecs::CameraSystem>(cameraSystemMask);
 
 	return true;
 }
@@ -105,10 +121,14 @@ void SampleApp::OnUpdate(float dt)
 		m_deltaMouseY = 0;
 
 		XMVECTOR posOffset = XMVectorSet(m_rightMovement - m_leftMovement, m_upMovement - m_downMovement, m_fwdMovement - m_aftMovement, 1.0f) * k_cameraSpeed * static_cast<float>(dt);
-		m_sceneCamera.Translate(posOffset, true);
+		auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
+		XMVECTOR newPos = cameraTransformComponent.Position + XMVector3Rotate(posOffset, cameraTransformComponent.Rotation);
+		newPos = XMVectorSetW(newPos, 1.0f);
+
+		m_cameraSystem->SetPosition(m_sceneCamera, newPos);
 
 		XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
-		m_sceneCamera.SetRotation(cameraRotationQuat);
+		m_cameraSystem->SetRotation(m_sceneCamera, cameraRotationQuat);
 	}
 
 	// Update the model matrix
@@ -126,9 +146,8 @@ void SampleApp::OnRender()
 void SampleApp::OnResize(int width, int height)
 {
 	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
-
-	float fov = m_sceneCamera.GetVerticalFov();
-	m_sceneCamera.SetProjectionParams(fov, m_aspectRatio, 0.1f, 100.0f);
+	
+	m_cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
 
 	m_gbufferRT.Resize(width, height);
 	m_hdrRT.Resize(width, height);
@@ -351,6 +370,10 @@ void SampleApp::LoadAssets()
 		ecsWorld->AddComponent(entity, ecs::ModelComponent{ m_cubeMesh.get() });
 
 		m_sceneEntities.emplace_back(entity);
+
+		m_sceneCamera = ecsWorld->CreateEntity();
+		ecsWorld->AddComponent(m_sceneCamera, ecs::TransformComponent{ position, rotation });
+		ecsWorld->AddComponent(m_sceneCamera, ecs::CameraComponent{});
 	}
 
 	// Check is root signature version 1.1 is available.
@@ -672,8 +695,8 @@ void SampleApp::PopulateCommandList()
 			pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
 			// Update the MVP matrix
-			XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_sceneCamera.GetViewMatrix());
-			mvpMatrix = XMMatrixMultiply(mvpMatrix, m_sceneCamera.GetProjMatrix());
+			XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_cameraSystem->GetViewMatrix(m_sceneCamera));
+			mvpMatrix = XMMatrixMultiply(mvpMatrix, m_cameraSystem->GetProjMatrix(m_sceneCamera));
 
 			Mat matrices;
 			matrices.ModelViewProjectionMatrix = mvpMatrix;
@@ -860,8 +883,10 @@ bool SampleApp::LoadContent()
 	LoadAssets();
 
 	XMVECTOR cameraPos = XMVectorSet(0.f, 5.f, -20.f, 1.0f);
-	m_sceneCamera.SetTranslation(cameraPos);
-	m_sceneCamera.SetProjectionParams(45.0f, m_aspectRatio, 0.1f, 100.0f);
+	auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
+	cameraTransformComponent.Position = cameraPos;
+
+	m_cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
 
 	return true;
 }

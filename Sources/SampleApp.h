@@ -10,9 +10,9 @@
 #include <Render/Buffers/GpuBuffer.h>
 #include <Render/Mesh.h>
 #include <Render/RenderTarget.h>
-#include <Render/Camera.h>
 
 #include <ECS/ModelSystem.h>
+#include <ECS/CameraSystem.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -91,7 +91,7 @@ private:
 
 	DirectX::XMMATRIX m_modelMatrix;
 
-	alexis::Camera m_sceneCamera;
+	alexis::ecs::Entity m_sceneCamera;
 
 	// Input system 
 
@@ -118,5 +118,6 @@ private:
 	bool m_isCameraFixed{ true };
 
 	std::shared_ptr<alexis::ecs::ModelSystem> m_modelSystem;
+	std::shared_ptr<alexis::ecs::CameraSystem> m_cameraSystem;
 	std::vector<alexis::ecs::Entity> m_sceneEntities;
 };

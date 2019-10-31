@@ -10,7 +10,6 @@ namespace alexis
 {
 	namespace ecs
 	{
-
 		void ModelSystem::Render(CommandContext* context)
 		{
 			auto ecsWorld = Core::Get().GetECS();

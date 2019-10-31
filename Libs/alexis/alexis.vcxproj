@@ -27,12 +27,14 @@
     <ClInclude Include="Sources\Core\Render.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\d3dx12.h" />
+    <ClInclude Include="Sources\ECS\CameraComponent.h" />
+    <ClInclude Include="Sources\ECS\CameraSystem.h" />
     <ClInclude Include="Sources\ECS\ECS.h" />
     <ClInclude Include="Sources\ECS\ModelSystem.h" />
+    <ClInclude Include="Sources\ECS\TransformComponent.h" />
     <ClInclude Include="Sources\Precompiled.h" />
     <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h" />
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />
-    <ClInclude Include="Sources\Render\Camera.h" />
     <ClInclude Include="Sources\Render\CommandContext.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
@@ -48,6 +50,7 @@
     <ClCompile Include="Sources\Core\Core.cpp" />
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp" />
     <ClCompile Include="Sources\Core\Render.cpp" />
+    <ClCompile Include="Sources\ECS\CameraSystem.cpp" />
     <ClCompile Include="Sources\ECS\ModelSystem.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
@@ -55,7 +58,6 @@
     </ClCompile>
     <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp" />
     <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp" />
-    <ClCompile Include="Sources\Render\Camera.cpp" />
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />

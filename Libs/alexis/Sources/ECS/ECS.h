@@ -261,7 +261,9 @@ namespace alexis
 			{
 				const char* typeName = typeid(T).name();
 
-				assert(m_systems.find(typeName) == m_systems.end() && "System not found!");
+
+				auto it = m_systems.find(typeName);
+				assert(m_systems.find(typeName) != m_systems.end() && "System not found!");
 
 				m_componentMasks.insert({ typeName, componentMask });
 			}
@@ -367,7 +369,7 @@ namespace alexis
 			template<class T>
 			ComponentType GetComponentType()
 			{
-				return m_componentManager->GetComponent<T>();
+				return m_componentManager->GetComponentType<T>();
 			}
 
 			// System related
@@ -380,7 +382,7 @@ namespace alexis
 			template<class T>
 			void SetSystemComponentMask(ComponentMask componentMask)
 			{
-				m_systemManager->SetComponentMask(componentMask);
+				m_systemManager->SetComponentMask<T>(componentMask);
 			}
 
 		private:
