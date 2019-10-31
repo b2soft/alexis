@@ -34,7 +34,7 @@ namespace alexis
 		const RenderTarget& GetBackbufferRT() const;
 
 		const CD3DX12_VIEWPORT& GetDefaultViewport() const;
-		const CD3DX12_RECT& GetDefaultScrissorRect() const;
+		const CD3DX12_RECT& GetDefaultScissorRect() const;
 
 		ID3D12Device2* GetDevice() const;
 

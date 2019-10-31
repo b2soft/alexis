@@ -38,7 +38,6 @@ public:
 	virtual void OnKeyPressed(alexis::KeyEventArgs& e) override;
 	virtual void OnKeyReleased(alexis::KeyEventArgs& e) override;
 
-	virtual void OnMouseButtonPressed(alexis::MouseButtonEventArgs& e) override;
 	virtual void OnMouseMoved(alexis::MouseMotionEventArgs& e) override;
 
 	virtual void Destroy() override;

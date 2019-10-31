@@ -273,14 +273,6 @@ void SampleApp::OnKeyReleased(KeyEventArgs& e)
 	}
 }
 
-void SampleApp::OnMouseButtonPressed(alexis::MouseButtonEventArgs& e)
-{
-	IGame::OnMouseButtonPressed(e);
-
-	//m_prevMouseX = e.X;
-	//m_prevMouseY = e.Y;
-}
-
 void SampleApp::OnMouseMoved(alexis::MouseMotionEventArgs& e)
 {
 	if (!m_isCameraFixed)
@@ -645,7 +637,7 @@ void SampleApp::LoadAssets()
 	m_context = ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 
-	ImGui::StyleColorsDark();
+	ImGui::StyleColorsLight();
 
 	ImGui_ImplWin32_Init(Core::GetHwnd());
 	ImGui_ImplDX12_Init(Render::GetInstance()->GetDevice(), 2,

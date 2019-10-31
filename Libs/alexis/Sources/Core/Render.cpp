@@ -101,7 +101,7 @@ namespace alexis
 		return m_viewport;
 	}
 
-	const CD3DX12_RECT& Render::GetDefaultScrissorRect() const
+	const CD3DX12_RECT& Render::GetDefaultScissorRect() const
 	{
 		return m_scissorRect;
 	}
