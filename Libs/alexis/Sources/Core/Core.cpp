@@ -3,6 +3,7 @@
 #include "Core.h"
 
 #include <ECS/ECS.h>
+#include <Scene.h>
 
 #include <string>
 
@@ -181,6 +182,7 @@ namespace alexis
 		s_frameCount = 0;
 
 		m_ecs = std::make_unique<ecs::World>();
+		m_scene = std::make_unique<Scene>();
 	}
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

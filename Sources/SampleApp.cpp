@@ -10,6 +10,7 @@
 #include <imgui_impl_dx12.h>
 #include <imgui_impl_win32.h>
 
+#include <Scene.h>
 #include <Core/Core.h>
 #include <Core/Render.h>
 #include <Core/CommandManager.h>
@@ -146,7 +147,7 @@ void SampleApp::OnRender()
 void SampleApp::OnResize(int width, int height)
 {
 	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
-	
+
 	m_cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
 
 	m_gbufferRT.Resize(width, height);
@@ -362,10 +363,6 @@ void SampleApp::LoadAssets()
 		ecsWorld->AddComponent(entity, ecs::ModelComponent{ m_cubeMesh.get() });
 
 		m_sceneEntities.emplace_back(entity);
-
-		m_sceneCamera = ecsWorld->CreateEntity();
-		ecsWorld->AddComponent(m_sceneCamera, ecs::TransformComponent{ position, rotation });
-		ecsWorld->AddComponent(m_sceneCamera, ecs::CameraComponent{});
 	}
 
 	// Check is root signature version 1.1 is available.
@@ -840,8 +837,26 @@ void SampleApp::UpdateGUI()
 			ImGui::Text(buffer);
 		}
 
+		{
+			ImGui::Begin("BottomBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs |
+				ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	
+			auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
+			sprintf_s(buffer, _countof(buffer), "Camera Pos{ X: %.2f Y: %.2f Z: %.2f }", XMVectorGetX(cameraTransformComponent.Position), XMVectorGetY(cameraTransformComponent.Position), XMVectorGetZ(cameraTransformComponent.Position));
+			ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), buffer);
+
+			auto posTextSize = ImGui::CalcTextSize(buffer);
+
+			ImGui::SetWindowSize(ImVec2(g_clientWidth, posTextSize.y));
+			ImGui::SetWindowPos(ImVec2(0, g_clientHeight - posTextSize.y - 10.0f));
+
+			ImGui::End();
+		}
+
 		ImGui::EndMainMenuBar();
 	}
+
+	//if ( ImGui::)
 
 	if (showDemoWindow)
 	{
@@ -873,11 +888,10 @@ bool SampleApp::LoadContent()
 	LoadPipeline();
 	LoadAssets();
 
-	XMVECTOR cameraPos = XMVectorSet(0.f, 5.f, -20.f, 1.0f);
-	auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
-	cameraTransformComponent.Position = cameraPos;
+	auto scene = Core::Get().GetScene();
+	scene->LoadFromJson(L"Resources/main.scene");
 
-	m_cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
+	m_sceneCamera = m_cameraSystem->GetActiveCamera();
 
 	return true;
 }

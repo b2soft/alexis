@@ -9,6 +9,7 @@ namespace alexis
 		class CameraSystem : public ecs::System
 		{
 		public:
+			Entity GetActiveCamera() const;
 			void XM_CALLCONV SetPosition(Entity entity, DirectX::FXMVECTOR position);
 			void XM_CALLCONV SetRotation(Entity entity, DirectX::FXMVECTOR rotation);
 			void XM_CALLCONV SetTransform(Entity entity, DirectX::FXMVECTOR position, DirectX::FXMVECTOR rotation);

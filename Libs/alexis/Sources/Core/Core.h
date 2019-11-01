@@ -44,6 +44,8 @@ namespace alexis
 		class World;
 	}
 
+	class Scene;
+
 	class Core
 	{
 	public:
@@ -78,6 +80,11 @@ namespace alexis
 			return m_ecs.get();
 		}
 
+		inline Scene* GetScene()
+		{
+			return m_scene.get();
+		}
+
 	protected:
 		// Create app instance
 		Core(HINSTANCE hInstance);
@@ -93,6 +100,7 @@ namespace alexis
 		void InitImgui();
 
 		std::unique_ptr<ecs::World> m_ecs;
+		std::unique_ptr<Scene> m_scene;
 
 		static HighResolutionClock s_updateClock;
 

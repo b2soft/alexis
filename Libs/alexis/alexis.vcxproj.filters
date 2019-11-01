@@ -79,6 +79,9 @@
     <ClCompile Include="Sources\ECS\CameraSystem.cpp">
       <Filter>Sources\ECS</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Scene.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -155,6 +158,9 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\CameraSystem.h">
       <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Scene.h">
+      <Filter>Sources</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

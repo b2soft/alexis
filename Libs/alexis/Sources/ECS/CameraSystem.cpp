@@ -10,6 +10,13 @@ namespace alexis
 {
 	namespace ecs
 	{
+
+		Entity CameraSystem::GetActiveCamera() const
+		{
+			// TODO: rework
+			return *Entities.begin();
+		}
+
 		void XM_CALLCONV CameraSystem::SetPosition(Entity entity, DirectX::FXMVECTOR position)
 		{
 			auto ecsWorld = Core::Get().GetECS();

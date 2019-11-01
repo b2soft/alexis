@@ -43,6 +43,7 @@
     <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\RenderTarget.h" />
     <ClInclude Include="Sources\Render\RootSignature.h" />
+    <ClInclude Include="Sources\Scene.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
   </ItemGroup>
   <ItemGroup>
@@ -66,6 +67,7 @@
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />
+    <ClCompile Include="Sources\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">
