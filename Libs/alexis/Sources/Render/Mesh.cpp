@@ -8,6 +8,9 @@
 
 #include <Render/CommandContext.h>
 
+#include <Core/Core.h>
+#include <Core/CommandManager.h>
+
 using namespace DirectX;
 using namespace Microsoft::WRL;
 
@@ -31,8 +34,11 @@ namespace alexis
 		commandContext->DrawIndexedInstanced(m_indexCount);
 	}
 
-	std::unique_ptr<alexis::Mesh> Mesh::LoadFBXFromFile(CommandContext* commandContext, const std::wstring& path)
+	std::unique_ptr<alexis::Mesh> Mesh::LoadFBXFromFile(const std::wstring& path)
 	{
+		//TODO replace with res manager
+		CommandContext* commandContext = CommandManager::GetInstance()->CreateCommandContext();
+
 		Assimp::Importer importer;
 
 		std::string convertedPath(path.begin(), path.end());
@@ -102,6 +108,8 @@ namespace alexis
 
 		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
 		mesh->Initialize(commandContext, vertices, indices);
+
+		CommandManager::GetInstance()->ExecuteCommandContext(commandContext, true);
 
 		return mesh;
 	}

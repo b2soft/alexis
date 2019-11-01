@@ -70,10 +70,7 @@ private:
 	alexis::TextureBuffer m_concreteTex;
 
 	alexis::VertexBuffer m_triangleVB;
-	alexis::DynamicConstantBuffer m_triangleCB;
-	//alexis::ConstantBuffer m_triangleCB; static
 	alexis::RootSignature m_rootSignature;
-	std::unique_ptr<alexis::Mesh> m_cubeMesh;
 	std::unique_ptr<alexis::Mesh> m_fsQuad;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
@@ -87,8 +84,6 @@ private:
 	int m_frameCount{ 0 };
 	float m_fps{ 0.f };
 	float m_totalTime{ 0.f };
-
-	DirectX::XMMATRIX m_modelMatrix;
 
 	alexis::ecs::Entity m_sceneCamera;
 

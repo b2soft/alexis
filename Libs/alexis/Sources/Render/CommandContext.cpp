@@ -69,7 +69,7 @@ namespace alexis
 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
 	}
 
-	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, DynamicConstantBuffer& resource)
+	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, const DynamicConstantBuffer& resource)
 	{
 		List->SetGraphicsRootConstantBufferView(rootParameterIdx, resource.GetGPUPtr());
 	}

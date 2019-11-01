@@ -102,7 +102,7 @@ namespace alexis
 				std::size_t newIndex = m_size;
 				m_entityToIndexMap[entity] = newIndex;
 				m_indexToEntityMap[newIndex] = entity;
-				m_componentArray[newIndex] = component;
+				m_componentArray[newIndex] = std::move(component);
 				++m_size;
 			}
 

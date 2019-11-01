@@ -7,12 +7,12 @@
 #include <fstream>
 
 #include <ECS/ECS.h>
+#include <ECS/ModelComponent.h>
 #include <ECS/CameraComponent.h>
 #include <ECS/TransformComponent.h>
 
 namespace alexis
 {
-
 	void Scene::LoadFromJson(const std::wstring& filename)
 	{
 		auto ecsWorld = Core::Get().GetECS();
@@ -56,11 +56,20 @@ namespace alexis
 					XMVECTOR position = XMVectorSet(posJson["x"], posJson["y"], posJson["z"], 1.f);
 					XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(rotJson["x"]), XMConvertToRadians(rotJson["y"]), XMConvertToRadians(rotJson["z"]));
 
-					ecsWorld->AddComponent(entity, ecs::TransformComponent{position, rotation});
+					ecsWorld->AddComponent(entity, ecs::TransformComponent{ position, rotation });
 				}
 				else if (componentName == "ModelComponent")
 				{
-					// TODO
+					std::string meshPath = componentKV.value()["mesh"];
+
+					auto mesh = Mesh::LoadFBXFromFile(std::wstring(meshPath.begin(), meshPath.end()));
+					m_meshes.push_back(std::move(mesh));
+
+					// TODO: Move semantics for adding components
+					ecsWorld->AddComponent(entity, ecs::ModelComponent{ m_meshes.back().get() });
+
+					// TODO move to material maybe?
+					ecsWorld->GetComponent<ecs::ModelComponent>(entity).CBV.Create(1, sizeof(ecs::ModelComponent::Mat));
 				}
 			}
 		}

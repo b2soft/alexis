@@ -12,16 +12,11 @@ namespace alexis
 
 	namespace ecs
 	{
-		struct ModelComponent
-		{
-			Mesh* Mesh;
-			DirectX::XMMATRIX ModelMatrix;
-		};
-
 		class ModelSystem : public ecs::System
 		{
 		public:
-			void Render(CommandContext* context);
+			void Update(float dt);
+			void Render(CommandContext* context, DirectX::XMMATRIX view/*, DirectX::XMMATRIX proj*/);
 		};
 
 	}

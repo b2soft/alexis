@@ -29,13 +29,11 @@ namespace alexis
 
 		void Draw(CommandContext* commandContext);
 
-		static std::unique_ptr<Mesh> LoadFBXFromFile(CommandContext* commandContext, const std::wstring& path);
+		static std::unique_ptr<Mesh> LoadFBXFromFile(const std::wstring& path);
 		static std::unique_ptr<Mesh> FullScreenQuad(CommandContext* commandContext);
 
 	private:
 		friend struct std::default_delete<Mesh>;
-
-		virtual ~Mesh() = default;
 
 		void Initialize(CommandContext* commandContext, VertexCollection& vertices, IndexCollection& indices);
 

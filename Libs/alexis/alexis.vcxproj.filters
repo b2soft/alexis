@@ -162,6 +162,9 @@
     <ClInclude Include="Sources\Scene.h">
       <Filter>Sources</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\ECS\ModelComponent.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">

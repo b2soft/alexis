@@ -15,21 +15,18 @@
 #include <Core/Render.h>
 #include <Core/CommandManager.h>
 
+#include <Render/Mesh.h>
+
 #include <ECS/ECS.h>
 #include <ECS/CameraComponent.h>
+#include <ECS/ModelComponent.h>
+#include <ECS/TransformComponent.h>
 
 using namespace alexis;
 using namespace DirectX;
 
 static const float k_cameraSpeed = 20.0f;
 static const float k_cameraTurnSpeed = 0.1f;
-
-struct Mat
-{
-	XMMATRIX ModelMatrix;
-	XMMATRIX ModelViewMatrix;
-	XMMATRIX ModelViewProjectionMatrix;
-};
 
 enum PBSObjectParameters
 {
@@ -95,6 +92,8 @@ bool SampleApp::Initialize()
 
 void SampleApp::OnUpdate(float dt)
 {
+	m_modelSystem->Update(dt);
+
 	ImGui::SetCurrentContext(m_context);
 	ImGui_ImplDX12_NewFrame();
 	ImGui_ImplWin32_NewFrame();
@@ -131,11 +130,6 @@ void SampleApp::OnUpdate(float dt)
 		XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
 		m_cameraSystem->SetRotation(m_sceneCamera, cameraRotationQuat);
 	}
-
-	// Update the model matrix
-	float angle = 0.0f;
-	const XMVECTOR rotationAxis = XMVectorSet(1.0f, 1.0f, 0.0f, 0.0f);
-	m_modelMatrix = XMMatrixRotationAxis(rotationAxis, XMConvertToRadians(angle));
 }
 
 void SampleApp::OnRender()
@@ -330,7 +324,6 @@ void SampleApp::LoadAssets()
 
 	// Constant Buffer
 
-	m_triangleCB.Create(1, sizeof(Mat));
 	//commandContext->CopyBuffer(m_triangleCB, &m_constantBufferData, 1, sizeof(SceneConstantBuffer));
 	//commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
@@ -346,24 +339,6 @@ void SampleApp::LoadAssets()
 
 	commandContext->LoadTextureFromFile(m_metalTex, L"Resources/Textures/metal_mero.dds");
 	commandContext->TransitionResource(m_metalTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	// Models 
-	//m_cubeMesh = Mesh::LoadFBXFromFile(commandContext, L"Resources/Models/Cube.fbx");
-
-	// ECS-like res manager
-	{
-		auto ecsWorld = Core::Get().GetECS();
-		ecs::Entity entity = ecsWorld->CreateEntity();
-
-		XMVECTOR position = XMVectorSet(0.f, 1.f, 0.f, 1.f);
-		XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(0.0f), XMConvertToRadians(0.0f), XMConvertToRadians(0.0f));
-		ecsWorld->AddComponent(entity, ecs::TransformComponent{ position, rotation });
-
-		m_cubeMesh = Mesh::LoadFBXFromFile(commandContext, L"Resources/Models/Cube.fbx");
-		ecsWorld->AddComponent(entity, ecs::ModelComponent{ m_cubeMesh.get() });
-
-		m_sceneEntities.emplace_back(entity);
-	}
 
 	// Check is root signature version 1.1 is available.
 	// Version 1.1 is preferred over 1.0 because it allows GPU to optimize some stuff
@@ -683,13 +658,7 @@ void SampleApp::PopulateCommandList()
 			pbsCommandContext->SetViewport(m_gbufferRT.GetViewport());
 			pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
-			// Update the MVP matrix
-			XMMATRIX mvpMatrix = XMMatrixMultiply(m_modelMatrix, m_cameraSystem->GetViewMatrix(m_sceneCamera));
-			mvpMatrix = XMMatrixMultiply(mvpMatrix, m_cameraSystem->GetProjMatrix(m_sceneCamera));
-
-			Mat matrices;
-			matrices.ModelViewProjectionMatrix = mvpMatrix;
-			memcpy(m_triangleCB.GetCPUPtr(), &matrices, sizeof(Mat));
+			XMMATRIX viewProj = XMMatrixMultiply(m_cameraSystem->GetViewMatrix(m_sceneCamera), m_cameraSystem->GetProjMatrix(m_sceneCamera));
 
 			pbsCommandContext->List->SetPipelineState(m_pbsObjectPSO.Get());
 			pbsCommandContext->SetRootSignature(m_pbsObjectSig);
@@ -698,10 +667,7 @@ void SampleApp::PopulateCommandList()
 			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, m_normalTex);
 			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, m_metalTex);
 
-			pbsCommandContext->SetDynamicCBV(0, m_triangleCB);
-
-			//m_cubeMesh->Draw(pbsCommandContext);
-			m_modelSystem->Render(pbsCommandContext);
+			m_modelSystem->Render(pbsCommandContext, viewProj);
 		});
 
 	auto resolveLightingTask = std::async([this, lightingCommandContext, clearColor]
