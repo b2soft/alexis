@@ -1,7 +1,5 @@
 struct Mat
 {
-	matrix mMatrix;
-	matrix mvMatrix;
 	matrix mvpMatrix;
 };
 

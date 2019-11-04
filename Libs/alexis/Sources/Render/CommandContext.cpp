@@ -69,9 +69,14 @@ namespace alexis
 		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
 	}
 
-	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, const DynamicConstantBuffer& resource)
+	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
 	{
-		List->SetGraphicsRootConstantBufferView(rootParameterIdx, resource.GetGPUPtr());
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		auto cb = bufferManager->Allocate(bufferSize);
+		memcpy(cb.Cpu, bufferData, bufferSize);
+
+		List->SetGraphicsRootConstantBufferView(rootParameterIdx, cb.Gpu);
 	}
 
 	void CommandContext::ClearTexture(const TextureBuffer& texture, const float clearColor[4])

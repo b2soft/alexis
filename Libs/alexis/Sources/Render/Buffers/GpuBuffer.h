@@ -116,38 +116,4 @@ namespace alexis
 		DescriptorAllocation m_rtv;
 		DescriptorAllocation m_dsv;
 	};
-
-	class DynamicConstantBuffer
-	{
-	public:
-
-		void Create(std::size_t numElements, std::size_t elementsSize);
-
-		D3D12_CPU_DESCRIPTOR_HANDLE GetCBV() const
-		{
-			return m_cbv.GetDescriptorHandle();
-		}
-
-		D3D12_GPU_VIRTUAL_ADDRESS GetGPUPtr() const
-		{
-			return m_gpuPtr;
-		}
-
-		void* GetCPUPtr() const
-		{
-			return m_cpuPtr;
-		}
-
-	private:
-		Microsoft::WRL::ComPtr<ID3D12Resource> m_resource;
-
-		std::size_t m_numElements{ 0 };
-		std::size_t m_elementSize{ 0 };
-		std::size_t m_bufferSize{ 0 };
-
-		D3D12_GPU_VIRTUAL_ADDRESS m_gpuPtr;
-		void* m_cpuPtr{ nullptr };
-
-		DescriptorAllocation m_cbv;
-	};
 }

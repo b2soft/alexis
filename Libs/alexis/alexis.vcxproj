@@ -52,6 +52,7 @@
     <ClCompile Include="Sources\Core\Core.cpp" />
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp" />
     <ClCompile Include="Sources\Core\Render.cpp" />
+    <ClCompile Include="Sources\Core\ResourceManager.cpp" />
     <ClCompile Include="Sources\ECS\CameraSystem.cpp" />
     <ClCompile Include="Sources\ECS\ModelSystem.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
@@ -93,6 +94,9 @@
     <ProjectReference Include="..\imgui\imgui.vcxproj">
       <Project>{50698603-7722-47dd-8377-d05ff49122f3}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sources\Core\ResourceManager.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>

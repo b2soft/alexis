@@ -82,6 +82,9 @@
     <ClCompile Include="Sources\Scene.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Core\ResourceManager.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -173,5 +176,10 @@
     <FxCompile Include="Resources\ImGui_vs.hlsl">
       <Filter>Resources</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Sources\Core\ResourceManager.h">
+      <Filter>Sources\Core</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -2,8 +2,6 @@
 
 #include <DirectXMath.h>
 
-#include <Render/Buffers/GpuBuffer.h>
-
 namespace alexis
 {
 	class Mesh;
@@ -20,7 +18,6 @@ namespace alexis
 			};
 
 			Mesh* Mesh;
-			alexis::DynamicConstantBuffer CBV;
 			DirectX::XMMATRIX ModelMatrix;
 			bool IsTransformDirty{ true };
 		};

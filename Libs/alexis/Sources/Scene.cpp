@@ -67,9 +67,6 @@ namespace alexis
 
 					// TODO: Move semantics for adding components
 					ecsWorld->AddComponent(entity, ecs::ModelComponent{ m_meshes.back().get() });
-
-					// TODO move to material maybe?
-					ecsWorld->GetComponent<ecs::ModelComponent>(entity).CBV.Create(1, sizeof(ecs::ModelComponent::Mat));
 				}
 			}
 		}

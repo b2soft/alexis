@@ -31,7 +31,7 @@ namespace alexis
 			}
 		}
 
-		void ModelSystem::Render(CommandContext* context, XMMATRIX view/*, XMMATRIX proj*/)
+		void ModelSystem::Render(CommandContext* context, XMMATRIX viewProj)
 		{
 			auto ecsWorld = Core::Get().GetECS();
 			for (const auto& entity : Entities)
@@ -39,14 +39,9 @@ namespace alexis
 				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
 
 				// Update the MVP matrix
-				XMMATRIX mvpMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, view);
-				//mvpMatrix = XMMatrixMultiply(mvpMatrix, proj);
+				XMMATRIX mvpMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, viewProj);
 
-				context->SetDynamicCBV(0, modelComponent.CBV);
-
-				ModelComponent::Mat matrices;
-				matrices.ModelViewProjectionMatrix = mvpMatrix;
-				memcpy(modelComponent.CBV.GetCPUPtr() , &matrices, sizeof(ModelComponent::Mat));
+				context->SetDynamicCBV(0, sizeof(mvpMatrix), &mvpMatrix);
 
 				modelComponent.Mesh->Draw(context);
 			}

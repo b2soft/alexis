@@ -40,7 +40,7 @@ namespace alexis
 
 		void SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const TextureBuffer& resource);
 		void SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const ConstantBuffer& resource);
-		void SetDynamicCBV(uint32_t rootParameterIdx, const DynamicConstantBuffer& resource);
+		void SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData);
 
 		void ClearTexture(const TextureBuffer& texture, const float clearColor[4]);
 		void ClearDepthStencil(const TextureBuffer& texture, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);
