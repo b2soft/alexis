@@ -1,0 +1,4 @@
+{
+   "type" : "PBS",
+   "samplers":[ "Resources/Textures/metal_base.dds","Resources/Textures/metal_normal.dds","Resources/Textures/metal_mero.dds"]
+}
