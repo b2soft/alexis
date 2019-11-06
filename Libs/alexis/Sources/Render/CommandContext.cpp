@@ -3,14 +3,50 @@
 #include "CommandContext.h"
 
 #include <Core/Render.h>
+#include <Core/CommandManager.h>
 #include <Render/Buffers/UploadBufferManager.h>
 
 namespace alexis
 {
 
-	CommandContext::CommandContext()
+	CommandContext::CommandContext(D3D12_COMMAND_LIST_TYPE type) :
+		m_type(type)
 	{
 
+	}
+
+	uint64_t CommandContext::Flush(bool waitForCompletion /*= false*/)
+	{
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		uint64_t fenceValue = commandManager->GetQueue(m_type).ExecuteCommandList(List.Get());
+
+		if (waitForCompletion)
+		{
+			commandManager->WaitForFence(fenceValue);
+		}
+
+		List->Reset(Allocator.Get(), nullptr);
+
+		return fenceValue;
+	}
+
+	uint64_t CommandContext::Finish(bool waitForCompletion /*= false*/)
+	{
+		// Never finish copy lists
+		assert(m_type == D3D12_COMMAND_LIST_TYPE_DIRECT || m_type == D3D12_COMMAND_LIST_TYPE_COMPUTE);
+
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		uint64_t fenceValue = commandManager->GetQueue(m_type).ExecuteCommandList(List.Get());
+
+		if (waitForCompletion)
+		{
+			commandManager->WaitForFence(fenceValue);
+		}
+
+		commandManager->CacheContext(this, fenceValue);
+		Render::GetInstance()->ReleaseStaleDescriptors(fenceValue);
+
+		return fenceValue;
 	}
 
 	void CommandContext::DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount, UINT startVertexLocation, UINT startInstanceLocation)

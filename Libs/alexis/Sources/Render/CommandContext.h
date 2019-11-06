@@ -14,22 +14,18 @@ namespace alexis
 	class CommandContext
 	{
 	public:
-		CommandContext();
-		//CommandContext(const CommandContext&) = delete;
-		//
-		//CommandContext(CommandContext&& other) :
-		//	Allocator(std::move(other.Allocator)),
-		//	List(std::move(other.List)),
-		//	DynamicDescriptors(std::move(other.DynamicDescriptors)),
-		//	DescriptorHeap{ other.DescriptorHeap },
-		//	m_rootSignature{ other.m_rootSignature }
-		//{
-		//}
+		CommandContext(D3D12_COMMAND_LIST_TYPE type);
 
-		~CommandContext()
+		D3D12_COMMAND_LIST_TYPE GetType() const
 		{
-			//__debugbreak();
+			return m_type;
 		}
+
+		// Flush commands and keep context alive
+		uint64_t Flush(bool waitForCompletion = false);
+
+		// Flush commands and release context
+		uint64_t Finish(bool waitForCompletion = false);
 
 		void DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount, UINT startVertexLocation, UINT startInstanceLocation);
 		void DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount = 1, UINT startIndexLocation = 0, INT baseVertexLocation = 0, UINT startInstanceLocation = 0);
@@ -70,6 +66,7 @@ namespace alexis
 
 	private:
 		ID3D12RootSignature* m_rootSignature{ nullptr };
+		D3D12_COMMAND_LIST_TYPE m_type{ D3D12_COMMAND_LIST_TYPE_DIRECT };
 
 		static std::mutex s_textureCacheMutex;
 		static std::map<std::wstring, ID3D12Resource*> s_textureCache;

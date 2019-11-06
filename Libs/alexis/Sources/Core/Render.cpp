@@ -35,15 +35,13 @@ namespace alexis
 
 	void Render::Destroy()
 	{
-		CommandManager::GetInstance()->WaitForGpu();
+		m_commandManager->WaitForGpu();
 
-		CommandManager::GetInstance()->Destroy();
+		m_commandManager.reset();
 	}
 
 	void Render::BeginRender()
 	{
-		CommandManager::GetInstance()->Release();
-
 		WaitForSingleObjectEx(m_swapChainEvent, 100, FALSE);
 	}
 
@@ -53,14 +51,14 @@ namespace alexis
 		UINT presetFlags = m_isTearingSupported && !m_vSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
 		ThrowIfFailed(m_swapChain->Present(syncInterval, presetFlags));
 
-		auto fv = CommandManager::GetInstance()->SignalFence();
-		m_fenceValues[m_frameIndex] = fv;
+		//auto fv = CommandManager::GetInstance()->SignalFence();
+		//m_fenceValues[m_frameIndex] = fv;
 
-		ReleaseStaleDescriptors(CommandManager::GetInstance()->GetLastCompletedFence());
+		//ReleaseStaleDescriptors(CommandManager::GetInstance()->GetLastCompletedFence());
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
-		CommandManager::GetInstance()->WaitForFence(m_fenceValues[m_frameIndex]);
+		//CommandManager::GetInstance()->WaitForFence(m_fenceValues[m_frameIndex]);
 	}
 
 	void Render::OnResize(int width, int height)
@@ -71,7 +69,7 @@ namespace alexis
 			m_windowWidth = std::max(1, width);
 			m_windowHeight = std::max(1, height);
 
-			CommandManager::GetInstance()->WaitForGpu();
+			m_commandManager->WaitForGpu();
 
 			m_backbufferRT.AttachTexture(TextureBuffer(), RenderTarget::Slot0);
 			for (int i = 0; i < k_frameCount; ++i)
@@ -108,11 +106,6 @@ namespace alexis
 	ID3D12Device2* Render::GetDevice() const
 	{
 		return m_device.Get();
-	}
-
-	alexis::UploadBufferManager* Render::GetUploadBufferManager() const
-	{
-		return m_uploadBufferManager.get();
 	}
 
 	bool Render::IsVSync() const
@@ -223,7 +216,7 @@ namespace alexis
 
 			//debugInterface->SetEnableGPUBasedValidation(TRUE);
 			//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
-	}
+		}
 #endif
 
 #endif
@@ -296,8 +289,7 @@ namespace alexis
 #endif
 
 		// Init command manager to have command queue needed for swapchain
-		CommandManager::GetInstance()->Initialize();
-
+		m_commandManager = std::make_unique<CommandManager>();
 
 		// Check for G-Sync / FreeSync is available
 		{
@@ -334,7 +326,7 @@ namespace alexis
 
 			ComPtr<IDXGISwapChain1> swapChain;
 			ThrowIfFailed(factory->CreateSwapChainForHwnd(
-				CommandManager::GetInstance()->m_directCommandQueue.Get(),
+				m_commandManager->GetGraphicsQueue().GetCommandQueue(),
 				hwnd,
 				&swapChainDesc,
 				nullptr,
@@ -356,6 +348,7 @@ namespace alexis
 	{
 
 	}
+
 	void Render::ReleaseStaleDescriptors(uint64_t fenceValue)
 	{
 		for (auto& allocator : m_descriptorAllocators)
@@ -414,5 +407,5 @@ namespace alexis
 			m_backbufferTextures[i].SetFromResource(backBuffer.Get());
 		}
 	}
-}
+	}
 

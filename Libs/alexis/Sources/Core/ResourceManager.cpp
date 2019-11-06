@@ -14,6 +14,8 @@ namespace alexis
 		}
 
 		LoadTexture(path);
+
+		return it->second;
 	}
 
 	void ResourceManager::LoadTexture(const std::wstring& path)

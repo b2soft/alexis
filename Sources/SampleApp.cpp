@@ -306,7 +306,7 @@ void SampleApp::LoadAssets()
 	//----- Loading
 	auto render = alexis::Render::GetInstance();
 	auto device = render->GetDevice();
-	auto commandManager = CommandManager::GetInstance();
+	auto commandManager = render->GetCommandManager();
 	auto commandContext = commandManager->CreateCommandContext();
 	auto commandList = commandContext->List.Get();
 	//------
@@ -537,9 +537,8 @@ void SampleApp::LoadAssets()
 		ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_hdr2sdrPSO)));
 	}
 
-
-	commandManager->ExecuteCommandContext(commandContext, true);
-
+	// Finish loading and wait until all assets are loaded
+	commandContext->Finish(true);
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
@@ -556,14 +555,14 @@ void SampleApp::LoadAssets()
 
 	// Create Synchronization Objects
 	{
-		alexis::CommandManager::GetInstance()->WaitForGpu();
+		render->GetCommandManager()->WaitForGpu();
 	}
 }
 
 void SampleApp::PopulateCommandList()
 {
 	auto render = alexis::Render::GetInstance();
-	auto commandManager = alexis::CommandManager::GetInstance();
+	auto commandManager = render->GetCommandManager();
 
 	auto pbsCommandContext = commandManager->CreateCommandContext();
 	auto lightingCommandContext = commandManager->CreateCommandContext();
@@ -676,14 +675,10 @@ void SampleApp::PopulateCommandList()
 	hdr2sdrTask.wait();
 	imguiTask.wait();
 
-	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext, imguiContext });
-	commandManager->ExecuteCommandContext(pbsCommandContext);
-	commandManager->ExecuteCommandContext(lightingCommandContext);
-	commandManager->ExecuteCommandContext(hdrCommandContext);
-	commandManager->ExecuteCommandContext(imguiContext);
-	//TODO: Flickers if debug layer is enabled. Wait for DX team to be fixed
-	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext });
-	//commandManager->ExecuteCommandContext(imguiContext);
+	pbsCommandContext->Finish();
+	lightingCommandContext->Finish();
+	hdrCommandContext->Finish();
+	imguiContext->Finish();
 }
 
 void SampleApp::UpdateGUI()

@@ -8,6 +8,8 @@
 
 #include <Utils/Singleton.h>
 
+#include <Core/CommandManager.h>
+
 #include <Render/RenderTarget.h>
 #include <Render/Descriptors/DescriptorAllocation.h>
 #include <Render/Descriptors/DescriptorAllocator.h>
@@ -38,7 +40,15 @@ namespace alexis
 
 		ID3D12Device2* GetDevice() const;
 
-		UploadBufferManager* GetUploadBufferManager() const;
+		UploadBufferManager* GetUploadBufferManager() const
+		{
+			return m_uploadBufferManager.get();
+		}
+
+		CommandManager* GetCommandManager() const
+		{
+			return m_commandManager.get();
+		}
 
 		bool IsVSync() const;
 		void SetVSync(bool vSync);
@@ -51,13 +61,13 @@ namespace alexis
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
 		D3D_ROOT_SIGNATURE_VERSION GetHightestSignatureVersion() const;
 
+		void ReleaseStaleDescriptors(uint64_t fenceValue);
+
 	private:
 		void InitDevice();
 		void InitPipeline();
 
 		void UpdateRenderTargetViews();
-
-		void ReleaseStaleDescriptors(uint64_t fenceValue);
 
 		Microsoft::WRL::ComPtr<IDXGIAdapter4> GetHardwareAdapter(IDXGIFactory4* factory);
 		static const UINT k_frameCount = 2;
@@ -73,6 +83,8 @@ namespace alexis
 
 		std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		std::unique_ptr<UploadBufferManager> m_uploadBufferManager;
+
+		std::unique_ptr<CommandManager> m_commandManager;
 
 		// Sync objects
 		UINT m_frameIndex{ 0 };

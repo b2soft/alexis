@@ -10,6 +10,7 @@
 
 #include <Core/Core.h>
 #include <Core/CommandManager.h>
+#include <Core/Render.h>
 
 using namespace DirectX;
 using namespace Microsoft::WRL;
@@ -37,7 +38,8 @@ namespace alexis
 	std::unique_ptr<alexis::Mesh> Mesh::LoadFBXFromFile(const std::wstring& path)
 	{
 		//TODO replace with res manager
-		CommandContext* commandContext = CommandManager::GetInstance()->CreateCommandContext();
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		CommandContext* commandContext = commandManager->CreateCommandContext();
 
 		Assimp::Importer importer;
 
@@ -109,7 +111,7 @@ namespace alexis
 		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
 		mesh->Initialize(commandContext, vertices, indices);
 
-		CommandManager::GetInstance()->ExecuteCommandContext(commandContext, true);
+		commandContext->Finish(true);
 
 		return mesh;
 	}
