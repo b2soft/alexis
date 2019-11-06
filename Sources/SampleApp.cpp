@@ -28,19 +28,11 @@ using namespace DirectX;
 static const float k_cameraSpeed = 20.0f;
 static const float k_cameraTurnSpeed = 0.1f;
 
-enum PBSObjectParameters
-{
-	MatricesCB, //ConstantBuffer<Mat> MatCB: register(b0);
-	Textures, //Texture2D 3 textures starting from BaseColor : register( t0 );
-	NumPBSObjectParameters
-};
-
 enum LightingParameters
 {
 	GBuffer, //Texture2D 3 textures starting from BaseColor : register( t0 );
 	NumLightingParameters
 };
-
 
 enum Hdr2SdrParameters
 {
@@ -340,15 +332,6 @@ void SampleApp::LoadAssets()
 	commandContext->LoadTextureFromFile(m_metalTex, L"Resources/Textures/metal_mero.dds");
 	commandContext->TransitionResource(m_metalTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-	// Check is root signature version 1.1 is available.
-	// Version 1.1 is preferred over 1.0 because it allows GPU to optimize some stuff
-	D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-	featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-	if (FAILED(device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-	{
-		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-	}
-
 	// Depth
 	DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
 	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthFormat, alexis::g_clientWidth, alexis::g_clientHeight);
@@ -397,6 +380,18 @@ void SampleApp::LoadAssets()
 		commandContext->TransitionResource(depthTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 	}
 
+	PBRMaterialParams params =
+	{
+		.VSPath = L"Resources/Shaders/PBS_object_vs.cso",
+		.PSPath = L"Resources/Shaders/PBS_object_ps.cso",
+		.RTVFormats = m_gbufferRT.GetFormat(),
+		.DSVFormat = depthFormat,
+		.t0 = m_concreteTex,
+		.t1 = m_normalTex,
+		.t2 = m_metalTex
+	};
+
+	m_pbrMaterial = std::make_unique<PBRMaterial>(params);
 
 
 	// Create an HDR RT
@@ -420,65 +415,6 @@ void SampleApp::LoadAssets()
 		m_hdrRT.AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
 		commandContext->TransitionResource(hdrTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		m_hdrRT.AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
-	}
-
-	// Root signature and PSO for PBS objects. Objects -> GBuffer
-	{
-		ComPtr<ID3DBlob> vertexShaderBlob;
-		ComPtr<ID3DBlob> pixelShaderBlob;
-#if defined(_DEBUG)
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_vs_d.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_ps_d.cso", &pixelShaderBlob));
-#else
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_vs.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_ps.cso", &pixelShaderBlob));
-#endif
-
-		// Allow input layout and deny unnecessary access to certain pipeline stages
-		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
-
-		CD3DX12_ROOT_PARAMETER1 rootParameters[PBSObjectParameters::NumPBSObjectParameters];
-		rootParameters[PBSObjectParameters::MatricesCB].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
-		rootParameters[PBSObjectParameters::Textures].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
-
-		CD3DX12_STATIC_SAMPLER_DESC anisotropicSampler(0, D3D12_FILTER_ANISOTROPIC);
-
-		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-		rootSignatureDescription.Init_1_1(PBSObjectParameters::NumPBSObjectParameters, rootParameters, 1, &anisotropicSampler, rootSignatureFlags);
-
-		m_pbsObjectSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, featureData.HighestVersion);
-
-		struct PipelineStateStream
-		{
-			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSignature;
-			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT inputLayout;
-			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY primitiveTopology;
-			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
-			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
-			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT dsvFormat;
-			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
-		} pipelineStateStream;
-
-		pipelineStateStream.rootSignature = m_pbsObjectSig.GetRootSignature().Get();
-		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
-		pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
-		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
-		pipelineStateStream.rtvFormats = m_gbufferRT.GetFormat();
-		pipelineStateStream.dsvFormat = m_gbufferRT.GetDSFormat();
-
-		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
-		{
-			sizeof(PipelineStateStream), &pipelineStateStream
-		};
-
-		ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pbsObjectPSO)));
 	}
 
 	// Root signature and PSO for Lighting. GBuffer -> HDR
@@ -512,7 +448,7 @@ void SampleApp::LoadAssets()
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, 1, &linearSampler, rootSignatureFlags);
 
-		m_lightingSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, featureData.HighestVersion);
+		m_lightingSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, render->GetHightestSignatureVersion());
 
 		struct PipelineStateStream
 		{
@@ -569,7 +505,7 @@ void SampleApp::LoadAssets()
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 		rootSignatureDescription.Init_1_1(Hdr2SdrParameters::NumHdr2SdrParameters, rootParameters, 1, &linearSampler, rootSignatureFlags);
 
-		m_hdr2sdrSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, featureData.HighestVersion);
+		m_hdr2sdrSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, render->GetHightestSignatureVersion());
 
 		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
 		rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
@@ -660,12 +596,7 @@ void SampleApp::PopulateCommandList()
 
 			XMMATRIX viewProj = XMMatrixMultiply(m_cameraSystem->GetViewMatrix(m_sceneCamera), m_cameraSystem->GetProjMatrix(m_sceneCamera));
 
-			pbsCommandContext->List->SetPipelineState(m_pbsObjectPSO.Get());
-			pbsCommandContext->SetRootSignature(m_pbsObjectSig);
-
-			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, m_checkerTexture);
-			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, m_normalTex);
-			pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, m_metalTex);
+			m_pbrMaterial->SetupToRender(pbsCommandContext);
 
 			m_modelSystem->Render(pbsCommandContext, viewProj);
 		});
@@ -691,6 +622,7 @@ void SampleApp::PopulateCommandList()
 			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 0, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0));
 			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 1, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1));
 			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 2, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2));
+
 
 			m_fsQuad->Draw(lightingCommandContext);
 		});
@@ -806,7 +738,7 @@ void SampleApp::UpdateGUI()
 		{
 			ImGui::Begin("BottomBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs |
 				ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
-	
+
 			auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
 			sprintf_s(buffer, _countof(buffer), "Camera Pos{ X: %.2f Y: %.2f Z: %.2f }", XMVectorGetX(cameraTransformComponent.Position), XMVectorGetY(cameraTransformComponent.Position), XMVectorGetZ(cameraTransformComponent.Position));
 			ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), buffer);

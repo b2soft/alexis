@@ -85,6 +85,9 @@
     <ClCompile Include="Sources\Core\ResourceManager.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -167,6 +170,9 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\ModelComponent.h">
       <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\PBRMaterial.h">
+      <Filter>Sources\Render</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

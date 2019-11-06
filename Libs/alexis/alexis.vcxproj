@@ -41,6 +41,7 @@
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
     <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h" />
+    <ClInclude Include="Sources\Render\Materials\PBRMaterial.h" />
     <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\RenderTarget.h" />
     <ClInclude Include="Sources\Render\RootSignature.h" />
@@ -66,6 +67,7 @@
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp" />
+    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />

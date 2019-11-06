@@ -14,6 +14,8 @@
 #include <ECS/ModelSystem.h>
 #include <ECS/CameraSystem.h>
 
+#include <Render/Materials/PBRMaterial.h>
+
 using Microsoft::WRL::ComPtr;
 
 class SampleApp : public alexis::IGame
@@ -49,9 +51,7 @@ private:
 	CD3DX12_VIEWPORT m_viewport;
 	CD3DX12_RECT m_scissorRect;
 
-	ComPtr<ID3D12PipelineState> m_pipelineState;
-
-	ComPtr<ID3D12PipelineState> m_pbsObjectPSO;
+	//ComPtr<ID3D12PipelineState> m_pbsObjectPSO;
 	ComPtr<ID3D12PipelineState> m_lightingPSO;
 	ComPtr<ID3D12PipelineState> m_hdr2sdrPSO;
 
@@ -59,7 +59,7 @@ private:
 	alexis::RenderTarget m_hdrRT;
 
 	// Signatures
-	alexis::RootSignature m_pbsObjectSig;
+	//alexis::RootSignature m_pbsObjectSig;
 	alexis::RootSignature m_lightingSig;
 	alexis::RootSignature m_hdr2sdrSig;
 
@@ -70,11 +70,13 @@ private:
 	alexis::TextureBuffer m_concreteTex;
 
 	alexis::VertexBuffer m_triangleVB;
-	alexis::RootSignature m_rootSignature;
 	std::unique_ptr<alexis::Mesh> m_fsQuad;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
 	ImGuiContext* m_context{ nullptr };
+
+	//temp
+	std::unique_ptr<alexis::PBRMaterial> m_pbrMaterial;
 
 	float m_aspectRatio{ 1.0f };
 

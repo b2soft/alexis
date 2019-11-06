@@ -35,6 +35,8 @@ namespace alexis
 		void DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount = 1, UINT startIndexLocation = 0, INT baseVertexLocation = 0, UINT startInstanceLocation = 0);
 
 		void SetRootSignature(const RootSignature& rootSignature);
+		// TODO: Do I need wrapper over pipeline state like RootSignature?
+		void SetPipelineState(ID3D12PipelineState* pipelineState);
 
 		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
 

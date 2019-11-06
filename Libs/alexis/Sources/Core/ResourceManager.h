@@ -15,7 +15,6 @@ namespace alexis
 		void LoadTexture(const std::wstring& path);
 
 		std::unordered_map<std::wstring, TextureBuffer> m_textures;
-
 	};
 
 }

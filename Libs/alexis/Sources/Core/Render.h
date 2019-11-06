@@ -49,6 +49,7 @@ namespace alexis
 		void ToggleFullscreen();
 
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
+		D3D_ROOT_SIGNATURE_VERSION GetHightestSignatureVersion() const;
 
 	private:
 		void InitDevice();

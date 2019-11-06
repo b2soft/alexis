@@ -87,7 +87,6 @@ namespace alexis
 
 			UpdateRenderTargetViews();
 		}
-
 	}
 
 	const RenderTarget& Render::GetBackbufferRT() const
@@ -193,6 +192,20 @@ namespace alexis
 		return m_descriptorAllocators[type]->Allocate(numDescriptors);
 	}
 
+	D3D_ROOT_SIGNATURE_VERSION Render::GetHightestSignatureVersion() const
+	{
+		// Check is root signature version 1.1 is available.
+		// Version 1.1 is preferred over 1.0 because it allows GPU to optimize some stuff
+		D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
+		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
+		if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
+		{
+			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
+		}
+
+		return featureData.HighestVersion;
+	}
+
 	void Render::InitDevice()
 	{
 		UINT dxgiFactoryFlags = 0;
@@ -210,7 +223,7 @@ namespace alexis
 
 			//debugInterface->SetEnableGPUBasedValidation(TRUE);
 			//debugInterface->SetEnableSynchronizedCommandQueueValidation(TRUE);
-		}
+	}
 #endif
 
 #endif
@@ -337,7 +350,7 @@ namespace alexis
 		ThrowIfFailed(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-	}
+		}
 
 	void Render::InitPipeline()
 	{

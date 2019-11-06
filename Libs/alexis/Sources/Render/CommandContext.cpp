@@ -50,6 +50,11 @@ namespace alexis
 		}
 	}
 
+	void CommandContext::SetPipelineState(ID3D12PipelineState* pipelineState)
+	{
+		List->SetPipelineState(pipelineState);
+	}
+
 	void CommandContext::SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap)
 	{
 		if (DescriptorHeap[heapType] != heap)
