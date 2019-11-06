@@ -35,6 +35,8 @@ namespace alexis
 	private:
 		friend struct std::default_delete<Mesh>;
 
+		friend class ResourceManager;
+
 		void Initialize(CommandContext* commandContext, VertexCollection& vertices, IndexCollection& indices);
 
 		VertexBuffer m_vertexBuffer;

@@ -2,9 +2,11 @@
 
 #include "Scene.h"
 
-#include <Core/Core.h>
 #include <json.hpp>
 #include <fstream>
+
+#include <Core/Core.h>
+#include <Core/ResourceManager.h>
 
 #include <ECS/ECS.h>
 #include <ECS/ModelComponent.h>
@@ -61,12 +63,13 @@ namespace alexis
 				else if (componentName == "ModelComponent")
 				{
 					std::string meshPath = componentKV.value()["mesh"];
+					std::wstring meshPathWStr{ meshPath.begin(), meshPath.end() };
 
-					auto mesh = Mesh::LoadFBXFromFile(std::wstring(meshPath.begin(), meshPath.end()));
-					m_meshes.push_back(std::move(mesh));
+					auto resourceManager = Core::Get().GetResourceManager();
+					auto mesh = resourceManager->GetMesh(meshPathWStr);
 
 					// TODO: Move semantics for adding components
-					ecsWorld->AddComponent(entity, ecs::ModelComponent{ m_meshes.back().get() });
+					ecsWorld->AddComponent(entity, ecs::ModelComponent{ mesh });
 				}
 			}
 		}

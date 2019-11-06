@@ -29,6 +29,9 @@
     <Filter Include="Sources\Render\Commands">
       <UniqueIdentifier>{4b1dde96-f7c0-4d93-9f3c-b464d0c992ad}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Render\Materials">
+      <UniqueIdentifier>{6a59af77-f88c-46b0-b2e5-20bbb18b5446}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Precompiled.cpp">
@@ -85,11 +88,11 @@
     <ClCompile Include="Sources\Scene.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Core\ResourceManager.cpp">
       <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
+      <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -175,7 +178,7 @@
       <Filter>Sources\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\PBRMaterial.h">
-      <Filter>Sources\Render</Filter>
+      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
