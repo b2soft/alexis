@@ -22,6 +22,8 @@
 #include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
 
+#include <Core/ResourceManager.h>
+
 using namespace alexis;
 using namespace DirectX;
 
@@ -320,8 +322,11 @@ void SampleApp::LoadAssets()
 	//commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
 
 	// Textures
-	commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.dds");
-	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+	auto resManager = Core::Get().GetResourceManager();
+	m_checkerTexture = resManager->GetTexture(L"Resources/Textures/Checker2.dds");
+
+	//commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.dds");
+	//commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	commandContext->LoadTextureFromFile(m_concreteTex, L"Resources/Textures/metal_base.dds");
 	commandContext->TransitionResource(m_concreteTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
@@ -386,7 +391,7 @@ void SampleApp::LoadAssets()
 		.PSPath = L"Resources/Shaders/PBS_object_ps.cso",
 		.RTVFormats = m_gbufferRT.GetFormat(),
 		.DSVFormat = depthFormat,
-		.t0 = m_concreteTex,
+		.t0 = *m_checkerTexture,
 		.t1 = m_normalTex,
 		.t2 = m_metalTex
 	};
@@ -538,7 +543,7 @@ void SampleApp::LoadAssets()
 	}
 
 	// Finish loading and wait until all assets are loaded
-	commandContext->Finish(true);
+	commandContext->Flush(true);
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();

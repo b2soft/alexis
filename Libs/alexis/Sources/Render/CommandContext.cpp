@@ -203,7 +203,7 @@ namespace alexis
 
 		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
-		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+		//TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	void CommandContext::LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename)

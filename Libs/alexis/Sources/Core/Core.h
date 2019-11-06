@@ -45,6 +45,7 @@ namespace alexis
 	}
 
 	class Scene;
+	class ResourceManager;
 
 	class Core
 	{
@@ -85,6 +86,11 @@ namespace alexis
 			return m_scene.get();
 		}
 
+		inline ResourceManager* GetResourceManager()
+		{
+			return m_resourceManager.get();
+		}
+
 	protected:
 		// Create app instance
 		Core(HINSTANCE hInstance);
@@ -101,6 +107,7 @@ namespace alexis
 
 		std::unique_ptr<ecs::World> m_ecs;
 		std::unique_ptr<Scene> m_scene;
+		std::unique_ptr<ResourceManager> m_resourceManager;
 
 		static HighResolutionClock s_updateClock;
 

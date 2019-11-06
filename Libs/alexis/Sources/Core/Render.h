@@ -70,7 +70,7 @@ namespace alexis
 		void UpdateRenderTargetViews();
 
 		Microsoft::WRL::ComPtr<IDXGIAdapter4> GetHardwareAdapter(IDXGIFactory4* factory);
-		static const UINT k_frameCount = 2;
+		static const UINT k_frameCount = 4;
 
 		CD3DX12_VIEWPORT m_viewport;
 		CD3DX12_RECT m_scissorRect;

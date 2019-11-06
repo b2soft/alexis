@@ -1,24 +1,19 @@
 #include "Precompiled.h"
-//
+
 #include <Shlwapi.h>
 
-//
-//#include <Application.h>
-//#include "b2Game.h"
-//
-
+#if defined(_DEBUG) && defined(REPORT_LIVE_OBJECTS)
 #include <dxgidebug.h>
 #include <dxgi1_3.h>
 void ReportLiveObjects()
 {
-#if defined(_DEBUG)
 	IDXGIDebug1* dxgiDebug;
 	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
 
 	dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
 	dxgiDebug->Release();
-#endif
 }
+#endif
 
 #include "SampleApp.h"
 
@@ -36,7 +31,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 		SetCurrentDirectoryW(path);
 	}
 
+#if defined(_DEBUG) && defined(REPORT_LIVE_OBJECTS)
 	atexit(&ReportLiveObjects);
+#endif
 
 	int returnCode = 0;
 	alexis::Core::Create(hInstance);
@@ -47,7 +44,4 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 	alexis::Core::Destroy();
 
 	return returnCode;
-
-	//SampleApp sample(1280, 720, L"Alexis Sample App");
-	//return alexis::Win32Application::Run(&sample, hInstance, nCmdShow);
 }

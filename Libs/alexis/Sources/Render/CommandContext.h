@@ -14,7 +14,7 @@ namespace alexis
 	class CommandContext
 	{
 	public:
-		CommandContext(D3D12_COMMAND_LIST_TYPE type);
+		explicit CommandContext(D3D12_COMMAND_LIST_TYPE type);
 
 		D3D12_COMMAND_LIST_TYPE GetType() const
 		{

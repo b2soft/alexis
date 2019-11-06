@@ -64,7 +64,7 @@ private:
 	alexis::RootSignature m_hdr2sdrSig;
 
 	// Textures
-	alexis::TextureBuffer m_checkerTexture;
+	alexis::TextureBuffer* m_checkerTexture;
 	alexis::TextureBuffer m_normalTex;
 	alexis::TextureBuffer m_metalTex;
 	alexis::TextureBuffer m_concreteTex;

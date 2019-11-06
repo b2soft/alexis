@@ -4,6 +4,7 @@
 
 #include <ECS/ECS.h>
 #include <Scene.h>
+#include <Core/ResourceManager.h>
 
 #include <string>
 
@@ -183,6 +184,7 @@ namespace alexis
 
 		m_ecs = std::make_unique<ecs::World>();
 		m_scene = std::make_unique<Scene>();
+		m_resourceManager = std::make_unique<ResourceManager>();
 	}
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)

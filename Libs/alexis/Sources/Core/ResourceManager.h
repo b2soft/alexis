@@ -6,15 +6,20 @@
 
 namespace alexis
 {
+	class CommandContext;
+
 	class ResourceManager
 	{
 	public:
-		TextureBuffer& GetTexture(const std::wstring& path);
+		ResourceManager();
+		TextureBuffer* GetTexture(const std::wstring& path);
 
 	private:
-		void LoadTexture(const std::wstring& path);
+		CommandContext* m_copyContext{ nullptr };
 
-		std::unordered_map<std::wstring, TextureBuffer> m_textures;
+		using TextureMap = std::unordered_map<std::wstring, TextureBuffer>;
+		TextureMap::iterator LoadTexture(const std::wstring& path);
+		TextureMap m_textures;
 	};
 
 }

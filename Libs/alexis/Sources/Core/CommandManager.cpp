@@ -169,7 +169,7 @@ namespace alexis
 
 		m_commandQueue->Signal(m_fence.Get(), m_nextFenceValue);
 
-		return m_nextFenceValue;
+		return m_nextFenceValue++;
 	}
 
 }
