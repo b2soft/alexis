@@ -5,7 +5,7 @@
 namespace alexis
 {
 	class Mesh;
-	class IMaterial;
+	class MaterialBase;
 
 	namespace ecs
 	{
@@ -19,7 +19,7 @@ namespace alexis
 			};
 
 			Mesh* Mesh;
-			IMaterial* Material;
+			MaterialBase* Material;
 
 			DirectX::XMMATRIX ModelMatrix;
 			bool IsTransformDirty{ true };

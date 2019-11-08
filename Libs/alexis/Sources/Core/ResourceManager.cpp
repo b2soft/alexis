@@ -14,6 +14,7 @@
 // Material
 #include <json.hpp>
 #include <fstream>
+#include <Render/Materials/PBRMaterial.h>
 
 namespace alexis
 {
@@ -49,7 +50,7 @@ namespace alexis
 		return it->second.get();
 	}
 
-	IMaterial* ResourceManager::GetMaterial(const std::wstring& path)
+	MaterialBase* ResourceManager::GetMaterial(const std::wstring& path)
 	{
 		auto it = m_materials.find(path);
 
