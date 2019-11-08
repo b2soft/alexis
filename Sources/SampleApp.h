@@ -55,28 +55,16 @@ private:
 	ComPtr<ID3D12PipelineState> m_lightingPSO;
 	ComPtr<ID3D12PipelineState> m_hdr2sdrPSO;
 
-	alexis::RenderTarget m_gbufferRT;
-	alexis::RenderTarget m_hdrRT;
-
 	// Signatures
 	//alexis::RootSignature m_pbsObjectSig;
 	alexis::RootSignature m_lightingSig;
 	alexis::RootSignature m_hdr2sdrSig;
-
-	// Textures
-	alexis::TextureBuffer* m_checkerTexture;
-	alexis::TextureBuffer m_normalTex;
-	alexis::TextureBuffer m_metalTex;
-	alexis::TextureBuffer m_concreteTex;
 
 	alexis::VertexBuffer m_triangleVB;
 	std::unique_ptr<alexis::Mesh> m_fsQuad;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
 	ImGuiContext* m_context{ nullptr };
-
-	//temp
-	std::unique_ptr<alexis::PBRMaterial> m_pbrMaterial;
 
 	float m_aspectRatio{ 1.0f };
 

@@ -180,6 +180,9 @@
     <ClInclude Include="Sources\Render\Materials\PBRMaterial.h">
       <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Render\RenderTargetManager.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">

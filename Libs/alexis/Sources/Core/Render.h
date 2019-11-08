@@ -11,9 +11,11 @@
 #include <Core/CommandManager.h>
 
 #include <Render/RenderTarget.h>
+#include <Render/Buffers/UploadBufferManager.h>
+
 #include <Render/Descriptors/DescriptorAllocation.h>
 #include <Render/Descriptors/DescriptorAllocator.h>
-#include <Render/Buffers/UploadBufferManager.h>
+#include <Render/RenderTargetManager.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -50,6 +52,11 @@ namespace alexis
 			return m_commandManager.get();
 		}
 
+		RenderTargetManager* GetRTManager() const
+		{
+			return m_rtManager.get();
+		}
+
 		bool IsVSync() const;
 		void SetVSync(bool vSync);
 		void ToggleVSync();
@@ -59,7 +66,6 @@ namespace alexis
 		void ToggleFullscreen();
 
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
-		D3D_ROOT_SIGNATURE_VERSION GetHightestSignatureVersion() const;
 
 		void ReleaseStaleDescriptors(uint64_t fenceValue);
 
@@ -85,6 +91,7 @@ namespace alexis
 		std::unique_ptr<UploadBufferManager> m_uploadBufferManager;
 
 		std::unique_ptr<CommandManager> m_commandManager;
+		std::unique_ptr<RenderTargetManager> m_rtManager;
 
 		// Sync objects
 		UINT m_frameIndex{ 0 };

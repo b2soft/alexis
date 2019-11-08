@@ -29,6 +29,7 @@ namespace alexis
 		}
 
 		m_uploadBufferManager = std::make_unique<UploadBufferManager>();
+		m_rtManager = std::make_unique<RenderTargetManager>();
 
 		UpdateRenderTargetViews();
 	}
@@ -183,20 +184,6 @@ namespace alexis
 	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
 	{
 		return m_descriptorAllocators[type]->Allocate(numDescriptors);
-	}
-
-	D3D_ROOT_SIGNATURE_VERSION Render::GetHightestSignatureVersion() const
-	{
-		// Check is root signature version 1.1 is available.
-		// Version 1.1 is preferred over 1.0 because it allows GPU to optimize some stuff
-		D3D12_FEATURE_DATA_ROOT_SIGNATURE featureData = {};
-		featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_1;
-		if (FAILED(m_device->CheckFeatureSupport(D3D12_FEATURE_ROOT_SIGNATURE, &featureData, sizeof(featureData))))
-		{
-			featureData.HighestVersion = D3D_ROOT_SIGNATURE_VERSION_1_0;
-		}
-
-		return featureData.HighestVersion;
 	}
 
 	void Render::InitDevice()

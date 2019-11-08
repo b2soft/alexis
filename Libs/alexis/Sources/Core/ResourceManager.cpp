@@ -11,6 +11,10 @@
 #include <assimp/postprocess.h>
 #include <assimp/scene.h>
 
+// Material
+#include <json.hpp>
+#include <fstream>
+
 namespace alexis
 {
 
@@ -32,7 +36,7 @@ namespace alexis
 		return &(it->second);
 	}
 
-	alexis::Mesh* ResourceManager::GetMesh(const std::wstring& path)
+	Mesh* ResourceManager::GetMesh(const std::wstring& path)
 	{
 		auto it = m_meshes.find(path);
 
@@ -42,6 +46,19 @@ namespace alexis
 		}
 
 		it = LoadMesh(path);
+		return it->second.get();
+	}
+
+	IMaterial* ResourceManager::GetMaterial(const std::wstring& path)
+	{
+		auto it = m_materials.find(path);
+
+		if (it != m_materials.end())
+		{
+			return it->second.get();
+		}
+
+		it = LoadMaterial(path);
 		return it->second.get();
 	}
 
@@ -191,6 +208,35 @@ namespace alexis
 		m_copyContext->Flush(true);
 
 		return m_meshes.emplace(path, std::move(mesh)).first;
+	}
+
+	ResourceManager::MaterialMap::iterator ResourceManager::LoadMaterial(const std::wstring& path)
+	{
+		fs::path filePath(path);
+
+		if (!fs::exists(filePath))
+		{
+			throw std::exception("File not found!");
+		}
+
+		using json = nlohmann::json;
+
+		std::ifstream ifs(path);
+		json j = nlohmann::json::parse(ifs);
+
+		std::string type = j["type"];
+		if (type == "PBS")
+		{
+			PBRMaterialParams params;
+			params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
+			params.NormalMap = GetTexture(ToWStr(j["normalMap"]));
+			params.MetalRoughness = GetTexture(ToWStr(j["metalRoughness"]));
+
+			auto material = std::make_unique<PBRMaterial>(params);
+			return m_materials.emplace(path, std::move(material)).first;
+		}
+
+		return m_materials.end();
 	}
 
 }

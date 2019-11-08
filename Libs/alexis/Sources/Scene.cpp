@@ -2,6 +2,8 @@
 
 #include "Scene.h"
 
+#include <CoreHelpers.h>
+
 #include <json.hpp>
 #include <fstream>
 
@@ -63,13 +65,15 @@ namespace alexis
 				else if (componentName == "ModelComponent")
 				{
 					std::string meshPath = componentKV.value()["mesh"];
-					std::wstring meshPathWStr{ meshPath.begin(), meshPath.end() };
 
 					auto resourceManager = Core::Get().GetResourceManager();
-					auto mesh = resourceManager->GetMesh(meshPathWStr);
+					auto mesh = resourceManager->GetMesh(ToWStr(meshPath));
+
+					std::string materialPath = componentKV.value()["material"];
+					auto material = resourceManager->GetMaterial(ToWStr(materialPath));
 
 					// TODO: Move semantics for adding components
-					ecsWorld->AddComponent(entity, ecs::ModelComponent{ mesh });
+					ecsWorld->AddComponent(entity, ecs::ModelComponent{ mesh, material });
 				}
 			}
 		}

@@ -1,4 +1,6 @@
 {
    "type" : "PBS",
-   "samplers":[ "Resources/Textures/metal_base.dds","Resources/Textures/metal_normal.dds","Resources/Textures/metal_mero.dds"]
+   "baseColor":"Resources/Textures/metal_base.dds",
+   "normalMap":"Resources/Textures/metal_normal.dds",
+   "metalRoughness":"Resources/Textures/metal_mero.dds"
 }

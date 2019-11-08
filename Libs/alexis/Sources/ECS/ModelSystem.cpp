@@ -5,6 +5,7 @@
 #include <Core/Core.h>
 #include <Render/Mesh.h>
 #include <Render/CommandContext.h>
+#include <Render/Materials/PBRMaterial.h>
 
 #include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
@@ -42,8 +43,9 @@ namespace alexis
 				// Update the MVP matrix
 				XMMATRIX mvpMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, viewProj);
 
-				context->SetDynamicCBV(0, sizeof(mvpMatrix), &mvpMatrix);
+				modelComponent.Material->SetupToRender(context);
 
+				context->SetDynamicCBV(0, sizeof(mvpMatrix), &mvpMatrix);
 				modelComponent.Mesh->Draw(context);
 			}
 		}

@@ -30,7 +30,8 @@
          "components":[
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/Cube.fbx"
+                  "mesh":"Resources/Models/Cube.fbx",
+                  "material":"Resources/Materials/Checker.material"
                }
             },
             {
@@ -53,7 +54,8 @@
          "components":[
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/Sphere.fbx"
+                  "mesh":"Resources/Models/Sphere.fbx",
+                  "material":"Resources/Materials/Checker.material"
                }
             },
             {
@@ -76,7 +78,8 @@
          "components":[
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/Cube.fbx"
+                  "mesh":"Resources/Models/Cube.fbx",
+                  "material":"Resources/Materials/Checker.material"
                }
             },
             {
