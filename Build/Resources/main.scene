@@ -31,7 +31,7 @@
             {
                "ModelComponent":{
                   "mesh":"Resources/Models/Cube.fbx",
-                  "material":"Resources/Materials/Checker.material"
+                  "material":"Resources/Materials/Metal.material"
                }
             },
             {
@@ -55,7 +55,7 @@
             {
                "ModelComponent":{
                   "mesh":"Resources/Models/Sphere.fbx",
-                  "material":"Resources/Materials/Checker.material"
+                  "material":"Resources/Materials/Metal.material"
                }
             },
             {
