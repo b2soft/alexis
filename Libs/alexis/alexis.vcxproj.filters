@@ -26,6 +26,12 @@
     <Filter Include="Sources\ECS">
       <UniqueIdentifier>{774e1729-7fb0-4a05-ab26-b2f1b938ae7f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Sources\Render\Commands">
+      <UniqueIdentifier>{4b1dde96-f7c0-4d93-9f3c-b464d0c992ad}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Sources\Render\Materials">
+      <UniqueIdentifier>{6a59af77-f88c-46b0-b2e5-20bbb18b5446}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Precompiled.cpp">
@@ -83,9 +89,15 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Core\ResourceManager.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Core</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
   </ItemGroup>
@@ -172,7 +184,19 @@
       <Filter>Sources\ECS</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\PBRMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\RenderTargetManager.h">
       <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\MaterialBase.h">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

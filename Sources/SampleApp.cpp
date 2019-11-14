@@ -22,23 +22,17 @@
 #include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
 
+#include <Core/ResourceManager.h>
+#include <Render/Materials/LightingMaterial.h>
+#include <Render/Materials/Hdr2SdrMaterial.h>
+
 using namespace alexis;
 using namespace DirectX;
 
+#define MULTITHREAD_CONTEXTS
+
 static const float k_cameraSpeed = 20.0f;
 static const float k_cameraTurnSpeed = 0.1f;
-
-enum LightingParameters
-{
-	GBuffer, //Texture2D 3 textures starting from BaseColor : register( t0 );
-	NumLightingParameters
-};
-
-enum Hdr2SdrParameters
-{
-	HDR, //Texture2D 3 textures starting from BaseColor : register( t0 );
-	NumHdr2SdrParameters
-};
 
 SampleApp::SampleApp() :
 	m_viewport(0.0f, 0.0f, static_cast<float>(alexis::g_clientWidth), static_cast<float>(alexis::g_clientHeight)),
@@ -136,8 +130,7 @@ void SampleApp::OnResize(int width, int height)
 
 	m_cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
 
-	m_gbufferRT.Resize(width, height);
-	m_hdrRT.Resize(width, height);
+	Render::GetInstance()->GetRTManager()->Resize(width, height);
 }
 
 void SampleApp::OnKeyPressed(alexis::KeyEventArgs& e)
@@ -306,31 +299,8 @@ void SampleApp::LoadAssets()
 	//----- Loading
 	auto render = alexis::Render::GetInstance();
 	auto device = render->GetDevice();
-	auto commandManager = CommandManager::GetInstance();
-	auto commandContext = commandManager->CreateCommandContext();
-	auto commandList = commandContext->List.Get();
+	auto commandManager = render->GetCommandManager();
 	//------
-
-	// FS Quad
-	m_fsQuad = Mesh::FullScreenQuad(commandContext);
-
-	// Constant Buffer
-
-	//commandContext->CopyBuffer(m_triangleCB, &m_constantBufferData, 1, sizeof(SceneConstantBuffer));
-	//commandContext->TransitionResource(m_triangleCB, D3D12_RESOURCE_STATE_GENERIC_READ, true, D3D12_RESOURCE_STATE_COPY_DEST);
-
-	// Textures
-	commandContext->LoadTextureFromFile(m_checkerTexture, L"Resources/Textures/Checker2.dds");
-	commandContext->TransitionResource(m_checkerTexture, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	commandContext->LoadTextureFromFile(m_concreteTex, L"Resources/Textures/metal_base.dds");
-	commandContext->TransitionResource(m_concreteTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	commandContext->LoadTextureFromFile(m_normalTex, L"Resources/Textures/metal_normal.dds");
-	commandContext->TransitionResource(m_normalTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-	commandContext->LoadTextureFromFile(m_metalTex, L"Resources/Textures/metal_mero.dds");
-	commandContext->TransitionResource(m_metalTex, D3D12_RESOURCE_STATE_GENERIC_READ, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 	// Depth
 	DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
@@ -346,6 +316,8 @@ void SampleApp::LoadAssets()
 
 	// Create a G-Buffer
 	{
+		auto gbuffer = std::make_unique<RenderTarget>();
+
 		DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 		auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(gbufferColorFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
 		colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
@@ -359,43 +331,28 @@ void SampleApp::LoadAssets()
 
 		TextureBuffer gb0;
 		gb0.Create(colorDesc, &colorClearValue); // Base color
-		m_gbufferRT.AttachTexture(gb0, RenderTarget::Slot::Slot0);
+		gbuffer->AttachTexture(gb0, RenderTarget::Slot::Slot0);
 		gb0.GetResource()->SetName(L"GB 0");
-		commandContext->TransitionResource(gb0, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		TextureBuffer gb1;
-		gb1.Create(colorDesc, &colorClearValue); // Base color
-		m_gbufferRT.AttachTexture(gb1, RenderTarget::Slot::Slot1);
+		gb1.Create(colorDesc, &colorClearValue); // Normals
+		gbuffer->AttachTexture(gb1, RenderTarget::Slot::Slot1);
 		gb1.GetResource()->SetName(L"GB 1");
-		commandContext->TransitionResource(gb1, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		TextureBuffer gb2;
 		gb2.Create(colorDesc, &colorClearValue); // Base color
-		m_gbufferRT.AttachTexture(gb2, RenderTarget::Slot::Slot2);
+		gbuffer->AttachTexture(gb2, RenderTarget::Slot::Slot2);
 		gb2.GetResource()->SetName(L"GB 2");
-		commandContext->TransitionResource(gb2, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-		m_gbufferRT.AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+		gbuffer->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 		depthTexture.GetResource()->SetName(L"GB Depth");
-		commandContext->TransitionResource(depthTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+
+		render->GetRTManager()->EmplaceTarget(L"GB", std::move(gbuffer));
 	}
-
-	PBRMaterialParams params =
-	{
-		.VSPath = L"Resources/Shaders/PBS_object_vs.cso",
-		.PSPath = L"Resources/Shaders/PBS_object_ps.cso",
-		.RTVFormats = m_gbufferRT.GetFormat(),
-		.DSVFormat = depthFormat,
-		.t0 = m_concreteTex,
-		.t1 = m_normalTex,
-		.t2 = m_metalTex
-	};
-
-	m_pbrMaterial = std::make_unique<PBRMaterial>(params);
-
 
 	// Create an HDR RT
 	{
+		auto hdrTarget = std::make_unique<RenderTarget>();
 		DXGI_FORMAT hdrFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 
 		auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(hdrFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
@@ -412,134 +369,18 @@ void SampleApp::LoadAssets()
 		hdrTexture.Create(colorDesc, &colorClearValue);
 		hdrTexture.GetResource()->SetName(L"HDR Texture");
 
-		m_hdrRT.AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
-		commandContext->TransitionResource(hdrTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-		m_hdrRT.AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+		hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
+		hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+
+		render->GetRTManager()->EmplaceTarget(L"HDR", std::move(hdrTarget));
 	}
 
-	// Root signature and PSO for Lighting. GBuffer -> HDR
-	{
-		ComPtr<ID3DBlob> vertexShaderBlob;
-		ComPtr<ID3DBlob> pixelShaderBlob;
-#if defined(_DEBUG)
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_vs_d.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_ps_d.cso", &pixelShaderBlob));
-#else 
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_vs.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_ps.cso", &pixelShaderBlob));
-#endif
+	m_lightingMaterial = std::make_unique<LightingMaterial>();
+	m_hdr2sdrMaterial = std::make_unique<Hdr2SdrMaterial>();
 
-		// Allow input layout and deny unnecessary access to certain pipeline stages
-		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-		const auto& gbufferTextures = m_gbufferRT.GetTextures();
-
-		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
-
-		CD3DX12_ROOT_PARAMETER1 rootParameters[LightingParameters::NumLightingParameters];
-		rootParameters[LightingParameters::GBuffer].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
-
-		CD3DX12_STATIC_SAMPLER_DESC linearSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-
-		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, 1, &linearSampler, rootSignatureFlags);
-
-		m_lightingSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, render->GetHightestSignatureVersion());
-
-		struct PipelineStateStream
-		{
-			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSignature;
-			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT inputLayout;
-			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY primitiveTopology;
-			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
-			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
-			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
-		} pipelineStateStream;
-
-		pipelineStateStream.rootSignature = m_lightingSig.GetRootSignature().Get();
-		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
-		pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
-		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
-		pipelineStateStream.rtvFormats = m_hdrRT.GetFormat();
-
-		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
-		{
-			sizeof(PipelineStateStream), &pipelineStateStream
-		};
-
-		ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_lightingPSO)));
-	}
-
-	// Root signature and PSO for HDR to SDR conversion. HDR -> SDR backbuffer
-	{
-		// Load the vertex shader
-		ComPtr<ID3DBlob> vertexShaderBlob;
-		ComPtr<ID3DBlob> pixelShaderBlob;
-#if defined(_DEBUG)
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Hdr2Sdr_vs_d.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Hdr2Sdr_ps_d.cso", &pixelShaderBlob));
-#else
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Hdr2Sdr_vs.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Hdr2Sdr_ps.cso", &pixelShaderBlob));
-#endif
-
-		// Allow input layout and deny unnecessary access to certain pipeline stages
-		D3D12_ROOT_SIGNATURE_FLAGS rootSignatureFlags =
-			D3D12_ROOT_SIGNATURE_FLAG_ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_HULL_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
-			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
-
-		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 0);
-
-		CD3DX12_ROOT_PARAMETER1 rootParameters[Hdr2SdrParameters::NumHdr2SdrParameters];
-		rootParameters[Hdr2SdrParameters::HDR].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
-
-		CD3DX12_STATIC_SAMPLER_DESC linearSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
-
-		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-		rootSignatureDescription.Init_1_1(Hdr2SdrParameters::NumHdr2SdrParameters, rootParameters, 1, &linearSampler, rootSignatureFlags);
-
-		m_hdr2sdrSig.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, render->GetHightestSignatureVersion());
-
-		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
-		rasterizerDesc.CullMode = D3D12_CULL_MODE_NONE;
-
-		struct PipelineStateStream
-		{
-			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSignature;
-			CD3DX12_PIPELINE_STATE_STREAM_INPUT_LAYOUT inputLayout;
-			CD3DX12_PIPELINE_STATE_STREAM_PRIMITIVE_TOPOLOGY primitiveTopology;
-			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
-			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
-			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
-			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
-		} pipelineStateStream;
-
-		pipelineStateStream.rootSignature = m_hdr2sdrSig.GetRootSignature().Get();
-		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
-		pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
-		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
-		pipelineStateStream.Rasterizer = rasterizerDesc;
-		pipelineStateStream.rtvFormats = render->GetBackbufferRT().GetFormat();
-
-		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
-		{
-			sizeof(PipelineStateStream), &pipelineStateStream
-		};
-
-		ThrowIfFailed(device->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_hdr2sdrPSO)));
-	}
-
-
-	commandManager->ExecuteCommandContext(commandContext, true);
-
+	// FS Quad
+	
+	m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
@@ -556,15 +397,16 @@ void SampleApp::LoadAssets()
 
 	// Create Synchronization Objects
 	{
-		alexis::CommandManager::GetInstance()->WaitForGpu();
+		render->GetCommandManager()->WaitForGpu();
 	}
 }
 
 void SampleApp::PopulateCommandList()
 {
 	auto render = alexis::Render::GetInstance();
-	auto commandManager = alexis::CommandManager::GetInstance();
+	auto commandManager = render->GetCommandManager();
 
+	auto clearTargetCommandContext = commandManager->CreateCommandContext();
 	auto pbsCommandContext = commandManager->CreateCommandContext();
 	auto lightingCommandContext = commandManager->CreateCommandContext();
 	auto hdrCommandContext = commandManager->CreateCommandContext();
@@ -572,89 +414,95 @@ void SampleApp::PopulateCommandList()
 
 	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 
-	auto pbsTask = std::async([this, pbsCommandContext, clearColor]()
+	auto gbuffer = render->GetRTManager()->GetRenderTarget(L"GB");
+	auto hdrRT = render->GetRTManager()->GetRenderTarget(L"HDR");
+
+#if defined(MULTITHREAD_CONTEXTS)
+	auto clearTargetsTask = std::async([this, clearTargetCommandContext, gbuffer, hdrRT, clearColor]()
+#endif
 		{
+			// Clear G-Buffer
+			auto& gbDepthStencil = gbuffer->GetTexture(RenderTarget::DepthStencil);
+
+			for (int i = RenderTarget::Slot::Slot0; i < RenderTarget::Slot::DepthStencil; ++i)
 			{
-				auto& gbDepthStencil = m_gbufferRT.GetTexture(RenderTarget::DepthStencil);
-
-				for (int i = RenderTarget::Slot::Slot0; i < RenderTarget::Slot::DepthStencil; ++i)
+				auto& texture = gbuffer->GetTexture(static_cast<RenderTarget::Slot>(i));
+				if (texture.IsValid())
 				{
-					auto& texture = m_gbufferRT.GetTexture(static_cast<RenderTarget::Slot>(i));
-					if (texture.IsValid())
-					{
-						pbsCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-						pbsCommandContext->ClearTexture(texture, clearColor);
-					}
+					clearTargetCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+					clearTargetCommandContext->ClearTexture(texture, clearColor);
 				}
-
-				pbsCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
 			}
 
-			pbsCommandContext->SetRenderTarget(m_gbufferRT);
-			pbsCommandContext->SetViewport(m_gbufferRT.GetViewport());
+			clearTargetCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
+
+			// Clear HDR
+			auto& texture = hdrRT->GetTexture(static_cast<RenderTarget::Slot>(RenderTarget::Slot::Slot0));
+			clearTargetCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			clearTargetCommandContext->ClearTexture(texture, clearColor);
+		}
+#if defined(MULTITHREAD_CONTEXTS)
+	);
+#endif
+
+#if defined(MULTITHREAD_CONTEXTS)
+	auto pbsTask = std::async([this, pbsCommandContext, clearColor, gbuffer]()
+#endif
+		{
+			pbsCommandContext->SetRenderTarget(*gbuffer);
+			pbsCommandContext->SetViewport(gbuffer->GetViewport());
 			pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
 			XMMATRIX viewProj = XMMatrixMultiply(m_cameraSystem->GetViewMatrix(m_sceneCamera), m_cameraSystem->GetProjMatrix(m_sceneCamera));
 
-			m_pbrMaterial->SetupToRender(pbsCommandContext);
-
 			m_modelSystem->Render(pbsCommandContext, viewProj);
-		});
+		}
+#if defined(MULTITHREAD_CONTEXTS)
+	);
+#endif
 
+#if defined(MULTITHREAD_CONTEXTS)
 	auto resolveLightingTask = std::async([this, lightingCommandContext, clearColor]
+#endif
 		{
-			{
-				lightingCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, D3D12_RESOURCE_STATE_RENDER_TARGET);
-				lightingCommandContext->ClearTexture(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), clearColor);
-			}
-
-			lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			lightingCommandContext->TransitionResource(m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-			lightingCommandContext->SetRenderTarget(m_hdrRT);
-			lightingCommandContext->SetViewport(m_hdrRT.GetViewport());
 			lightingCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
-
-			lightingCommandContext->List->SetPipelineState(m_lightingPSO.Get());
-			lightingCommandContext->SetRootSignature(m_lightingSig);
-
-			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 0, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot0));
-			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 1, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot1));
-			lightingCommandContext->SetSRV(LightingParameters::GBuffer, 2, m_gbufferRT.GetTexture(RenderTarget::Slot::Slot2));
-
+			// TODO create lighting system
+			m_lightingMaterial->SetupToRender(lightingCommandContext);
 
 			m_fsQuad->Draw(lightingCommandContext);
-		});
+		}
+#if defined(MULTITHREAD_CONTEXTS)
+	);
+#endif
 
 
-	// Setup render to backbuffer
 	const auto& backbuffer = render->GetBackbufferRT();
 	const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
 
+#if defined(MULTITHREAD_CONTEXTS)
 	auto hdr2sdrTask = std::async([this, hdrCommandContext, &backbuffer, &backTexture]
+#endif
 		{
-			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-			hdrCommandContext->TransitionResource(m_hdrRT.GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
 			hdrCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
-
+			// TODO create HDR2SDR system
+			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			
 			hdrCommandContext->SetRenderTarget(backbuffer);
 			hdrCommandContext->SetViewport(backbuffer.GetViewport());
 
-			hdrCommandContext->List->SetPipelineState(m_hdr2sdrPSO.Get());
-			hdrCommandContext->SetRootSignature(m_hdr2sdrSig);
-
-			hdrCommandContext->SetSRV(Hdr2SdrParameters::HDR, 0, m_hdrRT.GetTexture(RenderTarget::Slot::Slot0));
+			m_hdr2sdrMaterial->SetupToRender(hdrCommandContext);
 
 			m_fsQuad->Draw(hdrCommandContext);
 
 			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-			//hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		});
+		}
+#if defined(MULTITHREAD_CONTEXTS)
+	);
+#endif
 
+#if defined(MULTITHREAD_CONTEXTS)
 	auto imguiTask = std::async([this, imguiContext, &backbuffer, &backTexture]
+#endif
 		{
 			imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
@@ -662,28 +510,30 @@ void SampleApp::PopulateCommandList()
 			imguiContext->SetViewport(backbuffer.GetViewport());
 			imguiContext->List->RSSetScissorRects(1, &m_scissorRect);
 
-
 			ID3D12DescriptorHeap* imguiHeap[] = { m_imguiSrvHeap.Get() };
 			imguiContext->List->SetDescriptorHeaps(_countof(imguiHeap), imguiHeap);
 			ImGui::Render();
 			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), imguiContext->List.Get());
 
 			imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		});
+		}
+#if defined(MULTITHREAD_CONTEXTS)
+	);
+#endif
 
+#if defined(MULTITHREAD_CONTEXTS)
+	clearTargetsTask.wait();
 	pbsTask.wait();
 	resolveLightingTask.wait();
 	hdr2sdrTask.wait();
 	imguiTask.wait();
+#endif
 
-	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext, imguiContext });
-	commandManager->ExecuteCommandContext(pbsCommandContext);
-	commandManager->ExecuteCommandContext(lightingCommandContext);
-	commandManager->ExecuteCommandContext(hdrCommandContext);
-	commandManager->ExecuteCommandContext(imguiContext);
-	//TODO: Flickers if debug layer is enabled. Wait for DX team to be fixed
-	//commandManager->ExecuteCommandContexts({ pbsCommandContext, lightingCommandContext, hdrCommandContext });
-	//commandManager->ExecuteCommandContext(imguiContext);
+	clearTargetCommandContext->Finish();
+	pbsCommandContext->Finish();
+	lightingCommandContext->Finish();
+	hdrCommandContext->Finish();
+	imguiContext->Finish();
 }
 
 void SampleApp::UpdateGUI()

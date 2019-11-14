@@ -3,11 +3,35 @@
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 
+#include <string>
 #include <exception>
 #include <stdexcept>
 #include <wrl.h>
 
 #include <Core/Events.h>
+
+// WSTR stuff
+// https://stackoverflow.com/a/44777607
+static std::wstring ToWStr(const std::string& in)
+{
+	if (in.empty())
+	{
+		return std::wstring();
+	}
+
+	int numChars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, in.c_str(), in.length(), nullptr, 0);
+	std::wstring out;
+	if (numChars)
+	{
+		out.resize(numChars);
+		if (MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, in.c_str(), in.length(), &out[0], numChars))
+		{
+			return out;
+		}
+	}
+
+	return out;
+}
 
 using Microsoft::WRL::ComPtr;
 

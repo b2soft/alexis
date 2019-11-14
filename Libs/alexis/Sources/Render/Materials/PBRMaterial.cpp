@@ -3,6 +3,7 @@
 #include "PBRMaterial.h"
 
 #include <Core/Render.h>
+
 // for VertexDef
 #include <Render/Mesh.h>
 #include <Render/CommandContext.h>
@@ -17,27 +18,18 @@ namespace alexis
 	};
 
 	PBRMaterial::PBRMaterial(const PBRMaterialParams& params) :
-		m_baseColor(params.t0),
-		m_normalMap(params.t1),
-		m_metalRoughness(params.t2)
+		m_baseColor(params.BaseColor),
+		m_normalMap(params.NormalMap),
+		m_metalRoughness(params.MetalRoughness)
 	{
 		// TODO: move shader loading to resource manager
 
 #if defined(_DEBUG)
-		// debug only
-		std::wstring debugSuffix = L"_d";
-
-		std::wstring vsPathDebug = params.VSPath;
-		vsPathDebug.insert(params.VSPath.find_last_of('.'), debugSuffix);
-
-		std::wstring psPathDebug = params.PSPath;
-		psPathDebug.insert(params.PSPath.find_last_of('.'), debugSuffix);
-
-		ThrowIfFailed(D3DReadFileToBlob(vsPathDebug.c_str(), &m_vertexShader));
-		ThrowIfFailed(D3DReadFileToBlob(psPathDebug.c_str(), &m_pixelShader));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_vs_d.cso", &m_vertexShader));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_ps_d.cso", &m_pixelShader));
 #else
-		ThrowIfFailed(D3DReadFileToBlob(params.VSPath.c_str(), &m_vertexShader));
-		ThrowIfFailed(D3DReadFileToBlob(params.PSPath.c_str(), &m_pixelShader));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_vs.cso", &m_vertexShader));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/PBS_object_ps.cso", &m_pixelShader));
 #endif
 
 		// Allow input layout and deny unnecessary access to certain pipeline stages
@@ -58,10 +50,7 @@ namespace alexis
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 		rootSignatureDescription.Init_1_1(PBSObjectParameters::NumPBSObjectParameters, rootParameters, 1, &anisotropicSampler, rootSignatureFlags);
 
-		auto render = Render::GetInstance();
-
-		// TODO: consider using constant highest signature version since only desc 1.1 is created
-		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, render->GetHightestSignatureVersion());
+		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, D3D_ROOT_SIGNATURE_VERSION_1_1);
 
 		struct PipelineStateStream
 		{
@@ -74,19 +63,22 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
 		} pipelineStateStream;
 
+		auto rtManager = Render::GetInstance()->GetRTManager();
+
 		pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
 		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
 		pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(m_vertexShader.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(m_pixelShader.Get());
-		pipelineStateStream.rtvFormats = params.RTVFormats;
-		pipelineStateStream.dsvFormat = params.DSVFormat;
+		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"GB");
+		pipelineStateStream.dsvFormat = rtManager->GetDSFormat(L"GB");
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{
 			sizeof(PipelineStateStream), &pipelineStateStream
 		};
 
+		auto render = Render::GetInstance();
 		ThrowIfFailed(render->GetDevice()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pso)));
 	}
 
@@ -95,9 +87,9 @@ namespace alexis
 		pbsCommandContext->SetPipelineState(m_pso.Get());
 		pbsCommandContext->SetRootSignature(m_rootSignature);
 
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, m_baseColor);
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, m_normalMap);
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, m_metalRoughness);
+		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, *m_baseColor);
+		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, *m_normalMap);
+		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, *m_metalRoughness);
 	}
 
 }

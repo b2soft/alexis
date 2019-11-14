@@ -3,7 +3,6 @@
 #include <DirectXMath.h>
 
 #include <ECS/ECS.h>
-#include <ECS/TransformComponent.h>
 
 namespace alexis
 {

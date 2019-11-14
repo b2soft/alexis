@@ -14,7 +14,7 @@
 #include <ECS/ModelSystem.h>
 #include <ECS/CameraSystem.h>
 
-#include <Render/Materials/PBRMaterial.h>
+#include <Render/Materials/MaterialBase.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -45,52 +45,30 @@ public:
 	virtual void Destroy() override;
 
 private:
-	static const UINT k_frameCount = 4;
+	static const UINT k_frameCount = 3;
 
 	// Pipeline objects
 	CD3DX12_VIEWPORT m_viewport;
 	CD3DX12_RECT m_scissorRect;
 
-	//ComPtr<ID3D12PipelineState> m_pbsObjectPSO;
-	ComPtr<ID3D12PipelineState> m_lightingPSO;
-	ComPtr<ID3D12PipelineState> m_hdr2sdrPSO;
+	std::unique_ptr<alexis::MaterialBase> m_lightingMaterial;
+	std::unique_ptr<alexis::MaterialBase> m_hdr2sdrMaterial;
 
-	alexis::RenderTarget m_gbufferRT;
-	alexis::RenderTarget m_hdrRT;
+	alexis::Mesh* m_fsQuad{ nullptr };
 
-	// Signatures
-	//alexis::RootSignature m_pbsObjectSig;
-	alexis::RootSignature m_lightingSig;
-	alexis::RootSignature m_hdr2sdrSig;
-
-	// Textures
-	alexis::TextureBuffer m_checkerTexture;
-	alexis::TextureBuffer m_normalTex;
-	alexis::TextureBuffer m_metalTex;
-	alexis::TextureBuffer m_concreteTex;
-
-	alexis::VertexBuffer m_triangleVB;
-	std::unique_ptr<alexis::Mesh> m_fsQuad;
+	alexis::ecs::Entity m_sceneCamera;
 
 	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
 	ImGuiContext* m_context{ nullptr };
 
-	//temp
-	std::unique_ptr<alexis::PBRMaterial> m_pbrMaterial;
-
 	float m_aspectRatio{ 1.0f };
-
-	SceneConstantBuffer m_constantBufferData;
 
 	float m_timeCount{ 0.f };
 	int m_frameCount{ 0 };
 	float m_fps{ 0.f };
 	float m_totalTime{ 0.f };
 
-	alexis::ecs::Entity m_sceneCamera;
-
 	// Input system 
-
 	float m_fwdMovement{ 0.0f };
 	float m_aftMovement{ 0.0f };
 	float m_leftMovement{ 0.0f };
@@ -115,5 +93,4 @@ private:
 
 	std::shared_ptr<alexis::ecs::ModelSystem> m_modelSystem;
 	std::shared_ptr<alexis::ecs::CameraSystem> m_cameraSystem;
-	std::vector<alexis::ecs::Entity> m_sceneEntities;
 };

@@ -8,10 +8,14 @@
 
 #include <Utils/Singleton.h>
 
+#include <Core/CommandManager.h>
+
 #include <Render/RenderTarget.h>
+#include <Render/Buffers/UploadBufferManager.h>
+
 #include <Render/Descriptors/DescriptorAllocation.h>
 #include <Render/Descriptors/DescriptorAllocator.h>
-#include <Render/Buffers/UploadBufferManager.h>
+#include <Render/RenderTargetManager.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -38,7 +42,20 @@ namespace alexis
 
 		ID3D12Device2* GetDevice() const;
 
-		UploadBufferManager* GetUploadBufferManager() const;
+		UploadBufferManager* GetUploadBufferManager() const
+		{
+			return m_uploadBufferManager.get();
+		}
+
+		CommandManager* GetCommandManager() const
+		{
+			return m_commandManager.get();
+		}
+
+		RenderTargetManager* GetRTManager() const
+		{
+			return m_rtManager.get();
+		}
 
 		bool IsVSync() const;
 		void SetVSync(bool vSync);
@@ -49,7 +66,8 @@ namespace alexis
 		void ToggleFullscreen();
 
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
-		D3D_ROOT_SIGNATURE_VERSION GetHightestSignatureVersion() const;
+
+		void ReleaseStaleDescriptors(uint64_t fenceValue);
 
 	private:
 		void InitDevice();
@@ -57,10 +75,8 @@ namespace alexis
 
 		void UpdateRenderTargetViews();
 
-		void ReleaseStaleDescriptors(uint64_t fenceValue);
-
 		Microsoft::WRL::ComPtr<IDXGIAdapter4> GetHardwareAdapter(IDXGIFactory4* factory);
-		static const UINT k_frameCount = 2;
+		static const UINT k_frameCount = 4;
 
 		CD3DX12_VIEWPORT m_viewport;
 		CD3DX12_RECT m_scissorRect;
@@ -73,6 +89,9 @@ namespace alexis
 
 		std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		std::unique_ptr<UploadBufferManager> m_uploadBufferManager;
+
+		std::unique_ptr<CommandManager> m_commandManager;
+		std::unique_ptr<RenderTargetManager> m_rtManager;
 
 		// Sync objects
 		UINT m_frameIndex{ 0 };

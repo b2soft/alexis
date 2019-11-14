@@ -3,14 +3,50 @@
 #include "CommandContext.h"
 
 #include <Core/Render.h>
+#include <Core/CommandManager.h>
 #include <Render/Buffers/UploadBufferManager.h>
 
 namespace alexis
 {
 
-	CommandContext::CommandContext()
+	CommandContext::CommandContext(D3D12_COMMAND_LIST_TYPE type) :
+		m_type(type)
 	{
 
+	}
+
+	uint64_t CommandContext::Flush(bool waitForCompletion /*= false*/)
+	{
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		uint64_t fenceValue = commandManager->GetQueue(m_type).ExecuteCommandList(List.Get());
+
+		if (waitForCompletion)
+		{
+			commandManager->WaitForFence(fenceValue);
+		}
+
+		List->Reset(Allocator.Get(), nullptr);
+
+		return fenceValue;
+	}
+
+	uint64_t CommandContext::Finish(bool waitForCompletion /*= false*/)
+	{
+		// Never finish copy lists
+		assert(m_type == D3D12_COMMAND_LIST_TYPE_DIRECT || m_type == D3D12_COMMAND_LIST_TYPE_COMPUTE);
+
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		uint64_t fenceValue = commandManager->GetQueue(m_type).ExecuteCommandList(List.Get());
+
+		if (waitForCompletion)
+		{
+			commandManager->WaitForFence(fenceValue);
+		}
+
+		commandManager->CacheContext(this, fenceValue);
+		Render::GetInstance()->ReleaseStaleDescriptors(fenceValue);
+
+		return fenceValue;
 	}
 
 	void CommandContext::DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount, UINT startVertexLocation, UINT startInstanceLocation)
@@ -154,7 +190,7 @@ namespace alexis
 
 		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, allocation.Offset, sizeInBytes);
-		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+		//TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	void CommandContext::InitializeTexture(TextureBuffer& destination, UINT numSubresources, D3D12_SUBRESOURCE_DATA subData[])
@@ -167,7 +203,7 @@ namespace alexis
 
 		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
 		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
-		TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+		//TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
 	}
 
 	void CommandContext::LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename)
