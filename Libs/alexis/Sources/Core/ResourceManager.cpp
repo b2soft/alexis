@@ -136,6 +136,14 @@ namespace alexis
 
 	ResourceManager::MeshMap::iterator ResourceManager::LoadMesh(const std::wstring& path)
 	{
+		if (path == L"$FS_QUAD")
+		{
+			std::unique_ptr<Mesh> mesh = Mesh::FullScreenQuad(m_copyContext);
+			m_copyContext->Flush(true);
+
+			return m_meshes.emplace(path, std::move(mesh)).first;
+		}
+
 		Assimp::Importer importer;
 
 		std::string convertedPath(path.begin(), path.end());

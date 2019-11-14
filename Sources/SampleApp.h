@@ -54,7 +54,7 @@ private:
 	std::unique_ptr<alexis::MaterialBase> m_lightingMaterial;
 	std::unique_ptr<alexis::MaterialBase> m_hdr2sdrMaterial;
 
-	std::unique_ptr<alexis::Mesh> m_fsQuad;
+	alexis::Mesh* m_fsQuad{ nullptr };
 
 	alexis::ecs::Entity m_sceneCamera;
 

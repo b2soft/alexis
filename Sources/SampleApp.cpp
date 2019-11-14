@@ -300,12 +300,7 @@ void SampleApp::LoadAssets()
 	auto render = alexis::Render::GetInstance();
 	auto device = render->GetDevice();
 	auto commandManager = render->GetCommandManager();
-	auto commandContext = commandManager->CreateCommandContext();
-	auto commandList = commandContext->List.Get();
 	//------
-
-	// FS Quad
-	m_fsQuad = Mesh::FullScreenQuad(commandContext);
 
 	// Depth
 	DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
@@ -338,23 +333,19 @@ void SampleApp::LoadAssets()
 		gb0.Create(colorDesc, &colorClearValue); // Base color
 		gbuffer->AttachTexture(gb0, RenderTarget::Slot::Slot0);
 		gb0.GetResource()->SetName(L"GB 0");
-		commandContext->TransitionResource(gb0, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		TextureBuffer gb1;
 		gb1.Create(colorDesc, &colorClearValue); // Normals
 		gbuffer->AttachTexture(gb1, RenderTarget::Slot::Slot1);
 		gb1.GetResource()->SetName(L"GB 1");
-		commandContext->TransitionResource(gb1, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		TextureBuffer gb2;
 		gb2.Create(colorDesc, &colorClearValue); // Base color
 		gbuffer->AttachTexture(gb2, RenderTarget::Slot::Slot2);
 		gb2.GetResource()->SetName(L"GB 2");
-		commandContext->TransitionResource(gb2, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		gbuffer->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 		depthTexture.GetResource()->SetName(L"GB Depth");
-		commandContext->TransitionResource(depthTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 
 		render->GetRTManager()->EmplaceTarget(L"GB", std::move(gbuffer));
 	}
@@ -379,7 +370,6 @@ void SampleApp::LoadAssets()
 		hdrTexture.GetResource()->SetName(L"HDR Texture");
 
 		hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
-		commandContext->TransitionResource(hdrTexture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 
 		render->GetRTManager()->EmplaceTarget(L"HDR", std::move(hdrTarget));
@@ -388,8 +378,9 @@ void SampleApp::LoadAssets()
 	m_lightingMaterial = std::make_unique<LightingMaterial>();
 	m_hdr2sdrMaterial = std::make_unique<Hdr2SdrMaterial>();
 
-	// Finish loading and wait until all assets are loaded
-	commandContext->Flush(true);
+	// FS Quad
+	
+	m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
