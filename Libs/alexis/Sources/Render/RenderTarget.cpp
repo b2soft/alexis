@@ -64,7 +64,6 @@ namespace alexis
 			height = std::max(height, desc.Height);
 		}
 
-
 		D3D12_VIEWPORT viewport =
 		{
 			(width * bias.x),

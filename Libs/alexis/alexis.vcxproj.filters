@@ -94,6 +94,12 @@
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -184,6 +190,12 @@
       <Filter>Sources\Render</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h">
       <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
   </ItemGroup>

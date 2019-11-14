@@ -41,6 +41,8 @@
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
     <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h" />
+    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h" />
+    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h" />
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h" />
     <ClInclude Include="Sources\Render\Materials\PBRMaterial.h" />
     <ClInclude Include="Sources\Render\Mesh.h" />
@@ -69,6 +71,8 @@
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp" />
+    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp" />
+    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
