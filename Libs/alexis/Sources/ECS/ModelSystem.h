@@ -15,7 +15,7 @@ namespace alexis
 		{
 		public:
 			void Update(float dt);
-			void Render(CommandContext* context, DirectX::XMMATRIX view/*, DirectX::XMMATRIX proj*/);
+			void XM_CALLCONV Render(CommandContext* context, DirectX::XMMATRIX view/*, DirectX::XMMATRIX proj*/);
 		};
 
 	}

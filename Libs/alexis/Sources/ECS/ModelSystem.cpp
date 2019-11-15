@@ -7,6 +7,9 @@
 #include <Render/CommandContext.h>
 #include <Render/Materials/MaterialBase.h>
 
+#include <ECS/CameraSystem.h>
+
+#include <ECS/CameraComponent.h>
 #include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
 
@@ -14,6 +17,11 @@ namespace alexis
 {
 	namespace ecs
 	{
+		struct CameraCB
+		{
+			XMMATRIX viewProjMatrix;
+		};
+
 		void ModelSystem::Update(float dt)
 		{
 			auto ecsWorld = Core::Get().GetECS();
@@ -34,19 +42,25 @@ namespace alexis
 		}
 
 		// TODO: remove XMMATRIX viewProj arg
-		void ModelSystem::Render(CommandContext* context, XMMATRIX viewProj)
+		void XM_CALLCONV ModelSystem::Render(CommandContext* context, XMMATRIX viewProj)
 		{
 			auto ecsWorld = Core::Get().GetECS();
+			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto activeCamera = cameraSystem->GetActiveCamera();
+
+			auto viewMatrix = cameraSystem->GetViewMatrix(activeCamera);
+			auto projMatrix = cameraSystem->GetProjMatrix(activeCamera);
+
+
 			for (const auto& entity : Entities)
 			{
 				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
-
-				// Update the MVP matrix
-				XMMATRIX mvpMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, viewProj);
-
+				CameraCB cameraCB;
+				cameraCB.viewProjMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, viewProj);
 				modelComponent.Material->SetupToRender(context);
 
-				context->SetDynamicCBV(0, sizeof(mvpMatrix), &mvpMatrix);
+				context->SetDynamicCBV(0, sizeof(viewProj), &viewProj);
+				context->SetDynamicCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
 				modelComponent.Mesh->Draw(context);
 			}
 		}

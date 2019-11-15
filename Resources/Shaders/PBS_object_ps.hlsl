@@ -2,6 +2,7 @@ struct PSInput
 {
 	float4 normal : NORMAL;
 	float2 uv0 : TEXCOORD;
+	float4 position : Test;
 };
 
 struct PSOutput
@@ -22,6 +23,10 @@ PSOutput main(PSInput input)
 	float4 texColor = BaseColor.Sample(AnisotropicSampler, input.uv0);
 	float4 normal = Normal.Sample(AnisotropicSampler, input.uv0);
 	float4 metalRoughness = MetalRoughness.Sample(AnisotropicSampler, input.uv0);
+
+	texColor.a = input.position.x;
+	normal.a = input.position.y;
+	metalRoughness.a = input.position.z;
 
 	PSOutput output;
 	output.gb0 = texColor;

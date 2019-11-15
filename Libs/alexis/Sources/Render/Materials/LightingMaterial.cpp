@@ -12,6 +12,7 @@ namespace alexis
 {
 	enum LightingParameters
 	{
+		SunLight,
 		GBuffer, //Texture2D 3 textures starting from BaseColor : register( t0 );
 		NumLightingParameters
 	};
@@ -38,6 +39,7 @@ namespace alexis
 		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
 
 		CD3DX12_ROOT_PARAMETER1 rootParameters[LightingParameters::NumLightingParameters];
+		rootParameters[LightingParameters::SunLight].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);
 		rootParameters[LightingParameters::GBuffer].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_STATIC_SAMPLER_DESC pointSampler(0, D3D12_FILTER_MIN_MAG_MIP_POINT);

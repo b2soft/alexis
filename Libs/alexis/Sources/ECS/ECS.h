@@ -257,13 +257,23 @@ namespace alexis
 			}
 
 			template<class T>
+			std::shared_ptr<T> GetSystem()
+			{
+				const char* typeName = typeid(T).name();
+
+				auto it = m_systems.find(typeName);
+				assert(it != m_systems.end() && "System not found!");
+
+				return std::static_pointer_cast<T>(it->second);
+			}
+
+			template<class T>
 			void SetComponentMask(ComponentMask componentMask)
 			{
 				const char* typeName = typeid(T).name();
 
-
 				auto it = m_systems.find(typeName);
-				assert(m_systems.find(typeName) != m_systems.end() && "System not found!");
+				assert(it != m_systems.end() && "System not found!");
 
 				m_componentMasks.insert({ typeName, componentMask });
 			}
@@ -383,6 +393,12 @@ namespace alexis
 			void SetSystemComponentMask(ComponentMask componentMask)
 			{
 				m_systemManager->SetComponentMask<T>(componentMask);
+			}
+
+			template<class T>
+			std::shared_ptr<T> GetSystem()
+			{
+				return m_systemManager->GetSystem<T>();
 			}
 
 		private:

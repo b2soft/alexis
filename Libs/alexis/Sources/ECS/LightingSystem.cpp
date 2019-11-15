@@ -2,6 +2,10 @@
 
 #include "LightingSystem.h"
 
+#include <ECS/ECS.h>
+#include <ECS/CameraSystem.h>
+#include <ECS/TransformComponent.h>
+
 #include <Core/Core.h>
 #include <Core/ResourceManager.h>
 #include <Render/CommandContext.h>
@@ -13,16 +17,33 @@ namespace alexis
 	namespace ecs
 	{
 
+		struct SunLight
+		{
+			XMFLOAT4 Parameters;
+			XMVECTOR ViewPos;
+		};
+
+		static SunLight s_sunLight;
+
 		void LightingSystem::Init()
 		{
 			m_lightingMaterial = std::make_unique<LightingMaterial>();
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
+
+			s_sunLight.Parameters = XMFLOAT4{ 0.0f, -1.0f, 0.0f, 0.7f };
 		}
 
 		void LightingSystem::Render(CommandContext* context)
 		{
 			m_lightingMaterial->SetupToRender(context);
+
+			auto ecsWorld = Core::Get().GetECS();
+			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(cameraSystem->GetActiveCamera());
+			s_sunLight.ViewPos = transformComponent.Position;
+
+			context->SetDynamicCBV(0, sizeof(s_sunLight), &s_sunLight);
 
 			m_fsQuad->Draw(context);
 

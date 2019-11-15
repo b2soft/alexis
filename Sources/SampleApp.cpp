@@ -442,6 +442,7 @@ void SampleApp::PopulateCommandList()
 				}
 			}
 
+			clearTargetCommandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 			clearTargetCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
 
 			// Clear HDR
