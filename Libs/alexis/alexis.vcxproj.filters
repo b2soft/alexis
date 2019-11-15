@@ -100,6 +100,9 @@
     <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\ECS\LightingSystem.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -197,6 +200,9 @@
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h">
       <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\LightingSystem.h">
+      <Filter>Sources\ECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -13,6 +13,7 @@
 
 #include <ECS/ModelSystem.h>
 #include <ECS/CameraSystem.h>
+#include <ECS/LightingSystem.h>
 
 #include <Render/Materials/MaterialBase.h>
 
@@ -51,7 +52,6 @@ private:
 	CD3DX12_VIEWPORT m_viewport;
 	CD3DX12_RECT m_scissorRect;
 
-	std::unique_ptr<alexis::MaterialBase> m_lightingMaterial;
 	std::unique_ptr<alexis::MaterialBase> m_hdr2sdrMaterial;
 
 	alexis::Mesh* m_fsQuad{ nullptr };
@@ -93,4 +93,5 @@ private:
 
 	std::shared_ptr<alexis::ecs::ModelSystem> m_modelSystem;
 	std::shared_ptr<alexis::ecs::CameraSystem> m_cameraSystem;
+	std::shared_ptr<alexis::ecs::LightingSystem> m_lightingSystem;
 };

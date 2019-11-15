@@ -33,6 +33,7 @@ namespace alexis
 			}
 		}
 
+		// TODO: remove XMMATRIX viewProj arg
 		void ModelSystem::Render(CommandContext* context, XMMATRIX viewProj)
 		{
 			auto ecsWorld = Core::Get().GetECS();

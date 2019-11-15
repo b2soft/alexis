@@ -23,13 +23,12 @@
 #include <ECS/TransformComponent.h>
 
 #include <Core/ResourceManager.h>
-#include <Render/Materials/LightingMaterial.h>
 #include <Render/Materials/Hdr2SdrMaterial.h>
 
 using namespace alexis;
 using namespace DirectX;
 
-#define MULTITHREAD_CONTEXTS
+//#define MULTITHREAD_CONTEXTS
 
 static const float k_cameraSpeed = 20.0f;
 static const float k_cameraTurnSpeed = 0.1f;
@@ -72,6 +71,14 @@ bool SampleApp::Initialize()
 	cameraSystemMask.set(ecsWorld->GetComponentType<ecs::CameraComponent>());
 	cameraSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
 	ecsWorld->SetSystemComponentMask<ecs::CameraSystem>(cameraSystemMask);
+
+	// Lighting System
+	m_lightingSystem = ecsWorld->RegisterSystem<ecs::LightingSystem>();
+
+	ecs::ComponentMask lightingSystemMask;
+	//cameraSystemMask.set(ecsWorld->GetComponentType<ecs::CameraComponent>());
+	lightingSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
+	ecsWorld->SetSystemComponentMask<ecs::LightingSystem>(lightingSystemMask);
 
 	return true;
 }
@@ -375,12 +382,13 @@ void SampleApp::LoadAssets()
 		render->GetRTManager()->EmplaceTarget(L"HDR", std::move(hdrTarget));
 	}
 
-	m_lightingMaterial = std::make_unique<LightingMaterial>();
 	m_hdr2sdrMaterial = std::make_unique<Hdr2SdrMaterial>();
 
 	// FS Quad
 	
 	m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
+
+	m_lightingSystem->Init();
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
@@ -466,10 +474,7 @@ void SampleApp::PopulateCommandList()
 #endif
 		{
 			lightingCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
-			// TODO create lighting system
-			m_lightingMaterial->SetupToRender(lightingCommandContext);
-
-			m_fsQuad->Draw(lightingCommandContext);
+			m_lightingSystem->Render(lightingCommandContext);
 		}
 #if defined(MULTITHREAD_CONTEXTS)
 	);
