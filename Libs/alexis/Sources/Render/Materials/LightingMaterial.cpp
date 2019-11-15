@@ -40,10 +40,10 @@ namespace alexis
 		CD3DX12_ROOT_PARAMETER1 rootParameters[LightingParameters::NumLightingParameters];
 		rootParameters[LightingParameters::GBuffer].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
-		CD3DX12_STATIC_SAMPLER_DESC linearSampler(0, D3D12_FILTER_MIN_MAG_MIP_LINEAR);
+		CD3DX12_STATIC_SAMPLER_DESC pointSampler(0, D3D12_FILTER_MIN_MAG_MIP_POINT);
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, 1, &linearSampler, rootSignatureFlags);
+		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, 1, &pointSampler, rootSignatureFlags);
 
 		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, D3D_ROOT_SIGNATURE_VERSION_1_1);
 
@@ -78,6 +78,8 @@ namespace alexis
 
 	void LightingMaterial::SetupToRender(CommandContext* commandContext)
 	{
+		// TODO: get RTs on init once instead getting every frame
+
 		auto render = Render::GetInstance();
 		auto rtManager = render->GetRTManager();
 		auto gbuffer = rtManager->GetRenderTarget(L"GB");
