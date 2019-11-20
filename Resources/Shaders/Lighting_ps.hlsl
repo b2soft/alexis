@@ -32,6 +32,6 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 finalColor = BRDF(viewDir, SunCB.Parameters.xyz, normal.xyz, metalRoughness.y, metalRoughness.x, col.xyz);
 
-	return float4(col.xyz, 1.0);
+	return float4(worldPos, 1.0);
 	//return finalColor;
 }

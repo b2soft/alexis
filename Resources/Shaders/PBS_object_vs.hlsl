@@ -1,5 +1,6 @@
 struct CameraParams
 {
+	matrix ViewMatrix;
 	matrix ViewProjMatrix;
 };
 
@@ -33,10 +34,11 @@ VSOutput main(VSInput input)
 	VSOutput output;
 
 	matrix mvpMatrix = mul(CameraCB.ViewProjMatrix, ModelCB.ModelMatrix);
+	float4 worldPos = float4(input.position, 1.0f);
 
-	output.oPos = mul(CameraCB.ViewProjMatrix, float4(input.position, 1.0f));
-	output.position = mul(mvpMatrix, float4(input.position, 1.0));
-	output.normal = mul(mvpMatrix, float4(input.normal, 1.0f));
+	output.oPos = mul(ModelCB.ModelMatrix, worldPos);
+	output.position = mul(mvpMatrix, worldPos);
+	output.normal = mul(mvpMatrix, float4(input.normal, 0.0f));
 	output.uv0 = input.uv0;
 
 	return output;

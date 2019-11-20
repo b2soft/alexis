@@ -19,6 +19,7 @@ namespace alexis
 	{
 		__declspec(align(16)) struct CameraCB
 		{
+			XMMATRIX viewMatrix;
 			XMMATRIX viewProjMatrix;
 		};
 
@@ -57,6 +58,7 @@ namespace alexis
 			{
 				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
 				CameraCB cameraCB;
+				cameraCB.viewMatrix = viewMatrix;
 				cameraCB.viewProjMatrix = viewProjMatrix;
 				modelComponent.Material->SetupToRender(context);
 
