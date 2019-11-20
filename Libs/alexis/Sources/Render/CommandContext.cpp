@@ -112,6 +112,8 @@ namespace alexis
 
 	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
 	{
+		assert(bufferData && Math::IsAligned(bufferData, 16));
+
 		auto device = Render::GetInstance()->GetDevice();
 		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
 		auto cb = bufferManager->Allocate(bufferSize);

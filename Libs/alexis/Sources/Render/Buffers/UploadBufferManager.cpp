@@ -82,6 +82,9 @@ namespace alexis
 			IID_PPV_ARGS(&m_resource)
 		));
 
+		std::wstring name = L"Upload buffer " + std::to_wstring(m_offset);
+		SetName(m_resource.Get(), name.c_str());
+
 		m_gpuPtr = m_resource->GetGPUVirtualAddress();
 		m_resource->Map(0, nullptr, &m_cpuPtr);
 	}

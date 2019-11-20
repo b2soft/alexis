@@ -32,10 +32,10 @@ VSOutput main(VSInput input)
 {
 	VSOutput output;
 
-	matrix mvpMatrix = CameraCB.ViewProjMatrix;// mul(ModelCB.ModelMatrix, CameraCB.ViewProjMatrix);
+	matrix mvpMatrix = mul(CameraCB.ViewProjMatrix, ModelCB.ModelMatrix);
 
-	output.oPos = mul(ModelCB.ModelMatrix, float4(input.position, 1.0f));
-	output.position = mul(mvpMatrix, float4(input.position, 1.0f));
+	output.oPos = mul(CameraCB.ViewProjMatrix, float4(input.position, 1.0f));
+	output.position = mul(mvpMatrix, float4(input.position, 1.0));
 	output.normal = mul(mvpMatrix, float4(input.normal, 1.0f));
 	output.uv0 = input.uv0;
 

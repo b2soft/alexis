@@ -17,7 +17,7 @@ namespace alexis
 {
 	namespace ecs
 	{
-		struct CameraCB
+		__declspec(align(16)) struct CameraCB
 		{
 			XMMATRIX viewProjMatrix;
 		};
@@ -35,14 +35,14 @@ namespace alexis
 					XMMATRIX translationMatrix = XMMatrixTranslationFromVector(transformComponent.Position);
 					XMMATRIX rotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(transformComponent.Rotation));
 
-					modelComponent.ModelMatrix = translationMatrix * rotationMatrix;
+					modelComponent.ModelMatrix = XMMatrixMultiply(translationMatrix, rotationMatrix);
 					modelComponent.IsTransformDirty = false;
 				}
 			}
 		}
 
 		// TODO: remove XMMATRIX viewProj arg
-		void XM_CALLCONV ModelSystem::Render(CommandContext* context, XMMATRIX viewProj)
+		void XM_CALLCONV ModelSystem::Render(CommandContext* context)
 		{
 			auto ecsWorld = Core::Get().GetECS();
 			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
@@ -51,15 +51,16 @@ namespace alexis
 			auto viewMatrix = cameraSystem->GetViewMatrix(activeCamera);
 			auto projMatrix = cameraSystem->GetProjMatrix(activeCamera);
 
+			auto viewProjMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
 
 			for (const auto& entity : Entities)
 			{
 				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
 				CameraCB cameraCB;
-				cameraCB.viewProjMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, viewProj);
+				cameraCB.viewProjMatrix = viewProjMatrix;
 				modelComponent.Material->SetupToRender(context);
 
-				context->SetDynamicCBV(0, sizeof(viewProj), &viewProj);
+				context->SetDynamicCBV(0, sizeof(cameraCB), &cameraCB);
 				context->SetDynamicCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
 				modelComponent.Mesh->Draw(context);
 			}

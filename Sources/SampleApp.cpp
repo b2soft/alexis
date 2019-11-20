@@ -462,9 +462,7 @@ void SampleApp::PopulateCommandList()
 			pbsCommandContext->SetViewport(gbuffer->GetViewport());
 			pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
 
-			XMMATRIX viewProj = XMMatrixMultiply(m_cameraSystem->GetViewMatrix(m_sceneCamera), m_cameraSystem->GetProjMatrix(m_sceneCamera));
-
-			m_modelSystem->Render(pbsCommandContext, viewProj);
+			m_modelSystem->Render(pbsCommandContext);
 		}
 #if defined(MULTITHREAD_CONTEXTS)
 	);
