@@ -12,10 +12,10 @@ struct SunLight
 	float4 ViewPos;
 };
 
-ConstantBuffer<SunLight> SunCB : register(b0);
+ConstantBuffer<SunLight> SunCB : register(b2);
 
-Texture2D gb0 : register(t0); // (x,y,z) - baseColor, worldPos x
-Texture2D gb1 : register(t1); // (x,y,z) - normal, worldPos y
+Texture2D gb0 : register(t0); // (x,y,z) - baseColor, a - worldPos x
+Texture2D gb1 : register(t1); // (x,y,z) - normal, a - worldPos y
 Texture2D gb2 : register(t2); // x - metall, y - roughness, a - worldPos z
 
 SamplerState PointSampler : register(s0);
@@ -30,8 +30,9 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 viewDir = normalize(SunCB.ViewPos.xyz - worldPos);
 
-	float3 finalColor = BRDF(viewDir, SunCB.Parameters.xyz, normal.xyz, metalRoughness.y, metalRoughness.x, col.xyz);
+	float3 finalColor = BRDF(viewDir, -SunCB.Parameters.xyz, normal.xyz, metalRoughness.y, metalRoughness.x, col.xyz);
 
-	return float4(worldPos, 1.0);
-	//return finalColor;
+	//return float4(worldPos, 1.0);
+	//return float4(finalColor, 1.0);
+	return normal;
 }

@@ -595,7 +595,7 @@ void SampleApp::UpdateGUI()
 
 			auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
 			sprintf_s(buffer, _countof(buffer), "Camera Pos{ X: %.2f Y: %.2f Z: %.2f }", XMVectorGetX(cameraTransformComponent.Position), XMVectorGetY(cameraTransformComponent.Position), XMVectorGetZ(cameraTransformComponent.Position));
-			ImGui::TextColored(ImVec4(0.0, 0.0, 0.0, 1.0), buffer);
+			ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), buffer);
 
 			auto posTextSize = ImGui::CalcTextSize(buffer);
 
@@ -641,7 +641,8 @@ bool SampleApp::LoadContent()
 	LoadAssets();
 
 	auto scene = Core::Get().GetScene();
-	scene->LoadFromJson(L"Resources/main.scene");
+	//scene->LoadFromJson(L"Resources/main.scene");
+	scene->LoadFromJson(L"Resources/main_sphere.scene");
 
 	m_sceneCamera = m_cameraSystem->GetActiveCamera();
 

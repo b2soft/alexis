@@ -128,7 +128,7 @@ namespace alexis
 		textureDesc.Format = format;
 		textureDesc.Width = width;
 		textureDesc.Height = height;
-		textureDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+		textureDesc.Flags = D3D12_RESOURCE_FLAG_NONE;
 		textureDesc.DepthOrArraySize = 1;
 		textureDesc.SampleDesc.Count = 1;
 		textureDesc.SampleDesc.Quality = 0;
