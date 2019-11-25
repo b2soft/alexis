@@ -45,14 +45,14 @@ namespace alexis
 
 		std::string convertedPath(path.begin(), path.end());
 
-		auto scene = importer.ReadFile(convertedPath, aiProcess_ConvertToLeftHanded |
+		auto scene = importer.ReadFile(convertedPath, /*aiProcess_ConvertToLeftHanded |*/
 			aiProcess_RemoveRedundantMaterials |
-			aiProcess_CalcTangentSpace |
-			aiProcess_Triangulate |
+			/*aiProcess_CalcTangentSpace |*/
+			//aiProcess_Triangulate |
 			//aiProcess_FlipUVs |
-			aiProcess_JoinIdenticalVertices |
-			aiProcess_ValidateDataStructure |
-			aiProcess_PreTransformVertices);
+			//aiProcess_JoinIdenticalVertices |
+			aiProcess_ValidateDataStructure /*|
+			aiProcess_PreTransformVertices*/);
 
 		if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 		{

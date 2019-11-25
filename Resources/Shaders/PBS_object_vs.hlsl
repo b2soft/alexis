@@ -25,7 +25,7 @@ struct VSOutput
 {
 	float2 uv0 : TEXCOORD;
 	float4 oPos : Test;
-	float3x3 TBN : TBNBASIS;
+	//float3x3 TBN : TBNBASIS;
 	float4 normal : NORMAL;
 	float4 position : SV_Position;
 };
@@ -42,13 +42,13 @@ VSOutput main(VSInput input)
 	output.uv0 = input.uv0;
 
 	//output.normal = float4(mul(ModelCB.ModelMatrix, input.normal).xyz, 0.0);
-	output.normal = float4(input.normal.xyz, 0.0);
+	//output.normal = float4(input.normal.xyz, 0.0);
 	
-	// output.TBN = float3x3(input.tangent.rgb, input.bitangent.rgb, input.normal.rgb);
-	// output.TBN = mul(ModelCB.ModelMatrix,output.TBN);
+	//output.TBN = float3x3(input.tangent.rgb, input.bitangent.rgb, input.normal.rgb);
+	//output.TBN = mul((float3x3)ModelCB.ModelMatrix,output.TBN);
 
-	// float4 normal = mul(ModelCB.ModelMatrix, float4(input.normal, 0.0f));
-	// normal = normalize(normal);
+	float4 normal = mul(ModelCB.ModelMatrix, float4(input.normal, 0.0f));
+	output.normal = normalize(normal);
 
 	// float4 tangent = mul(ModelCB.ModelMatrix, float4(input.tangent, 0.0f));
 	// tangent = normalize(tangent);
