@@ -1,7 +1,6 @@
 struct PSInput
 {
 	float2 uv0 : TEXCOORD;
-	float4 position : Test;
 	//float3x3 TBN : TBNBASIS;
 	float4 normal : NORMAL;
 };
@@ -30,10 +29,6 @@ PSOutput main(PSInput input)
 	//float4 normal = float4(mul(input.TBN, normalMap.rgb), 0.0);
 
 	float4 normal = normalize(input.normal);
-
-	texColor.a = input.position.x;
-	normal.a = input.position.y;
-	metalRoughness.a = input.position.z;
 
 	PSOutput output;
 	output.gb0 = texColor;

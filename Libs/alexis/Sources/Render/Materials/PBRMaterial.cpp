@@ -73,7 +73,7 @@ namespace alexis
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(m_vertexShader.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(m_pixelShader.Get());
 		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"GB");
-		pipelineStateStream.dsvFormat = rtManager->GetDSFormat(L"GB");
+		pipelineStateStream.dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;// rtManager->GetDSFormat(L"GB");
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{

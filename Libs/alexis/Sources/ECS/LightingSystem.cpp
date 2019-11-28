@@ -23,6 +23,13 @@ namespace alexis
 			XMVECTOR ViewPos;
 		};
 
+		// Todo: generalize common case
+		__declspec(align(16)) struct CameraParams
+		{
+			XMMATRIX invViewMatrix;
+			XMMATRIX invProjMatrix;
+		};
+
 		static SunLight s_sunLight;
 
 		void LightingSystem::Init()
@@ -31,7 +38,7 @@ namespace alexis
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 
-			s_sunLight.Parameters = XMFLOAT4{ 0.0, -1.0, 0.0f, 10.f };
+			s_sunLight.Parameters = XMFLOAT4{ 0.768221, -0.640184, 0.0f, 1.f };
 		}
 
 		void LightingSystem::Render(CommandContext* context)
@@ -40,10 +47,16 @@ namespace alexis
 
 			auto ecsWorld = Core::Get().GetECS();
 			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(cameraSystem->GetActiveCamera());
+			auto activeCamera = cameraSystem->GetActiveCamera();
+			
+			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(activeCamera);
 			s_sunLight.ViewPos = transformComponent.Position;
+			context->SetDynamicCBV(1, sizeof(s_sunLight), &s_sunLight);
 
-			context->SetDynamicCBV(0, sizeof(s_sunLight), &s_sunLight);
+			CameraParams cameraParams;
+			cameraParams.invViewMatrix = cameraSystem->GetInvViewMatrix(activeCamera);
+			cameraParams.invProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
+			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
 
 			m_fsQuad->Draw(context);
 

@@ -13,10 +13,9 @@ float4 main(PSInput input) : SV_TARGET
 	// http://filmicworlds.com/blog/filmic-tonemapping-operators/
 
 	float4 x = hdrRT.Sample(PointSampler, input.uv0);
-	x = max(0.0, x);
-	//x *= 16; // Hardcoded exponent
-	x = x / (1 + x);
-	x = pow(x, 1 / 2.2);
+	////x *= 16; // Hardcoded exponent
+	//x = x / (1 + x);
+	//x = pow(x, 1 / 2.2);
 
 	return x;
 }

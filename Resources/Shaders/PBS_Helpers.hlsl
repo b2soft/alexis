@@ -65,13 +65,13 @@ float3 BRDF(float3 v, float3 l, float3 n, float perceptualRoughness, float f0, f
 	float G = G_SmithGGXCorrelated(NdotV, NdotL, roughness);
 
 	// Specular BRDF
-	float3 specular = D * F * G * k_invPi;
+	float3 specular = float3(1.0, 1.0, 1.0) * F * (D * G * k_pi * NdotL);
 
 
 	// Diffuse BRDF
 	float3 diffuse = diffuseColor * Fd_Lambert();
 
-	//return specular;
+	return specular;
 	//return diffuse;
 	return diffuse + specular;
 }

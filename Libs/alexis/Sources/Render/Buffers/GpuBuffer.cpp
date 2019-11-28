@@ -151,7 +151,7 @@ namespace alexis
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDesc,
 			D3D12_RESOURCE_STATE_COMMON,
-			clearValue,
+			nullptr,
 			IID_PPV_ARGS(&m_resource)));
 
 		CreateViews();
@@ -193,7 +193,15 @@ namespace alexis
 
 		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		srvDesc.Format = resDesc.Format;
+		if (resDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+		{
+			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+		}
+		else
+		{
+			srvDesc.Format = resDesc.Format;
+		}
+		
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 
@@ -207,22 +215,29 @@ namespace alexis
 		const bool dsFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL) != 0;
 		const bool srvFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE) != 0;
 
-		if (srvFormatSupport)
+		if (/*srvFormatSupport*/ true)
 		{
 			m_srv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
 			device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetDescriptorHandle());
 		}
 
-		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 && rtFormatSupport)
+		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 /*&& rtFormatSupport*/)
 		{
 			m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
 			device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
 		}
 
-		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 && dsFormatSupport)
+		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 /*&& dsFormatSupport*/)
 		{
-			m_dsv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-			device->CreateDepthStencilView(m_resource.Get(), nullptr, m_dsv.GetDescriptorHandle());
+			if (resDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+			{
+				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+				dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+				m_dsv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+				device->CreateDepthStencilView(m_resource.Get(), &dsvDesc, m_dsv.GetDescriptorHandle());
+			}
 		}
 	}
 

@@ -24,7 +24,6 @@ struct VSInput
 struct VSOutput
 {
 	float2 uv0 : TEXCOORD;
-	float4 oPos : Test;
 	//float3x3 TBN : TBNBASIS;
 	float4 normal : NORMAL;
 	float4 position : SV_Position;
@@ -37,7 +36,7 @@ VSOutput main(VSInput input)
 	matrix mvpMatrix = mul(CameraCB.ViewProjMatrix, ModelCB.ModelMatrix);
 	float4 worldPos = float4(input.position, 1.0f);
 
-	output.oPos = mul(ModelCB.ModelMatrix, worldPos);
+	//output.oPos = mul(ModelCB.ModelMatrix, worldPos);
 	output.position = mul(mvpMatrix, worldPos);
 	output.uv0 = input.uv0;
 

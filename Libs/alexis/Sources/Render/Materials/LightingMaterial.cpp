@@ -12,6 +12,7 @@ namespace alexis
 {
 	enum LightingParameters
 	{
+		CameraParams,
 		SunLight,
 		GBuffer, //Texture2D 3 textures starting from BaseColor : register( t0 );
 		NumLightingParameters
@@ -36,9 +37,10 @@ namespace alexis
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_DOMAIN_SHADER_ROOT_ACCESS |
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
-		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 3, 0);
+		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);
 
 		CD3DX12_ROOT_PARAMETER1 rootParameters[LightingParameters::NumLightingParameters];
+		rootParameters[LightingParameters::CameraParams].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);
 		rootParameters[LightingParameters::SunLight].InitAsConstantBufferView(2, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);
 		rootParameters[LightingParameters::GBuffer].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
@@ -87,9 +89,12 @@ namespace alexis
 		auto gbuffer = rtManager->GetRenderTarget(L"GB");
 		auto hdr = rtManager->GetRenderTarget(L"HDR");
 
+		auto& depth = gbuffer->GetTexture(RenderTarget::DepthStencil);
+
 		commandContext->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandContext->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandContext->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		commandContext->TransitionResource(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		commandContext->SetRenderTarget(*hdr);
 		commandContext->SetViewport(hdr->GetViewport());
@@ -101,6 +106,7 @@ namespace alexis
 		commandContext->SetSRV(LightingParameters::GBuffer, 0, gbuffer->GetTexture(RenderTarget::Slot::Slot0));
 		commandContext->SetSRV(LightingParameters::GBuffer, 1, gbuffer->GetTexture(RenderTarget::Slot::Slot1));
 		commandContext->SetSRV(LightingParameters::GBuffer, 2, gbuffer->GetTexture(RenderTarget::Slot::Slot2));
+		commandContext->SetSRV(LightingParameters::GBuffer, 3, depth);
 	}
 
 }

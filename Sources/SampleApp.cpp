@@ -310,7 +310,8 @@ void SampleApp::LoadAssets()
 	//------
 
 	// Depth
-	DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
+	//DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
+	DXGI_FORMAT depthFormat = DXGI_FORMAT_R24G8_TYPELESS;
 	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthFormat, alexis::g_clientWidth, alexis::g_clientHeight);
 	depthDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
@@ -332,8 +333,8 @@ void SampleApp::LoadAssets()
 		D3D12_CLEAR_VALUE colorClearValue;
 		colorClearValue.Format = colorDesc.Format;
 		colorClearValue.Color[0] = 0.0f;
-		colorClearValue.Color[1] = 0.2f;
-		colorClearValue.Color[2] = 0.4f;
+		colorClearValue.Color[1] = 0.0f;
+		colorClearValue.Color[2] = 0.0f;
 		colorClearValue.Color[3] = 1.0f;
 
 		TextureBuffer gb0;
@@ -420,7 +421,8 @@ void SampleApp::PopulateCommandList()
 	auto hdrCommandContext = commandManager->CreateCommandContext();
 	auto imguiContext = commandManager->CreateCommandContext();
 
-	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+	//const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+	const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
 
 	auto gbuffer = render->GetRTManager()->GetRenderTarget(L"GB");
 	auto hdrRT = render->GetRTManager()->GetRenderTarget(L"HDR");
