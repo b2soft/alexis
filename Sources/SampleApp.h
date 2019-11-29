@@ -77,7 +77,7 @@ private:
 	float m_downMovement{ 0.0f };
 
 	float m_pitch{ 0.0f };
-	float m_yaw{ 0.0f };
+	float m_yaw{ 180.0f };
 
 	void LoadPipeline();
 	void LoadAssets();

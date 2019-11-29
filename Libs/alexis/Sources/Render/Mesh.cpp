@@ -45,8 +45,8 @@ namespace alexis
 
 		std::string convertedPath(path.begin(), path.end());
 
-		auto scene = importer.ReadFile(convertedPath, /*aiProcess_ConvertToLeftHanded |*/
-			aiProcess_RemoveRedundantMaterials |
+		auto scene = importer.ReadFile(convertedPath, aiProcess_ConvertToLeftHanded |
+			//aiProcess_RemoveRedundantMaterials |
 			/*aiProcess_CalcTangentSpace |*/
 			//aiProcess_Triangulate |
 			//aiProcess_FlipUVs |

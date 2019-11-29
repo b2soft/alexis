@@ -643,7 +643,8 @@ bool SampleApp::LoadContent()
 	LoadAssets();
 
 	auto scene = Core::Get().GetScene();
-	scene->LoadFromJson(L"Resources/main.scene");
+	//scene->LoadFromJson(L"Resources/main.scene");
+	scene->LoadFromJson(L"Resources/shaderball.scene");
 	//scene->LoadFromJson(L"Resources/main_sphere.scene");
 
 	m_sceneCamera = m_cameraSystem->GetActiveCamera();
