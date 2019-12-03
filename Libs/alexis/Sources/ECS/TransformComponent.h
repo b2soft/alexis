@@ -8,6 +8,7 @@ namespace alexis
 		{
 			DirectX::XMVECTOR Position;
 			DirectX::XMVECTOR Rotation;
+			float UniformScale;
 		};
 	}
 }

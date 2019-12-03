@@ -28,7 +28,7 @@ PSOutput main(PSInput input)
 
 	//float4 normal = float4(mul(input.TBN, normalMap.rgb), 0.0);
 
-	float4 normal = normalize(input.normal);
+	float4 normal = float4(input.normal.xyz, 1.0);
 
 	PSOutput output;
 	output.gb0 = texColor;

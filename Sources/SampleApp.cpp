@@ -334,7 +334,7 @@ void SampleApp::LoadAssets()
 		colorClearValue.Format = colorDesc.Format;
 		colorClearValue.Color[0] = 0.0f;
 		colorClearValue.Color[1] = 0.0f;
-		colorClearValue.Color[2] = 0.0f;
+		colorClearValue.Color[2] = 0.5f;
 		colorClearValue.Color[3] = 1.0f;
 
 		TextureBuffer gb0;
@@ -369,8 +369,8 @@ void SampleApp::LoadAssets()
 		D3D12_CLEAR_VALUE colorClearValue;
 		colorClearValue.Format = colorDesc.Format;
 		colorClearValue.Color[0] = 0.0f;
-		colorClearValue.Color[1] = 0.2f;
-		colorClearValue.Color[2] = 0.4f;
+		colorClearValue.Color[1] = 0.0f;
+		colorClearValue.Color[2] = 0.0f;
 		colorClearValue.Color[3] = 1.0f;
 
 		TextureBuffer hdrTexture;
@@ -422,7 +422,7 @@ void SampleApp::PopulateCommandList()
 	auto imguiContext = commandManager->CreateCommandContext();
 
 	//const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-	const float clearColor[] = { 0.0f, 0.0f, 0.0f, 1.0f };
+	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
 
 	auto gbuffer = render->GetRTManager()->GetRenderTarget(L"GB");
 	auto hdrRT = render->GetRTManager()->GetRenderTarget(L"HDR");
@@ -445,7 +445,7 @@ void SampleApp::PopulateCommandList()
 			}
 
 			clearTargetCommandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			clearTargetCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0);
+			clearTargetCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
 
 			// Clear HDR
 			auto& texture = hdrRT->GetTexture(static_cast<RenderTarget::Slot>(RenderTarget::Slot::Slot0));

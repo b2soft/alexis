@@ -18,10 +18,11 @@
                       "z":-7.0
                    },
                    "rotation":{
-                      "x":30,
+                      "x":30.0,
                       "y":0.0,
                       "z":0.0
-                   }
+                   },
+				   "scale":1.0
                 }
              }
           ]
@@ -45,7 +46,58 @@
                      "x":0.0,
                      "y":0.0,
                      "z":0.0
-                  }
+                  },
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+	  {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/ShaderBall.fbx",
+				  "material":"Resources/Materials/Metal.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":5.0,
+                     "y":5.0,
+                     "z":-5.0
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+	  {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/Plane.fbx",
+				  "material":"Resources/Materials/Metal.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+				  "scale":200.0
                }
             }
          ]

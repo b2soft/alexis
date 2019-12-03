@@ -3,12 +3,11 @@ static const float k_invPi = 1.0 / k_pi;
 
 // Specular BRDF
 // Normal Distribution Function (D Term)
-float D_GGX(float NdotH, float roughness)
+float D_GGX(float NdotH, float a)
 {
-	float a = NdotH * roughness;
-	float k = roughness / (1.0 - NdotH * NdotH + a * a);
-
-	return k * k * k_invPi;
+	float a2 = a * a;
+	float f = (NdotH * a2 - NdotH) * NdotH + 1.0;
+	return a2 / (f * f);
 }
 
 // Geometric Shadowing (G Term)
@@ -25,7 +24,7 @@ float V_SmithGGXCorrelated(float NdotL, float NdotV, float a2)
 // U == LdotH
 float3 F_Schlick(float3 f0, float VdotH)
 {
-	float f = (1.0 - VdotH, 5.0);
+	float f = pow(1.0 - VdotH, 5.0);
 	return f + f0 * (1.0 - f);
 }
 
@@ -44,6 +43,7 @@ float3 BRDF(float3 v, float3 l, float3 n, float3 baseColor, float metallic, floa
 	float NdotL = saturate(dot(n, l));
 	float NdotH = saturate(dot(n, h));
 	float LdotH = saturate(dot(l, h));
+	float VdotH = saturate(dot(v, h));
 
 	// Roughness remapping
 	float a = roughness * roughness;
@@ -52,17 +52,17 @@ float3 BRDF(float3 v, float3 l, float3 n, float3 baseColor, float metallic, floa
 
 	float3 f0 = 0.16 * reflectance * reflectance * (1.0 - metallic) * baseColor * metallic;
 
-	float D = D_GGX(NdotH, roughness);
+	float D = D_GGX(NdotH, a);
 	float3 F = F_Schlick(f0, LdotH);
 	float V = V_SmithGGXCorrelated(NdotV, NdotL, roughness);
 
 	// Specular BRDF
-	float3 specular = D * F * V * k_invPi;
+	float3 specular = D * k_invPi;// D* F* V* k_invPi;
 
 	// Diffuse BRDF
 	float3 diffuse = baseColor * Fd_Lambert();
 
-	//return specular;
+	return specular;
 	return diffuse;
 	//return diffuse + specular;
 }

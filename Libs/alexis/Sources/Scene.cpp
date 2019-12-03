@@ -56,11 +56,13 @@ namespace alexis
 				{
 					auto posJson = componentKV.value()["position"];
 					auto rotJson = componentKV.value()["rotation"];
+					auto scaleJson = componentKV.value()["scale"];
 
 					XMVECTOR position = XMVectorSet(posJson["x"], posJson["y"], posJson["z"], 1.f);
 					XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(rotJson["x"]), XMConvertToRadians(rotJson["y"]), XMConvertToRadians(rotJson["z"]));
+					float scale = scaleJson;
 
-					ecsWorld->AddComponent(entity, ecs::TransformComponent{ position, rotation });
+					ecsWorld->AddComponent(entity, ecs::TransformComponent{ position, rotation, scale });
 				}
 				else if (componentName == "ModelComponent")
 				{

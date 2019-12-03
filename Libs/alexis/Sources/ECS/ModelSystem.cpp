@@ -35,8 +35,11 @@ namespace alexis
 				{
 					XMMATRIX translationMatrix = XMMatrixTranslationFromVector(transformComponent.Position);
 					XMMATRIX rotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(transformComponent.Rotation));
+					XMMATRIX scalingMatrix = XMMatrixScaling(transformComponent.UniformScale, transformComponent.UniformScale, transformComponent.UniformScale);
 
 					modelComponent.ModelMatrix = XMMatrixMultiply(translationMatrix, rotationMatrix);
+					modelComponent.ModelMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, scalingMatrix);
+					
 					modelComponent.IsTransformDirty = false;
 				}
 			}
