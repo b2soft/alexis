@@ -168,6 +168,8 @@ namespace alexis
 		VertexCollection vertices;
 		IndexCollection indices;
 
+		uint32_t offset = 0;
+
 		for (std::size_t i = 0; i < scene->mNumMeshes; ++i)
 		{
 			const aiMesh* mesh = scene->mMeshes[i];
@@ -176,9 +178,9 @@ namespace alexis
 			{
 				const aiFace* face = &mesh->mFaces[t];
 
-				indices.emplace_back(face->mIndices[0]);
-				indices.emplace_back(face->mIndices[1]);
-				indices.emplace_back(face->mIndices[2]);
+				indices.emplace_back(offset + face->mIndices[0]);
+				indices.emplace_back(offset + face->mIndices[1]);
+				indices.emplace_back(offset + face->mIndices[2]);
 			}
 
 			vertices.reserve(mesh->mNumVertices);
@@ -209,6 +211,8 @@ namespace alexis
 
 				vertices.emplace_back(def);
 			}
+
+			offset += mesh->mNumVertices;
 		}
 
 		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
