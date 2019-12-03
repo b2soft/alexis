@@ -76,8 +76,9 @@ private:
 	float m_upMovement{ 0.0f };
 	float m_downMovement{ 0.0f };
 
+	// TODO: load such values from Scene JSON
 	float m_pitch{ 0.0f };
-	float m_yaw{ 180.0f };
+	float m_yaw{ 0.0f };
 
 	void LoadPipeline();
 	void LoadAssets();

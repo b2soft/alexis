@@ -63,9 +63,14 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT dsvFormat;
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
+			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL depthStencil;
 		} pipelineStateStream;
 
 		auto rtManager = Render::GetInstance()->GetRTManager();
+
+		CD3DX12_DEPTH_STENCIL_DESC	dsDesc{ CD3DX12_DEFAULT() };
+		dsDesc.StencilEnable = TRUE;
+		dsDesc.FrontFace.StencilPassOp = D3D12_STENCIL_OP_INCR_SAT;
 
 		pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
 		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
@@ -73,7 +78,8 @@ namespace alexis
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(m_vertexShader.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(m_pixelShader.Get());
 		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"GB");
-		pipelineStateStream.dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;// rtManager->GetDSFormat(L"GB");
+		pipelineStateStream.dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;// rtManager->GetDSFormat(L"GB"); // 
+		pipelineStateStream.depthStencil = dsDesc;
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{
