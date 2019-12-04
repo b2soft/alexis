@@ -31,17 +31,6 @@ float3 F_Schlick(float3 f0, float VdotH)
 	return f0 + (1 - f0) * pow(2.0f, p);
 }
 
-// Geometric Shadowing (G Term)
-// a2 is roughness squared
-float V_SmithGGXCorrelated(float NdotL, float NdotV, float a)
-{
-	float a2 = a * a;
-	float GGXV = NdotL * sqrt(NdotV * NdotV * (1.0 - a2) + a2);
-	float GGXL = NdotV * sqrt(NdotL * NdotL * (1.0 - a2) + a2);
-
-	return 0.5 / max(0.0001f, GGXV + GGXL);
-}
-
 // Diffuse BRDF
 // Lambertian BRDF
 float Fd_Lambert()
