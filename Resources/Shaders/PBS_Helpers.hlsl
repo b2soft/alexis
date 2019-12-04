@@ -10,7 +10,25 @@ float D_GGX(float NdotH, float a)
 {
 	float a2 = a * a;
 	float f = (NdotH * a2 - NdotH) * NdotH + 1.0;
-	return a2 / (f * f);
+	//float f = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+	return (a2 * k_invPi) / (f * f);
+}
+
+// Geometric Shadowing (G Term)
+// Schlick model with k = a/2
+float G_Schlick(float NdotL, float NdotV, float roughness)
+{
+	float k = (roughness + 1.0f) * (roughness + 1.0f) * 0.125f;
+	float GGX_V = NdotV / (NdotV * (1.0 - k) + k);
+	float GGX_L = NdotL / (NdotL * (1.0 - k) + k);
+	return GGX_V + GGX_L;
+}
+
+// Fresnel (F Term)
+float3 F_Schlick(float3 f0, float VdotH)
+{
+	float p = (-5.55473f * VdotH - 6.98316f) * VdotH;
+	return f0 + (1 - f0) * pow(2.0f, p);
 }
 
 // Geometric Shadowing (G Term)
@@ -22,13 +40,6 @@ float V_SmithGGXCorrelated(float NdotL, float NdotV, float a)
 	float GGXL = NdotV * sqrt(NdotL * NdotL * (1.0 - a2) + a2);
 
 	return 0.5 / max(0.0001f, GGXV + GGXL);
-}
-
-// Fresnel (F term)
-float3 F_Schlick(float3 f0, float VdotH)
-{
-	float f = pow(1.0 - VdotH, 5.0);
-	return f + f0 * (1.0 - f);
 }
 
 // Diffuse BRDF
@@ -48,20 +59,17 @@ float3 BRDF(float3 v, float3 l, float3 n, float3 baseColor, float metallic, floa
 	float NdotH = saturate(dot(n, h));
 	float VdotH = saturate(dot(v, h));
 
-	// Roughness remapping
-	float roughnessSquared = roughness * roughness;
 	float3 diffuseColor = (1.0 - metallic) * baseColor.rgb;
-	float reflectance = 0.5;
+	float3 specularColor = lerp(0.04, baseColor.rgb, metallic);
 
-	float3 specularColor = 0.16 * reflectance * reflectance * (1.0 - metallic) + baseColor * metallic;
-
-	float D = D_GGX(NdotH, roughnessSquared);
+	float D = D_GGX(NdotH, roughness * roughness);
 	float3 F = F_Schlick(specularColor, VdotH);
-	float G = V_SmithGGXCorrelated(NdotL, NdotV, roughnessSquared);
+	float G = G_Schlick(NdotL, NdotV, roughness);
 
-	float3 diffuse = diffuseColor * Fd_Lambert();
-	float3 specular = lightColor * F * (D * G * k_pi * NdotL);
+	float3 diffuse = diffuseColor * Fd_Lambert() * lightColor * NdotL;
 
-	//return G * k_invPi;
-	return diffuse;
+	float3 specularBRDF = (D * F * G) / (4.0f * NdotL * NdotV);
+	float3 specular = specularColor * lightColor * specularBRDF;
+
+	return diffuse + specular;
 }
