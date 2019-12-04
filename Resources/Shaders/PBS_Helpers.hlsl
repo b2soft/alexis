@@ -9,8 +9,8 @@ static const float k_invPi = 1.0 / k_pi;
 float D_GGX(float NdotH, float a)
 {
 	float a2 = a * a;
-	float f = (NdotH * a2 - NdotH) * NdotH + 1.0;
-	//float f = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
+	//float f = (NdotH * a2 - NdotH) * NdotH + 1.0;
+	float f = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
 	return (a2 * k_invPi) / (f * f);
 }
 

@@ -68,7 +68,7 @@ float4 main(PSInput input) : SV_TARGET
 	//float NdotL = dot(N, L);
 
 	float roughness = 0.0;
-	float metallic = 0.0;
+	float metallic = 1.0;
 	//return LinearizeDepth(depth);
 	//return float4(V, 1.0);
 
