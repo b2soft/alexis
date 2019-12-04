@@ -76,31 +76,6 @@
                }
             }
          ]
-      },
-	  {
-         "components":[
-            {
-               "ModelComponent":{
-                  "mesh":"Resources/Models/Plane.fbx",
-				  "material":"Resources/Materials/Metal.material"
-               }
-            },
-            {
-               "TransformComponent":{
-                  "position":{
-                     "x":0.0,
-                     "y":0.0,
-                     "z":0.0
-                  },
-                  "rotation":{
-                     "x":0.0,
-                     "y":0.0,
-                     "z":0.0
-                  },
-				  "scale":200.0
-               }
-            }
-         ]
       }
     ]
  }

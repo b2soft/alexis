@@ -69,18 +69,19 @@ float4 main(PSInput input) : SV_TARGET
 	float3 N = normal.xyz;
 	float3 L = normalize(-SunCB.Parameters.xyz);
 	float3 V = normalize(SunCB.ViewPos.xyz - worldPos);
-	float intensity = dot(N, L);
+	float NdotL = dot(N, L);
 
 	float3 sunColor = float3(1.0, 1.0, 1.0); //0.88, 0.65, 0.2
 
 	float roughness = 0.5;
-	float metallic = 0.0;
+	float metallic = 1.0;
 	//return LinearizeDepth(depth);
 	//return float4(V, 1.0);
 
+	// For each light
 	//float3 finalColor = BRDF(V, L, N, metalRoughness.y, metalRoughness.x, baseColor.xyz);
 	float3 finalColor = BRDF(V, L, N, baseColor.xyz, metallic, roughness);
-	//finalColor = finalColor * sunColor * SunCB.Parameters.w * 10.0 * intensity;
+	//finalColor = finalColor * sunColor * SunCB.Parameters.w * 5.0 * NdotL;
 
 	//return float4(N, 1.0);
 	return float4(finalColor, 1.0);

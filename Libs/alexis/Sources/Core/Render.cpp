@@ -348,7 +348,7 @@ namespace alexis
 	{
 		ComPtr<IDXGIFactory4> dxgiFactory;
 		UINT createFactoryFlags = 0;
-#if defined(_DEBUG)
+#if defined(_DEBUG) && defined(ENABLE_DEBUG_LAYER)
 		createFactoryFlags = DXGI_CREATE_FACTORY_DEBUG;
 #endif
 

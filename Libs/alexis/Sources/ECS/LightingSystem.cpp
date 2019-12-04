@@ -38,7 +38,8 @@ namespace alexis
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 
-			s_sunLight.Parameters = XMFLOAT4{ -0.7f, -1.f, 0.f, 1.f };
+			//s_sunLight.Parameters = XMFLOAT4{ -0.7f, -1.f, 0.f, 1.f };
+			s_sunLight.Parameters = XMFLOAT4{ -0.f, -1.f, 0.f, 1.f };
 		}
 
 		void LightingSystem::Render(CommandContext* context)
