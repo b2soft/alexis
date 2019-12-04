@@ -19,9 +19,9 @@ float D_GGX(float NdotH, float a)
 float G_Schlick(float NdotL, float NdotV, float roughness)
 {
 	float k = (roughness + 1.0f) * (roughness + 1.0f) * 0.125f;
-	float GGX_V = NdotV / (NdotV * (1.0 - k) + k);
-	float GGX_L = NdotL / (NdotL * (1.0 - k) + k);
-	return GGX_V + GGX_L;
+	float GGX_V = NdotV / (NdotV * (1.0f - k) + k);
+	float GGX_L = NdotL / (NdotL * (1.0f - k) + k);
+	return GGX_V * GGX_L;
 }
 
 // Fresnel (F Term)
