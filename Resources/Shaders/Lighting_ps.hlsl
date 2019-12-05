@@ -57,7 +57,7 @@ float4 main(PSInput input) : SV_TARGET
 {
 	float4 baseColor = gb0.Sample(PointSampler, input.uv0);
 	float4 normal = gb1.Sample(PointSampler, input.uv0);
-	//float4 metalRoughness = gb2.Sample(PointSampler, input.uv0);
+	float4 metalRoughness = gb2.Sample(PointSampler, input.uv0);
 
 	float depth = depthTexture.Sample(PointSampler, input.uv0).r;
 	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
@@ -65,15 +65,9 @@ float4 main(PSInput input) : SV_TARGET
 	float3 N = normal.xyz;
 	float3 L = normalize(-SunCB.Parameters.xyz);
 	float3 V = normalize(SunCB.ViewPos.xyz - worldPos);
-	//float NdotL = dot(N, L);
-
-	float roughness = 0.0;
-	float metallic = 1.0;
-	//return LinearizeDepth(depth);
-	//return float4(V, 1.0);
 
 	// For each light
-	float3 finalColor = BRDF(V, L, N, baseColor.xyz, metallic, roughness);
+	float3 finalColor = BRDF(V, L, N, baseColor.xyz, metalRoughness.r, metalRoughness.g);
 
 	return float4(finalColor, 1.0);
 }

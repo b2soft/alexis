@@ -12,10 +12,10 @@ float4 main(PSInput input) : SV_TARGET
 	// Very basic tonemap - Reinhard tonemapping
 	// http://filmicworlds.com/blog/filmic-tonemapping-operators/
 
-	float4 x = hdrRT.Sample(PointSampler, input.uv0);
-	////x *= 16; // Hardcoded exponent
-	//x = x / (1 + x);
-	//x = pow(x, 1 / 2.2);
+	float3 x = hdrRT.Sample(PointSampler, input.uv0);
+	x *= 4.0f; // Hardcoded exponent
+	x = x / (1.0f + x);
+	x = pow(x, (1.0f / 2.2f));
 
-	return x;
+	return float4(x, 1.0f);
 }
