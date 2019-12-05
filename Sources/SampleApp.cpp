@@ -326,7 +326,8 @@ void SampleApp::LoadAssets()
 	{
 		auto gbuffer = std::make_unique<RenderTarget>();
 
-		DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		//DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+		DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
 		auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(gbufferColorFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
 		colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
 

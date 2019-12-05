@@ -47,7 +47,7 @@ VSOutput main(VSInput input)
 	//output.TBN = mul((float3x3)ModelCB.ModelMatrix,output.TBN);
 
 	float4 normal = mul(ModelCB.ModelMatrix, float4(input.normal, 0.0f));
-	output.normal = normalize(normal);
+	output.normal = normal;
 
 	// float4 tangent = mul(ModelCB.ModelMatrix, float4(input.tangent, 0.0f));
 	// tangent = normalize(tangent);
