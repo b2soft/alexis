@@ -15,16 +15,16 @@ struct PSInput
 struct SunLight
 {
 	float4 Parameters; // (x,y,z) - direction, w - intensity
-	float4 ViewPos;
+	float4 ViewPos; // Camera position
 };
 
 ConstantBuffer<CameraParams> CamCB : register(b0);
 ConstantBuffer<SunLight> SunCB : register(b2);
 
-Texture2D gb0 : register(t0); // (x,y,z) - baseColor
-Texture2D gb1 : register(t1); // (x,y,z) - normal
-Texture2D gb2 : register(t2); // x - metall
-Texture2D depthTexture : register(t3); // Depth
+Texture2D gb0 : register(t0); // (x,y,z) - baseColor RGB
+Texture2D gb1 : register(t1); // (x,y,z) - normal XYZ
+Texture2D gb2 : register(t2); // x - metall, y - roughness
+Texture2D depthTexture : register(t3); // Depth 24-bit + Stencil 8-bit
 
 SamplerState PointSampler : register(s0);
 
