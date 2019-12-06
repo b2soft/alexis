@@ -5,6 +5,7 @@
 #include <ECS/ECS.h>
 #include <ECS/CameraSystem.h>
 #include <ECS/TransformComponent.h>
+#include <ECS/LightComponent.h>
 
 #include <Core/Core.h>
 #include <Core/ResourceManager.h>
@@ -16,30 +17,25 @@ namespace alexis
 {
 	namespace ecs
 	{
-
-		struct SunLight
-		{
-			XMFLOAT4 Parameters;
-			XMVECTOR ViewPos;
-		};
-
 		// Todo: generalize common case
 		__declspec(align(16)) struct CameraParams
 		{
-			XMMATRIX invViewMatrix;
-			XMMATRIX invProjMatrix;
+			XMVECTOR CameraPos;
+			XMMATRIX InvViewMatrix;
+			XMMATRIX InvProjMatrix;
 		};
 
-		static SunLight s_sunLight;
+		__declspec(align(16)) struct DirectionalLight
+		{
+			XMVECTOR Direction;
+			XMVECTOR Color; 
+		};
 
 		void LightingSystem::Init()
 		{
 			m_lightingMaterial = std::make_unique<LightingMaterial>();
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
-
-			//s_sunLight.Parameters = XMFLOAT4{ -0.7f, -1.f, 0.f, 1.f };
-			s_sunLight.Parameters = XMFLOAT4{ -0.f, -1.f, 0.f, 1.f };
 		}
 
 		void LightingSystem::Render(CommandContext* context)
@@ -51,31 +47,28 @@ namespace alexis
 			auto activeCamera = cameraSystem->GetActiveCamera();
 
 			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(activeCamera);
-			s_sunLight.ViewPos = transformComponent.Position;
-			context->SetDynamicCBV(1, sizeof(s_sunLight), &s_sunLight);
 
 			CameraParams cameraParams;
-			cameraParams.invViewMatrix = cameraSystem->GetInvViewMatrix(activeCamera);
-			cameraParams.invProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
+			cameraParams.CameraPos = transformComponent.Position;
+			cameraParams.InvViewMatrix = cameraSystem->GetInvViewMatrix(activeCamera);
+			cameraParams.InvProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
 			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
 
+			DirectionalLight directionalLights[1];
+
+			for (const auto& entity : Entities)
+			{
+				auto& lightComponent = ecsWorld->GetComponent<LightComponent>(entity);
+				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
+				{
+					directionalLights[0].Color = lightComponent.Color;
+					directionalLights[0].Direction = lightComponent.Direction;
+				}
+			}
+
+			context->SetDynamicCBV(1, sizeof(directionalLights), &directionalLights);
+
 			m_fsQuad->Draw(context);
-
-			//auto ecsWorld = Core::Get().GetECS();
-
-			//for (const auto& entity : Entities)
-			//{
-			//	auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
-
-			//	// Update the MVP matrix
-			//	XMMATRIX mvpMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, viewProj);
-
-			//	modelComponent.Material->SetupToRender(context);
-
-			//	context->SetDynamicCBV(0, sizeof(mvpMatrix), &mvpMatrix);
-			//	modelComponent.Mesh->Draw(context);
-
-			//}
 		}
 	}
 }

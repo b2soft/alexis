@@ -21,6 +21,7 @@
 #include <ECS/CameraComponent.h>
 #include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
+#include <ECS/LightComponent.h>
 
 #include <Core/ResourceManager.h>
 #include <Render/Materials/Hdr2SdrMaterial.h>
@@ -55,6 +56,7 @@ bool SampleApp::Initialize()
 	ecsWorld->RegisterComponent<ecs::ModelComponent>();
 	ecsWorld->RegisterComponent<ecs::TransformComponent>();
 	ecsWorld->RegisterComponent<ecs::CameraComponent>();
+	ecsWorld->RegisterComponent<ecs::LightComponent>();
 
 	// Model System
 	m_modelSystem = ecsWorld->RegisterSystem<ecs::ModelSystem>();
@@ -76,8 +78,8 @@ bool SampleApp::Initialize()
 	m_lightingSystem = ecsWorld->RegisterSystem<ecs::LightingSystem>();
 
 	ecs::ComponentMask lightingSystemMask;
-	//cameraSystemMask.set(ecsWorld->GetComponentType<ecs::CameraComponent>());
-	lightingSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
+	lightingSystemMask.set(ecsWorld->GetComponentType<ecs::LightComponent>());
+	//lightingSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
 	ecsWorld->SetSystemComponentMask<ecs::LightingSystem>(lightingSystemMask);
 
 	return true;

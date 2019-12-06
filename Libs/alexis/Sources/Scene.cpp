@@ -14,6 +14,7 @@
 #include <ECS/ModelComponent.h>
 #include <ECS/CameraComponent.h>
 #include <ECS/TransformComponent.h>
+#include <ECS/LightComponent.h>
 
 namespace alexis
 {
@@ -76,6 +77,21 @@ namespace alexis
 
 					// TODO: Move semantics for adding components
 					ecsWorld->AddComponent(entity, ecs::ModelComponent{ mesh, material });
+				}
+				else if (componentName == "LightComponent")
+				{
+					std::string lightTypeStr = componentKV.value()["type"];
+
+					if (lightTypeStr == "Directional")
+					{
+						auto colorJson = componentKV.value()["color"];
+						XMVECTOR color = XMVectorSet(colorJson["r"], colorJson["g"], colorJson["b"], 1.f);
+
+						auto dirJson = componentKV.value()["direction"];
+						XMVECTOR direction = XMVectorSet(dirJson["x"], dirJson["y"], dirJson["z"], 1.f);
+
+						ecsWorld->AddComponent(entity, ecs::LightComponent{ ecs::LightComponent::LightType::Directional, direction, color });
+					}
 				}
 			}
 		}

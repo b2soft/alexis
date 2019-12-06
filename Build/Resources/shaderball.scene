@@ -32,7 +32,82 @@
             {
                "ModelComponent":{
                   "mesh":"Resources/Models/ShaderBall.fbx",
-				      "material":"Resources/Materials/Metal.material"
+				  "material":"Resources/Materials/Metal.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+      {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/Plane.fbx",
+				  "material":"Resources/Materials/Grid_red.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+				      "scale":100.0
+               }
+            }
+         ]
+      },
+      {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/ShaderBall.fbx",
+				      "material":"Resources/Materials/Grid_orange.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":90.0,
+                     "z":0.0
+                  },
+				      "scale":1.0
+               }
+            }
+         ]
+      },
+      {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/ShaderBall.fbx",
+				  "material":"Resources/Materials/Metal.material"
                }
             },
             {
@@ -76,6 +151,25 @@
                }
             }
          ]
-      }
+      },
+	  {
+		"components":[
+			{
+				"LightComponent":{
+					"type":"Directional",
+					"color":{
+						"r":1.0,
+						"g":1.0,
+						"b":1.0
+					},
+					"direction":{
+						"x":0.0,
+						"y":-1.0,
+						"z":0.0
+					}
+				}
+			}
+		]
+	  }
     ]
  }

@@ -30,6 +30,7 @@
     <ClInclude Include="Sources\ECS\CameraComponent.h" />
     <ClInclude Include="Sources\ECS\CameraSystem.h" />
     <ClInclude Include="Sources\ECS\ECS.h" />
+    <ClInclude Include="Sources\ECS\LightComponent.h" />
     <ClInclude Include="Sources\ECS\LightingSystem.h" />
     <ClInclude Include="Sources\ECS\ModelComponent.h" />
     <ClInclude Include="Sources\ECS\ModelSystem.h" />
