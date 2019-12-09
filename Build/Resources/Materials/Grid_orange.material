@@ -1,6 +1,0 @@
-{
-   "type" : "PBS",
-   "baseColor":"Resources/Textures/Grid_Orange.dds",
-   "normalMap":"Resources/Textures/metal_normal.dds",
-   "metalRoughness":"Resources/Textures/metal_mero.dds"
-}

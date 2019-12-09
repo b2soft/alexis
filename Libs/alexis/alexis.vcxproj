@@ -47,6 +47,7 @@
     <ClInclude Include="Sources\Render\Materials\LightingMaterial.h" />
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h" />
     <ClInclude Include="Sources\Render\Materials\PBRMaterial.h" />
+    <ClInclude Include="Sources\Render\Materials\PBS_Simple.h" />
     <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\RenderTarget.h" />
     <ClInclude Include="Sources\Render\RenderTargetManager.h" />
@@ -77,6 +78,7 @@
     <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
+    <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp" />
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />

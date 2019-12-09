@@ -1,0 +1,6 @@
+{
+   "type" : "PBS_Simple",
+   "baseColor":"Resources/Textures/Grid_Orange.dds",
+   "metallic":0.0,
+   "roughness":0.9
+}

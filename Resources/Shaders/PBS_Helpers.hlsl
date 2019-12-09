@@ -38,10 +38,6 @@ float Fd_Lambert()
 
 float3 BRDF(float3 v, float3 l, float3 n, float3 baseColor, float metallic, float roughness, float3 lightColor)
 {
-	baseColor = float3(1.0, 0.0, 0.0);
-	metallic = 0.0f;
-	roughness = 0.1f;
-
 	float3 h = normalize(l + v);
 
 	float NdotV = abs(dot(n, v)) + 1e-5f;

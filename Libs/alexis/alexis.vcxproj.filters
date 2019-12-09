@@ -103,6 +103,9 @@
     <ClCompile Include="Sources\ECS\LightingSystem.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -206,6 +209,9 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\LightComponent.h">
       <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\PBS_Simple.h">
+      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
