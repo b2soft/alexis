@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <Utils/unordered_map.h>
 
 #include <Render/Materials/MaterialBase.h>
 
@@ -16,23 +16,23 @@ namespace alexis
 	public:
 		ResourceManager();
 
-		TextureBuffer* GetTexture(const std::wstring& path);
-		Mesh* GetMesh(const std::wstring& path);
-		MaterialBase* GetMaterial(const std::wstring& path);
+		TextureBuffer* GetTexture(std::wstring_view path);
+		Mesh* GetMesh(std::wstring_view path);
+		MaterialBase* GetMaterial(std::wstring_view path);
 
 	private:
 		CommandContext* m_copyContext{ nullptr };
 
-		using TextureMap = std::unordered_map<std::wstring, TextureBuffer>;
-		TextureMap::iterator LoadTexture(const std::wstring& path);
+		using TextureMap = alexis::unordered_map<std::wstring, TextureBuffer>;
+		TextureMap::iterator LoadTexture(std::wstring_view path);
 		TextureMap m_textures;
 
-		using MeshMap = std::unordered_map<std::wstring, std::unique_ptr<Mesh>>;
-		MeshMap::iterator LoadMesh(const std::wstring& path);
+		using MeshMap = alexis::unordered_map<std::wstring, std::unique_ptr<Mesh>>;
+		MeshMap::iterator LoadMesh(std::wstring_view path);
 		MeshMap m_meshes;
 
-		using MaterialMap = std::unordered_map<std::wstring, std::unique_ptr<MaterialBase>>;
-		MaterialMap::iterator LoadMaterial(const std::wstring& path);
+		using MaterialMap = alexis::unordered_map<std::wstring, std::unique_ptr<MaterialBase>>;
+		MaterialMap::iterator LoadMaterial(std::wstring_view path);
 		MaterialMap m_materials;
 	};
 

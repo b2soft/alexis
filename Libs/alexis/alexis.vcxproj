@@ -54,6 +54,7 @@
     <ClInclude Include="Sources\Render\RootSignature.h" />
     <ClInclude Include="Sources\Scene.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
+    <ClInclude Include="Sources\Utils\unordered_map.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Sources\Core\CommandManager.cpp" />
@@ -189,7 +190,7 @@
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
@@ -253,7 +254,7 @@
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
       <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>

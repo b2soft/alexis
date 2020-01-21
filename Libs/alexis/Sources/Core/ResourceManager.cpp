@@ -26,7 +26,7 @@ namespace alexis
 		m_copyContext = commandManager->CreateCommandContext(D3D12_COMMAND_LIST_TYPE_COPY);
 	}
 
-	TextureBuffer* ResourceManager::GetTexture(const std::wstring& path)
+	TextureBuffer* ResourceManager::GetTexture(std::wstring_view path)
 	{
 		auto it = m_textures.find(path);
 		if (it != m_textures.end())
@@ -38,7 +38,7 @@ namespace alexis
 		return &(it->second);
 	}
 
-	Mesh* ResourceManager::GetMesh(const std::wstring& path)
+	Mesh* ResourceManager::GetMesh(std::wstring_view path)
 	{
 		auto it = m_meshes.find(path);
 
@@ -51,7 +51,7 @@ namespace alexis
 		return it->second.get();
 	}
 
-	MaterialBase* ResourceManager::GetMaterial(const std::wstring& path)
+	MaterialBase* ResourceManager::GetMaterial(std::wstring_view path)
 	{
 		auto it = m_materials.find(path);
 
@@ -64,7 +64,7 @@ namespace alexis
 		return it->second.get();
 	}
 
-	ResourceManager::TextureMap::iterator ResourceManager::LoadTexture(const std::wstring& path)
+	ResourceManager::TextureMap::iterator ResourceManager::LoadTexture(std::wstring_view path)
 	{
 		fs::path filePath(path);
 
@@ -79,24 +79,24 @@ namespace alexis
 		if (filePath.extension() == ".dds")
 		{
 			ThrowIfFailed(
-				LoadFromDDSFile(path.c_str(), DDS_FLAGS_FORCE_RGB, &metadata, scratchImage)
+				LoadFromDDSFile(path.data(), DDS_FLAGS_FORCE_RGB, &metadata, scratchImage)
 			);
 		}
 		else if (filePath.extension() == ".hdr")
 		{
 			ThrowIfFailed(
-				LoadFromHDRFile(path.c_str(), &metadata, scratchImage)
+				LoadFromHDRFile(path.data(), &metadata, scratchImage)
 			);
 		}
 		else if (filePath.extension() == ".tga")
 		{
 			ThrowIfFailed(
-				LoadFromTGAFile(path.c_str(), &metadata, scratchImage)
+				LoadFromTGAFile(path.data(), &metadata, scratchImage)
 			);
 		}
 		else
 		{
-			LoadFromWICFile(path.c_str(), WIC_FLAGS_FORCE_RGB, &metadata, scratchImage);
+			LoadFromWICFile(path.data(), WIC_FLAGS_FORCE_RGB, &metadata, scratchImage);
 		}
 
 		D3D12_RESOURCE_DESC textureDesc = {};
@@ -135,7 +135,7 @@ namespace alexis
 		return m_textures.emplace(path, std::move(texture)).first;
 	}
 
-	ResourceManager::MeshMap::iterator ResourceManager::LoadMesh(const std::wstring& path)
+	ResourceManager::MeshMap::iterator ResourceManager::LoadMesh(std::wstring_view path)
 	{
 		if (path == L"$FS_QUAD")
 		{
@@ -224,7 +224,7 @@ namespace alexis
 		return m_meshes.emplace(path, std::move(mesh)).first;
 	}
 
-	ResourceManager::MaterialMap::iterator ResourceManager::LoadMaterial(const std::wstring& path)
+	ResourceManager::MaterialMap::iterator ResourceManager::LoadMaterial(std::wstring_view path)
 	{
 		fs::path filePath(path);
 

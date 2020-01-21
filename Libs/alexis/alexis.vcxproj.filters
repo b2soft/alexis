@@ -213,6 +213,9 @@
     <ClInclude Include="Sources\Render\Materials\PBS_Simple.h">
       <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Utils\unordered_map.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">
