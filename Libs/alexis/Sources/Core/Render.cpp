@@ -5,7 +5,7 @@
 #include "Core.h"
 #include "CommandManager.h"
 
-//#define ENABLE_DEBUG_LAYER
+#define ENABLE_DEBUG_LAYER
 
 namespace alexis
 {
