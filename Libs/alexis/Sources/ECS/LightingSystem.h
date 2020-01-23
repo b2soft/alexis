@@ -15,6 +15,7 @@ namespace alexis
 		public:
 			void Init();
 			void Render(CommandContext* context);
+			DirectX::XMVECTOR GetSunDirection() const;
 
 		private:
 			std::unique_ptr<MaterialBase> m_lightingMaterial;

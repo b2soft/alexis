@@ -70,5 +70,20 @@ namespace alexis
 
 			m_fsQuad->Draw(context);
 		}
+
+		DirectX::XMVECTOR LightingSystem::GetSunDirection() const
+		{
+			for (const auto& entity : Entities)
+			{
+				auto ecsWorld = Core::Get().GetECS();
+
+				auto& lightComponent = ecsWorld->GetComponent<LightComponent>(entity);
+				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
+				{
+					return lightComponent.Direction;
+				}
+			}
+		}
+
 	}
 }

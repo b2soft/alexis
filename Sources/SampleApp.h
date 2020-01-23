@@ -12,6 +12,7 @@
 #include <Render/RenderTarget.h>
 
 #include <ECS/ModelSystem.h>
+#include <ECS/ShadowSystem.h>
 #include <ECS/CameraSystem.h>
 #include <ECS/LightingSystem.h>
 
@@ -93,6 +94,7 @@ private:
 	bool m_isCameraFixed{ true };
 
 	std::shared_ptr<alexis::ecs::ModelSystem> m_modelSystem;
+	std::shared_ptr<alexis::ecs::ShadowSystem> m_shadowSystem;
 	std::shared_ptr<alexis::ecs::CameraSystem> m_cameraSystem;
 	std::shared_ptr<alexis::ecs::LightingSystem> m_lightingSystem;
 };
