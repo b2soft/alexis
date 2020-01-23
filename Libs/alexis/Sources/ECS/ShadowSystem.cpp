@@ -37,7 +37,7 @@ namespace alexis
 			auto projMatrix = XMMatrixOrthographicLH(-10.f, 10.f, 0.001f, 100.f);
 
 			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
-			auto viewMatrix = XMMatrixLookAtLH(lightingSystem->GetSunDirection(), { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+			auto viewMatrix = XMMatrixLookAtLH(-lightingSystem->GetSunDirection(), { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 
 			m_shadowMaterial->SetupToRender(context);
 

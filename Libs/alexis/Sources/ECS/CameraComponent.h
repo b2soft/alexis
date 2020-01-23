@@ -13,11 +13,12 @@ namespace alexis
 				CameraData = static_cast<AlignedCameraData*>(_aligned_malloc(sizeof(AlignedCameraData), 16));
 			}
 
-			CameraComponent(float fov, float aspectRatio, float nearZ, float farZ) :
+			CameraComponent(float fov, float aspectRatio, float nearZ, float farZ, bool isOrtho) :
 				Fov(fov),
 				AspectRatio(aspectRatio),
 				NearZ(nearZ),
-				FarZ(farZ)
+				FarZ(farZ),
+				IsOrtho(isOrtho)
 			{
 				CameraData = static_cast<AlignedCameraData*>(_aligned_malloc(sizeof(AlignedCameraData), 16));
 			}
@@ -26,7 +27,8 @@ namespace alexis
 				Fov(other.Fov),
 				AspectRatio(other.AspectRatio),
 				NearZ(NearZ),
-				FarZ(FarZ)
+				FarZ(FarZ),
+				IsOrtho(other.IsOrtho)
 			{
 				CameraData = static_cast<AlignedCameraData*>(_aligned_malloc(sizeof(AlignedCameraData), 16));
 				memcpy_s(CameraData, sizeof(AlignedCameraData), other.CameraData, sizeof(AlignedCameraData));
@@ -36,8 +38,9 @@ namespace alexis
 			{
 				Fov = other.Fov;
 				AspectRatio = other.AspectRatio;
-				NearZ = NearZ;
-				FarZ = FarZ;
+				NearZ = other.NearZ;
+				FarZ = other.FarZ;
+				IsOrtho = other.IsOrtho;
 
 				CameraData = static_cast<AlignedCameraData*>(_aligned_malloc(sizeof(AlignedCameraData), 16));
 				memcpy_s(CameraData, sizeof(AlignedCameraData), other.CameraData, sizeof(AlignedCameraData));
@@ -55,6 +58,7 @@ namespace alexis
 			float AspectRatio{ 1.0f };
 			float NearZ{ 0.01f };
 			float FarZ{ 100.0f };
+			bool IsOrtho{ false };
 
 			__declspec(align(16)) struct AlignedCameraData
 			{

@@ -180,7 +180,16 @@ namespace alexis
 			auto ecsWorld = Core::Get().GetECS();
 			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
 
-			cameraComponent.CameraData->Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(cameraComponent.Fov), cameraComponent.AspectRatio, cameraComponent.NearZ, cameraComponent.FarZ);
+			if (cameraComponent.IsOrtho)
+			{
+				cameraComponent.CameraData->Proj = XMMatrixOrthographicLH(10.0f, 10.f, cameraComponent.NearZ, cameraComponent.FarZ);
+				//cameraComponent.CameraData->View = XMMatrixLookAtLH(XMVECTOR{ -0.5, 0.8, 0.0, 1.0 }, XMVECTOR{ 0.0, 0.0, 0.0, 1.0 }, XMVECTOR{ 0.0, 1.0, 0.0, 0.0 });
+			}
+			else
+			{
+				cameraComponent.CameraData->Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(cameraComponent.Fov), cameraComponent.AspectRatio, cameraComponent.NearZ, cameraComponent.FarZ);
+			}
+
 			cameraComponent.IsProjDirty = false;
 			cameraComponent.IsInvProjDirty = true;
 		}

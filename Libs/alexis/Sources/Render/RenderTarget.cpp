@@ -52,16 +52,17 @@ namespace alexis
 
 	D3D12_VIEWPORT RenderTarget::GetViewport(DirectX::XMFLOAT2 scale /*= { 1.0f, 1.0f }*/, DirectX::XMFLOAT2 bias /*= { 0.0f, 0.0f }*/, float minDepth /*= 0.0f*/, float maxDepth /*= 1.0f*/) const
 	{
-		const TextureBuffer& texture = m_textures[0];
-
 		UINT64 width = 0;
 		UINT height = 0;
 
-		if (texture.IsValid())
+		for (const auto& texture : m_textures)
 		{
-			auto desc = texture.GetResourceDesc();
-			width = std::max(width, desc.Width);
-			height = std::max(height, desc.Height);
+			if (texture.IsValid())
+			{
+				auto desc = texture.GetResourceDesc();
+				width = std::max(width, desc.Width);
+				height = std::max(height, desc.Height);
+			}
 		}
 
 		D3D12_VIEWPORT viewport =

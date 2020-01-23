@@ -51,7 +51,8 @@ namespace alexis
 					float aspectRatio = componentKV.value()["aspectRatio"];
 					float nearZ = componentKV.value()["nearZ"];
 					float farZ = componentKV.value()["farZ"];
-					ecsWorld->AddComponent(entity, ecs::CameraComponent{ fov, aspectRatio, nearZ, farZ });
+					bool isOrtho = (componentKV.value()["isOrtho"] == 1);
+					ecsWorld->AddComponent(entity, ecs::CameraComponent{ fov, aspectRatio, nearZ, farZ, isOrtho });
 				}
 				else if (componentName == "TransformComponent")
 				{
