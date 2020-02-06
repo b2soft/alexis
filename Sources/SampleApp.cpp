@@ -389,7 +389,7 @@ void SampleApp::LoadAssets()
 		hdrTexture.GetResource()->SetName(L"HDR Texture");
 
 		hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
-		hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+		//hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 
 		render->GetRTManager()->EmplaceTarget(L"HDR", std::move(hdrTarget));
 	}

@@ -13,6 +13,11 @@ struct DirectionalLightParams
 	float4 Color;
 };
 
+struct ShadowMapParams
+{
+	matrix LightSpaceMatrix;
+};
+
 struct PSInput
 {
 	float2 uv0 : TEXCOORD;
@@ -20,11 +25,14 @@ struct PSInput
 
 ConstantBuffer<CameraParams> CamCB : register(b0);
 ConstantBuffer<DirectionalLightParams> DirectionalLightsCB[1] : register(b1);
+ConstantBuffer<ShadowMapParams> ShadowMapCB : register(b2);
 
 Texture2D gb0 : register(t0); // (x,y,z) - baseColor RGB
 Texture2D gb1 : register(t1); // (x,y,z) - normal XYZ
 Texture2D gb2 : register(t2); // x - metall, y - roughness
 Texture2D depthTexture : register(t3); // Depth 24-bit + Stencil 8-bit
+
+Texture2D shadowMap : register(t4); // Shadow Map
 
 SamplerState PointSampler : register(s0);
 
@@ -68,5 +76,20 @@ float4 main(PSInput input) : SV_TARGET
 	// For each light
 	float3 finalColor = BRDF(V, L, N, baseColor.xyz, metalRoughness.r, metalRoughness.g, DirectionalLightsCB[0].Color.rgb);
 
+	float4 pixelPosInLightSpace = mul(ShadowMapCB.LightSpaceMatrix, float4(worldPos, 1.0));
+
+	float3 projCoords = pixelPosInLightSpace.xyz / pixelPosInLightSpace.w;
+	projCoords = projCoords * 0.5 + 0.5;
+
+	float closestDepth = shadowMap.Sample(PointSampler, projCoords.xy).r;
+
+	float currentDepth = projCoords.z;
+
+	float shadow = currentDepth > closestDepth ? 0.7 : 0.0;
+
+	return float4(shadowMap.Sample(PointSampler, input.uv0).r, 0.0, 0.0, 1.0);
+
+	//finalColor = finalColor * (1.0 - shadow);
+	//
 	return float4(finalColor, 1.0);
 }

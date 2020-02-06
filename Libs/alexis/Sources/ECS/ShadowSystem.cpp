@@ -21,6 +21,7 @@ namespace alexis
 	{
 		__declspec(align(16)) struct DepthCB
 		{
+			XMMATRIX modelMatrix;
 			XMMATRIX viewProjMatrix;
 		};
 
@@ -34,21 +35,36 @@ namespace alexis
 		{
 			auto ecsWorld = Core::Get().GetECS();
 
-			auto projMatrix = XMMatrixOrthographicLH(-10.f, 10.f, 0.001f, 100.f);
-
-			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
-			auto viewMatrix = XMMatrixLookAtLH(-lightingSystem->GetSunDirection(), { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+			//auto projMatrix = XMMatrixOrthographicLH(-10.f, 10.f, 0.001f, 100.f);
+			//
+			//auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
+			//auto viewMatrix = XMMatrixLookAtLH({ 0.f, 16.f, 0.f }, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+			//
+			//auto depthMVP = XMMatrixMultiply(viewMatrix, projMatrix);
 
 			m_shadowMaterial->SetupToRender(context);
 
+
+			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto activeCamera = cameraSystem->GetActiveCamera();
+
+			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(activeCamera);
+
+			auto viewMatrix = cameraSystem->GetViewMatrix(activeCamera);
+			auto projMatrix = cameraSystem->GetProjMatrix(activeCamera);
+
+			auto viewProjMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
+
+			DepthCB depthCB;
+			depthCB.viewProjMatrix = viewProjMatrix;
+
+			
+
 			for (const auto& entity : Entities)
 			{
-				auto depthMVP = XMMatrixMultiply(viewMatrix, projMatrix);
-
 				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
 
-				DepthCB depthCB;
-				depthCB.viewProjMatrix = depthMVP;
+				depthCB.modelMatrix = modelComponent.ModelMatrix;
 
 				context->SetDynamicCBV(0, sizeof(depthCB), &depthCB);
 				modelComponent.Mesh->Draw(context);

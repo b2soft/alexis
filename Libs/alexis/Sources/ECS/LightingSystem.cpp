@@ -31,6 +31,11 @@ namespace alexis
 			XMVECTOR Color; 
 		};
 
+		__declspec(align(16)) struct DepthParams
+		{
+			XMMATRIX viewProjMatrix;
+		};
+
 		void LightingSystem::Init()
 		{
 			m_lightingMaterial = std::make_unique<LightingMaterial>();
@@ -67,6 +72,17 @@ namespace alexis
 			}
 
 			context->SetDynamicCBV(1, sizeof(directionalLights), &directionalLights);
+
+			DepthParams depthParams;
+			auto projMatrix = XMMatrixOrthographicLH(-10.f, 10.f, 0.001f, 100.f);
+
+			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
+			auto viewMatrix = XMMatrixLookAtLH(-lightingSystem->GetSunDirection(), { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+
+			auto depthMVP = XMMatrixMultiply(viewMatrix, projMatrix);
+			depthParams.viewProjMatrix = depthMVP;
+
+			context->SetDynamicCBV(2, sizeof(depthParams), &depthParams);
 
 			m_fsQuad->Draw(context);
 		}

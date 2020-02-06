@@ -1,5 +1,6 @@
 struct DepthParams
 {
+	matrix ModelMatrix;
 	matrix DepthMVP;
 };
 
@@ -8,5 +9,8 @@ ConstantBuffer<DepthParams> DepthCB : register(b0);
 
 float4 main( float4 pos : POSITION ) : SV_POSITION
 {
-	return mul(pos, DepthCB.DepthMVP);
+	matrix mvpMatrix = mul(DepthCB.DepthMVP, DepthCB.ModelMatrix);
+	float4 worldPos = float4(pos.xyz, 1.0f);
+
+	return mul(mvpMatrix, worldPos);
 }
