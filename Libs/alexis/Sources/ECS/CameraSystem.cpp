@@ -14,7 +14,7 @@ namespace alexis
 		Entity CameraSystem::GetActiveCamera() const
 		{
 			// TODO: rework
-			return *Entities.begin();
+			return *Entities.rbegin();
 		}
 
 		void XM_CALLCONV CameraSystem::SetPosition(Entity entity, DirectX::FXMVECTOR position)
@@ -133,16 +133,16 @@ namespace alexis
 			cameraComponent.IsInvProjDirty = true;
 		}
 
-		void XM_CALLCONV CameraSystem::LookAt(Entity entity, DirectX::FXMVECTOR targetPos, DirectX::FXMVECTOR up)
+		void CameraSystem::LookAt(Entity entity, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR up) const
 		{
 			auto ecsWorld = Core::Get().GetECS();
 			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
 			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
 
-			cameraComponent.CameraData->View = XMMatrixLookAtLH(transformComponent.Position, targetPos, up);
-			transformComponent.Rotation = XMQuaternionRotationMatrix(XMMatrixTranspose(cameraComponent.CameraData->View));
+			auto mat = XMMatrixLookAtLH(transformComponent.Position, targetPos, up);
+			transformComponent.Rotation = XMQuaternionRotationMatrix(XMMatrixTranspose(mat));
 
-			cameraComponent.IsViewDirty = false;
+			cameraComponent.IsViewDirty = true;
 			cameraComponent.IsInvViewDirty = true;
 		}
 
@@ -180,7 +180,15 @@ namespace alexis
 			auto ecsWorld = Core::Get().GetECS();
 			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
 
-			cameraComponent.CameraData->Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(cameraComponent.Fov), cameraComponent.AspectRatio, cameraComponent.NearZ, cameraComponent.FarZ);
+			if (cameraComponent.IsOrtho)
+			{
+				cameraComponent.CameraData->Proj = XMMatrixOrthographicLH(40.f, 40.f, cameraComponent.NearZ, cameraComponent.FarZ);
+			}
+			else
+			{
+				cameraComponent.CameraData->Proj = XMMatrixPerspectiveFovLH(XMConvertToRadians(cameraComponent.Fov), cameraComponent.AspectRatio, cameraComponent.NearZ, cameraComponent.FarZ);
+			}
+
 			cameraComponent.IsProjDirty = false;
 			cameraComponent.IsInvProjDirty = true;
 		}

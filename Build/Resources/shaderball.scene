@@ -7,18 +7,19 @@
                    "fov":45.0,
                    "aspectRatio":1.7777778,
                    "nearZ":0.01,
-                   "farZ":100.0
+                   "farZ":100.0,
+				   "isOrtho":0
                 }
              },
              {
                 "TransformComponent":{
                    "position":{
-                      "x":0.0,
-                      "y":4.0,
-                      "z":-7.0
+                      "x":0.5,
+                      "y":3,
+                      "z":-6
                    },
                    "rotation":{
-                      "x":30.0,
+                      "x":0.0,
                       "y":0.0,
                       "z":0.0
                    },
@@ -39,7 +40,7 @@
                "TransformComponent":{
                   "position":{
                      "x":0.0,
-                     "y":0.0,
+                     "y":1,
                      "z":0.0
                   },
                   "rotation":{
@@ -88,9 +89,9 @@
 						"b":1.0
 					},
 					"direction":{
-						"x":0.0,
-						"y":-1.0,
-						"z":0.0
+						"x":0,
+						"y":-10.0,
+						"z":15.0
 					}
 				}
 			}

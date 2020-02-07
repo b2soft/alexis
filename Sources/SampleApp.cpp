@@ -66,6 +66,14 @@ bool SampleApp::Initialize()
 	modelSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
 	ecsWorld->SetSystemComponentMask<ecs::ModelSystem>(modelSystemMask);
 
+	// Shadow System
+	m_shadowSystem = ecsWorld->RegisterSystem<ecs::ShadowSystem>();
+
+	ecs::ComponentMask shadowSystemMask;
+	shadowSystemMask.set(ecsWorld->GetComponentType<ecs::ModelComponent>());
+	shadowSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
+	ecsWorld->SetSystemComponentMask<ecs::ShadowSystem>(shadowSystemMask);
+
 	// Camera System
 	m_cameraSystem = ecsWorld->RegisterSystem<ecs::CameraSystem>();
 
@@ -381,11 +389,30 @@ void SampleApp::LoadAssets()
 		hdrTexture.GetResource()->SetName(L"HDR Texture");
 
 		hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
-		hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+		//hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 
 		render->GetRTManager()->EmplaceTarget(L"HDR", std::move(hdrTarget));
 	}
 
+	// Create shadow map target
+	{
+		DXGI_FORMAT shadowFormat = DXGI_FORMAT_R24G8_TYPELESS;
+		auto shadowDesc = CD3DX12_RESOURCE_DESC::Tex2D(shadowFormat, 1024, 1024);
+		shadowDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE shadowDepthClearValue;
+		shadowDepthClearValue.Format = shadowDesc.Format;
+		shadowDepthClearValue.DepthStencil = { 1.0f, 0 };
+
+		TextureBuffer shadowDepthTexture;
+		shadowDepthTexture.Create(shadowDesc, &shadowDepthClearValue);
+
+		auto shadowRT = std::make_unique<RenderTarget>();
+		shadowRT->AttachTexture(shadowDepthTexture, RenderTarget::DepthStencil);
+		render->GetRTManager()->EmplaceTarget(L"Shadow Map", std::move(shadowRT));
+	}
+
+	// Todo: move material to corresponding system
 	m_hdr2sdrMaterial = std::make_unique<Hdr2SdrMaterial>();
 
 	// FS Quad
@@ -393,6 +420,7 @@ void SampleApp::LoadAssets()
 	m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 
 	m_lightingSystem->Init();
+	m_shadowSystem->Init();
 
 	IMGUI_CHECKVERSION();
 	m_context = ImGui::CreateContext();
@@ -420,6 +448,7 @@ void SampleApp::PopulateCommandList()
 
 	auto clearTargetCommandContext = commandManager->CreateCommandContext();
 	auto pbsCommandContext = commandManager->CreateCommandContext();
+	auto shadowContext = commandManager->CreateCommandContext();
 	auto lightingCommandContext = commandManager->CreateCommandContext();
 	auto hdrCommandContext = commandManager->CreateCommandContext();
 	auto imguiContext = commandManager->CreateCommandContext();
@@ -429,6 +458,7 @@ void SampleApp::PopulateCommandList()
 
 	auto gbuffer = render->GetRTManager()->GetRenderTarget(L"GB");
 	auto hdrRT = render->GetRTManager()->GetRenderTarget(L"HDR");
+	auto shadowRT = render->GetRTManager()->GetRenderTarget(L"Shadow Map");
 
 #if defined(MULTITHREAD_CONTEXTS)
 	auto clearTargetsTask = std::async([this, clearTargetCommandContext, gbuffer, hdrRT, clearColor]()
@@ -454,6 +484,12 @@ void SampleApp::PopulateCommandList()
 			auto& texture = hdrRT->GetTexture(static_cast<RenderTarget::Slot>(RenderTarget::Slot::Slot0));
 			clearTargetCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 			clearTargetCommandContext->ClearTexture(texture, clearColor);
+
+			{
+				auto& shadowDepth = shadowRT->GetTexture(RenderTarget::DepthStencil);
+				clearTargetCommandContext->TransitionResource(shadowDepth, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+				clearTargetCommandContext->ClearDepthStencil(shadowDepth, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
+			}
 		}
 #if defined(MULTITHREAD_CONTEXTS)
 	);
@@ -472,6 +508,13 @@ void SampleApp::PopulateCommandList()
 #if defined(MULTITHREAD_CONTEXTS)
 	);
 #endif
+
+	{
+		shadowContext->List->RSSetScissorRects(1, &m_scissorRect);
+
+		m_shadowSystem->Render(shadowContext);
+	}
+
 
 #if defined(MULTITHREAD_CONTEXTS)
 	auto resolveLightingTask = std::async([this, lightingCommandContext, clearColor]
@@ -540,6 +583,7 @@ void SampleApp::PopulateCommandList()
 
 	clearTargetCommandContext->Finish();
 	pbsCommandContext->Finish();
+	shadowContext->Finish();
 	lightingCommandContext->Finish();
 	hdrCommandContext->Finish();
 	imguiContext->Finish();

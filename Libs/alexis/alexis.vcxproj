@@ -34,6 +34,7 @@
     <ClInclude Include="Sources\ECS\LightingSystem.h" />
     <ClInclude Include="Sources\ECS\ModelComponent.h" />
     <ClInclude Include="Sources\ECS\ModelSystem.h" />
+    <ClInclude Include="Sources\ECS\ShadowSystem.h" />
     <ClInclude Include="Sources\ECS\TransformComponent.h" />
     <ClInclude Include="Sources\Precompiled.h" />
     <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h" />
@@ -48,6 +49,7 @@
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h" />
     <ClInclude Include="Sources\Render\Materials\PBRMaterial.h" />
     <ClInclude Include="Sources\Render\Materials\PBS_Simple.h" />
+    <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h" />
     <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\RenderTarget.h" />
     <ClInclude Include="Sources\Render\RenderTargetManager.h" />
@@ -65,6 +67,7 @@
     <ClCompile Include="Sources\ECS\CameraSystem.cpp" />
     <ClCompile Include="Sources\ECS\LightingSystem.cpp" />
     <ClCompile Include="Sources\ECS\ModelSystem.cpp" />
+    <ClCompile Include="Sources\ECS\ShadowSystem.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -80,6 +83,7 @@
     <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp" />
+    <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp" />
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />
@@ -184,7 +188,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>

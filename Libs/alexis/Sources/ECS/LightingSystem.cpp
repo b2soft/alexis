@@ -4,6 +4,7 @@
 
 #include <ECS/ECS.h>
 #include <ECS/CameraSystem.h>
+#include <ECS/ShadowSystem.h>
 #include <ECS/TransformComponent.h>
 #include <ECS/LightComponent.h>
 
@@ -29,6 +30,11 @@ namespace alexis
 		{
 			XMVECTOR Direction;
 			XMVECTOR Color; 
+		};
+
+		__declspec(align(16)) struct ShadowMapParams
+		{
+			XMMATRIX LightSpaceMatrix;
 		};
 
 		void LightingSystem::Init()
@@ -68,7 +74,31 @@ namespace alexis
 
 			context->SetDynamicCBV(1, sizeof(directionalLights), &directionalLights);
 
+			ShadowMapParams depthParams;
+			
+			auto shadowSystem = ecsWorld->GetSystem<ShadowSystem>();
+			depthParams.LightSpaceMatrix = shadowSystem->GetShadowMatrix();
+
+			context->SetDynamicCBV(2, sizeof(depthParams), &depthParams);
+
 			m_fsQuad->Draw(context);
 		}
+
+		DirectX::XMVECTOR LightingSystem::GetSunDirection() const
+		{
+			for (const auto& entity : Entities)
+			{
+				auto ecsWorld = Core::Get().GetECS();
+
+				auto& lightComponent = ecsWorld->GetComponent<LightComponent>(entity);
+				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
+				{
+					return lightComponent.Direction;
+				}
+			}
+
+			return { 0., 0., 0.f };
+		}
+
 	}
 }

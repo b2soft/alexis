@@ -78,5 +78,8 @@
     <FxCompile Include="..\Resources\Shaders\PBS_object_simple_ps.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Shadows_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

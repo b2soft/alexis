@@ -14,7 +14,9 @@ namespace alexis
 	{
 		CameraParams,
 		DirectionalLights,
+		ShadowMapParams,
 		GBuffer, //Texture2D 3 textures starting from BaseColor : register( t0 );
+		ShadowMap,
 		NumLightingParameters
 	};
 
@@ -38,16 +40,22 @@ namespace alexis
 			D3D12_ROOT_SIGNATURE_FLAG_DENY_GEOMETRY_SHADER_ROOT_ACCESS;
 
 		CD3DX12_DESCRIPTOR_RANGE1 descriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 4, 0);
+		CD3DX12_DESCRIPTOR_RANGE1 shadowMapDescriptorRange(D3D12_DESCRIPTOR_RANGE_TYPE_SRV, 1, 4);
 
 		CD3DX12_ROOT_PARAMETER1 rootParameters[LightingParameters::NumLightingParameters];
 		rootParameters[LightingParameters::CameraParams].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);
 		rootParameters[LightingParameters::DirectionalLights].InitAsConstantBufferView(1, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);
+		rootParameters[LightingParameters::ShadowMapParams].InitAsConstantBufferView(2, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_PIXEL);
 		rootParameters[LightingParameters::GBuffer].InitAsDescriptorTable(1, &descriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
+		rootParameters[LightingParameters::ShadowMap].InitAsDescriptorTable(1, &shadowMapDescriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_STATIC_SAMPLER_DESC pointSampler(0, D3D12_FILTER_MIN_MAG_MIP_POINT);
+		CD3DX12_STATIC_SAMPLER_DESC clampSampler(1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+
+		CD3DX12_STATIC_SAMPLER_DESC samplers[2] = { pointSampler, clampSampler };
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, 1, &pointSampler, rootSignatureFlags);
+		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, _countof(samplers), samplers, rootSignatureFlags);
 
 		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, D3D_ROOT_SIGNATURE_VERSION_1_1);
 
@@ -60,16 +68,10 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
 			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
-			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL depthStencil;
 		} pipelineStateStream;
 
 		auto render = Render::GetInstance();
 		auto rtManager = render->GetRTManager();
-
-		CD3DX12_DEPTH_STENCIL_DESC	dsDesc{ CD3DX12_DEFAULT() };
-		dsDesc.StencilEnable = TRUE;
-		dsDesc.StencilWriteMask = 0x00;
-		dsDesc.FrontFace.StencilFunc = D3D12_COMPARISON_FUNC_LESS;
 
 		pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
 		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
@@ -77,7 +79,6 @@ namespace alexis
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
 		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"HDR");
-		pipelineStateStream.depthStencil = dsDesc;
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{
@@ -94,14 +95,18 @@ namespace alexis
 		auto render = Render::GetInstance();
 		auto rtManager = render->GetRTManager();
 		auto gbuffer = rtManager->GetRenderTarget(L"GB");
+		auto shadowMapRT = rtManager->GetRenderTarget(L"Shadow Map");
 		auto hdr = rtManager->GetRenderTarget(L"HDR");
 
 		auto& depth = gbuffer->GetTexture(RenderTarget::DepthStencil);
+		auto& shadowMap = shadowMapRT->GetTexture(RenderTarget::DepthStencil);
 
 		commandContext->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandContext->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandContext->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 		commandContext->TransitionResource(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		commandContext->TransitionResource(shadowMap, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 		commandContext->SetRenderTarget(*hdr);
 		commandContext->SetViewport(hdr->GetViewport());
@@ -114,6 +119,8 @@ namespace alexis
 		commandContext->SetSRV(LightingParameters::GBuffer, 1, gbuffer->GetTexture(RenderTarget::Slot::Slot1));
 		commandContext->SetSRV(LightingParameters::GBuffer, 2, gbuffer->GetTexture(RenderTarget::Slot::Slot2));
 		commandContext->SetSRV(LightingParameters::GBuffer, 3, depth);
+
+		commandContext->SetSRV(LightingParameters::ShadowMap, 0, shadowMap);
 	}
 
 }

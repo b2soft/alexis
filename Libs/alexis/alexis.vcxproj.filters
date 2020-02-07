@@ -94,16 +94,22 @@
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\ECS\LightingSystem.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\ShadowSystem.cpp">
+      <Filter>Sources\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
   </ItemGroup>
@@ -215,6 +221,12 @@
     </ClInclude>
     <ClInclude Include="Sources\Utils\unordered_map.h">
       <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\ShadowSystem.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
