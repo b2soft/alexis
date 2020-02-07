@@ -49,7 +49,7 @@ namespace alexis
 			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
 			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
 			cameraSystem->SetPosition(m_phantomCamera, -lightingSystem->GetSunDirection());
-		//	cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+			cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 
 
 			DepthCB depthParams;

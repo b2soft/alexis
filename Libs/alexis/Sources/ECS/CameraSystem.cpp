@@ -133,16 +133,16 @@ namespace alexis
 			cameraComponent.IsInvProjDirty = true;
 		}
 
-		void CameraSystem::LookAt(Entity entity, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR up)
+		void CameraSystem::LookAt(Entity entity, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR up) const
 		{
 			auto ecsWorld = Core::Get().GetECS();
 			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
 			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
 
-			cameraComponent.CameraData->View = XMMatrixLookAtLH(transformComponent.Position, targetPos, up);
-			transformComponent.Rotation = XMQuaternionRotationMatrix(XMMatrixTranspose(cameraComponent.CameraData->View));
+			auto mat = XMMatrixLookAtLH(transformComponent.Position, targetPos, up);
+			transformComponent.Rotation = XMQuaternionRotationMatrix(XMMatrixTranspose(mat));
 
-			cameraComponent.IsViewDirty = false;
+			cameraComponent.IsViewDirty = true;
 			cameraComponent.IsInvViewDirty = true;
 		}
 
