@@ -22,7 +22,7 @@ namespace alexis
 
 			void SetFov(Entity entity, float fov);
 			void SetProjectionParams(Entity entity, float fov, float aspectRatio, float nearZ, float farZ);
-			void XM_CALLCONV LookAt(Entity entity, DirectX::FXMVECTOR targetPos, DirectX::FXMVECTOR up);
+			void LookAt(Entity entity, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR up);
 
 		private:
 			void UpdateViewMatrix(Entity entity) const;

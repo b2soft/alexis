@@ -10,7 +10,6 @@
 #include <ECS/CameraSystem.h>
 #include <ECS/LightingSystem.h>
 
-#include <ECS/CameraComponent.h>
 #include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
 #include <ECS/LightComponent.h>
@@ -28,6 +27,18 @@ namespace alexis
 		void ShadowSystem::Init()
 		{
 			m_shadowMaterial = std::make_unique<ShadowMaterial>();
+
+			auto ecsWorld = Core::Get().GetECS();
+			auto entity = ecsWorld->CreateEntity();
+			ecsWorld->AddComponent(entity, ecs::CameraComponent{ 0.1f, 1.0f, 0.01f, 100.f, true });
+			m_phantomCamera = entity;
+
+			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
+			XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(90.f), 0.f, 0);
+			ecsWorld->AddComponent(entity, ecs::TransformComponent{ -lightingSystem->GetSunDirection(), rotation, {1.f} });
+			
+			//auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			//cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 		}
 
 		// TODO: remove XMMATRIX viewProj arg
@@ -35,40 +46,45 @@ namespace alexis
 		{
 			auto ecsWorld = Core::Get().GetECS();
 
-			//auto projMatrix = XMMatrixOrthographicLH(-10.f, 10.f, 0.001f, 100.f);
-			//
-			//auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
-			//auto viewMatrix = XMMatrixLookAtLH({ 0.f, 16.f, 0.f }, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
-			//
-			//auto depthMVP = XMMatrixMultiply(viewMatrix, projMatrix);
+			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
+			cameraSystem->SetPosition(m_phantomCamera, -lightingSystem->GetSunDirection());
+		//	cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
+
+
+			DepthCB depthParams;
+
+			auto m2 = cameraSystem->GetViewMatrix(m_phantomCamera);
+			auto proj2 = cameraSystem->GetProjMatrix(m_phantomCamera);
+			depthParams.viewProjMatrix = XMMatrixMultiply(m2, proj2);
 
 			m_shadowMaterial->SetupToRender(context);
-
-
-			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
-			auto activeCamera = cameraSystem->GetActiveCamera();
-
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(activeCamera);
-
-			auto viewMatrix = cameraSystem->GetViewMatrix(activeCamera);
-			auto projMatrix = cameraSystem->GetProjMatrix(activeCamera);
-
-			auto viewProjMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
-
-			DepthCB depthCB;
-			depthCB.viewProjMatrix = viewProjMatrix;
-
-			
 
 			for (const auto& entity : Entities)
 			{
 				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
 
-				depthCB.modelMatrix = modelComponent.ModelMatrix;
+				depthParams.modelMatrix = modelComponent.ModelMatrix;
 
-				context->SetDynamicCBV(0, sizeof(depthCB), &depthCB);
+				context->SetDynamicCBV(0, sizeof(depthParams), &depthParams);
 				modelComponent.Mesh->Draw(context);
 			}
 		}
+
+		DirectX::XMMATRIX ShadowSystem::GetShadowMatrix() const
+		{
+			auto ecsWorld = Core::Get().GetECS();
+
+			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+
+			auto modelMatrix = XMMatrixIdentity();
+			auto viewMatrix = cameraSystem->GetViewMatrix(m_phantomCamera);
+			auto projMatrix = cameraSystem->GetProjMatrix(m_phantomCamera);
+
+			auto modelView = XMMatrixMultiply(modelMatrix, viewMatrix);
+
+			return XMMatrixMultiply(modelView, projMatrix);
+		}
+
 	}
 }

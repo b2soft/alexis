@@ -57,7 +57,7 @@ float3 BRDF(float3 v, float3 l, float3 n, float3 baseColor, float metallic, floa
 
 	float3 specular = (D * F * G) / (4.0f * NdotL * NdotV);
 
-	float3 finalColor = NdotL * lightColor * (diffuse + specular);
+	float3 finalColor = NdotL * lightColor * (diffuse + specular) * 2.5f; //2.5 - light intensity
 
 	return finalColor;
 }

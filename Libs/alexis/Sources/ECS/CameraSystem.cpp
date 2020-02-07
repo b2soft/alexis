@@ -14,7 +14,7 @@ namespace alexis
 		Entity CameraSystem::GetActiveCamera() const
 		{
 			// TODO: rework
-			return *Entities.begin();
+			return *Entities.rbegin();
 		}
 
 		void XM_CALLCONV CameraSystem::SetPosition(Entity entity, DirectX::FXMVECTOR position)
@@ -133,7 +133,7 @@ namespace alexis
 			cameraComponent.IsInvProjDirty = true;
 		}
 
-		void XM_CALLCONV CameraSystem::LookAt(Entity entity, DirectX::FXMVECTOR targetPos, DirectX::FXMVECTOR up)
+		void CameraSystem::LookAt(Entity entity, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR up)
 		{
 			auto ecsWorld = Core::Get().GetECS();
 			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
@@ -182,8 +182,7 @@ namespace alexis
 
 			if (cameraComponent.IsOrtho)
 			{
-				cameraComponent.CameraData->Proj = XMMatrixOrthographicLH(10.0f, 10.f, cameraComponent.NearZ, cameraComponent.FarZ);
-				//cameraComponent.CameraData->View = XMMatrixLookAtLH(XMVECTOR{ -0.5, 0.8, 0.0, 1.0 }, XMVECTOR{ 0.0, 0.0, 0.0, 1.0 }, XMVECTOR{ 0.0, 1.0, 0.0, 0.0 });
+				cameraComponent.CameraData->Proj = XMMatrixOrthographicLH(40.f, 40.f, cameraComponent.NearZ, cameraComponent.FarZ);
 			}
 			else
 			{
