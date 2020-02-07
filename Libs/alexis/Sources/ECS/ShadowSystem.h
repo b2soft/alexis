@@ -19,7 +19,7 @@ namespace alexis
 			void Init();
 			void XM_CALLCONV Render(CommandContext* context);
 
-			XMMATRIX GetShadowMatrix() const;
+			DirectX::XMMATRIX GetShadowMatrix() const;
 
 		private:
 			std::unique_ptr<MaterialBase> m_shadowMaterial;
