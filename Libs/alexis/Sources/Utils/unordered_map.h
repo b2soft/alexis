@@ -14,7 +14,7 @@ namespace alexis
 	template <typename C, typename T, typename A>
 	struct basic_string_hash
 	{
-		using transparent_key_equal = std::equal_to<>;
+		using is_transparent = std::equal_to<>;
 		using hash_type = std::hash<std::basic_string_view<C, T>>;
 		std::size_t operator()(std::basic_string_view<C, T> txt) const { return hash_type{}(txt); }
 		std::size_t operator()(const std::basic_string<C, T, A>& txt) const { return hash_type{}(txt); }
@@ -40,7 +40,8 @@ namespace alexis
 			std::basic_string<C, T, SA>,
 			V,
 			basic_string_hash<C, T, SA>,
-			std::equal_to<>>;
+			std::equal_to<>,
+			A>;
 	};
 
 	template<
