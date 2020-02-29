@@ -19,12 +19,12 @@ static std::wstring ToWStr(const std::string& in)
 		return std::wstring();
 	}
 
-	int numChars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, in.c_str(), in.length(), nullptr, 0);
+	int numChars = MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, in.c_str(), static_cast<int>(in.length()), nullptr, 0);
 	std::wstring out;
 	if (numChars)
 	{
 		out.resize(numChars);
-		if (MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, in.c_str(), in.length(), &out[0], numChars))
+		if (MultiByteToWideChar(CP_ACP, MB_ERR_INVALID_CHARS, in.c_str(), static_cast<int>(in.length()), &out[0], numChars))
 		{
 			return out;
 		}

@@ -8,9 +8,10 @@
 
 #include <string>
 
-#include "Render.h"
+#include <Render/Render.h>
 #include "CoreHelpers.h"
 
+#include <ECS/ImguiSystem.h>
 
 // TODO: rework it! Needed to get app's icon
 #include "../../Resources/resource.h"
@@ -84,11 +85,6 @@ namespace alexis
 
 			MessageBoxA(NULL, "Could not create the window for rendering", "Error", MB_OK | MB_ICONERROR);
 		}
-	}
-
-	void Core::InitImgui()
-	{
-
 	}
 
 	void Core::Create(HINSTANCE hInstance)
@@ -211,8 +207,8 @@ namespace alexis
 
 			Core::s_game->OnUpdate(Core::s_updateClock.GetDeltaSeconds());
 
+			// Evaluate render graph
 			auto render = Render::GetInstance();
-			// Reset queue and lists
 			render->BeginRender();
 
 			// Populate game command lists to render

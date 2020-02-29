@@ -15,6 +15,8 @@
 #include <ECS/ShadowSystem.h>
 #include <ECS/CameraSystem.h>
 #include <ECS/LightingSystem.h>
+#include <ECS/Hdr2SdrSystem.h>
+#include <ECS/ImguiSystem.h>
 
 #include <Render/Materials/MaterialBase.h>
 
@@ -53,14 +55,7 @@ private:
 	CD3DX12_VIEWPORT m_viewport;
 	CD3DX12_RECT m_scissorRect;
 
-	std::unique_ptr<alexis::MaterialBase> m_hdr2sdrMaterial;
-
-	alexis::Mesh* m_fsQuad{ nullptr };
-
 	alexis::ecs::Entity m_sceneCamera;
-
-	ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;
-	ImGuiContext* m_context{ nullptr };
 
 	float m_aspectRatio{ 1.0f };
 
@@ -83,7 +78,6 @@ private:
 
 	void LoadPipeline();
 	void LoadAssets();
-	void PopulateCommandList();
 
 	void UpdateGUI();
 
@@ -97,4 +91,6 @@ private:
 	std::shared_ptr<alexis::ecs::ShadowSystem> m_shadowSystem;
 	std::shared_ptr<alexis::ecs::CameraSystem> m_cameraSystem;
 	std::shared_ptr<alexis::ecs::LightingSystem> m_lightingSystem;
+	std::shared_ptr<alexis::ecs::Hdr2SdrSystem> m_hdr2SdrSystem;
+	std::shared_ptr<alexis::ecs::ImguiSystem> m_imguiSystem;
 };

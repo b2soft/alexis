@@ -2,7 +2,7 @@
 
 #include "LightingMaterial.h"
 
-#include <Core/Render.h>
+#include <Render/Render.h>
 
 // for VertexDef
 #include <Render/Mesh.h>

@@ -12,7 +12,7 @@
 
 #include <Scene.h>
 #include <Core/Core.h>
-#include <Core/Render.h>
+#include <Render/Render.h>
 #include <Core/CommandManager.h>
 
 #include <Render/Mesh.h>
@@ -24,7 +24,6 @@
 #include <ECS/LightComponent.h>
 
 #include <Core/ResourceManager.h>
-#include <Render/Materials/Hdr2SdrMaterial.h>
 
 using namespace alexis;
 using namespace DirectX;
@@ -90,6 +89,10 @@ bool SampleApp::Initialize()
 	//lightingSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
 	ecsWorld->SetSystemComponentMask<ecs::LightingSystem>(lightingSystemMask);
 
+	m_hdr2SdrSystem = ecsWorld->RegisterSystem<ecs::Hdr2SdrSystem>();
+
+	m_imguiSystem = ecsWorld->RegisterSystem<ecs::ImguiSystem>();
+
 	return true;
 }
 
@@ -97,11 +100,7 @@ void SampleApp::OnUpdate(float dt)
 {
 	m_modelSystem->Update(dt);
 
-	ImGui::SetCurrentContext(m_context);
-	ImGui_ImplDX12_NewFrame();
-	ImGui_ImplWin32_NewFrame();
-	ImGui::NewFrame();
-
+	m_imguiSystem->Update();
 	UpdateGUI();
 
 	m_frameCount++;
@@ -137,8 +136,7 @@ void SampleApp::OnUpdate(float dt)
 
 void SampleApp::OnRender()
 {
-	// Records commands
-	PopulateCommandList();
+
 }
 
 void SampleApp::OnResize(int width, int height)
@@ -292,31 +290,17 @@ void SampleApp::OnMouseMoved(alexis::MouseMotionEventArgs& e)
 
 void SampleApp::Destroy()
 {
-	ImGui_ImplDX12_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-	ImGui::DestroyContext(m_context);
 }
 
 void SampleApp::LoadPipeline()
 {
-	auto device = alexis::Render::GetInstance()->GetDevice();
 
-	// Create Descriptor Heaps
-	{
-		D3D12_DESCRIPTOR_HEAP_DESC desc = {};
-		desc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
-		desc.NumDescriptors = 1;
-		desc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
-		ThrowIfFailed(device->CreateDescriptorHeap(&desc, IID_PPV_ARGS(&m_imguiSrvHeap)));
-	}
 }
 
 void SampleApp::LoadAssets()
 {
 	//----- Loading
 	auto render = alexis::Render::GetInstance();
-	auto device = render->GetDevice();
-	auto commandManager = render->GetCommandManager();
 	//------
 
 	// Depth
@@ -412,27 +396,10 @@ void SampleApp::LoadAssets()
 		render->GetRTManager()->EmplaceTarget(L"Shadow Map", std::move(shadowRT));
 	}
 
-	// Todo: move material to corresponding system
-	m_hdr2sdrMaterial = std::make_unique<Hdr2SdrMaterial>();
-
-	// FS Quad
-	
-	m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
-
 	m_lightingSystem->Init();
 	m_shadowSystem->Init();
-
-	IMGUI_CHECKVERSION();
-	m_context = ImGui::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-
-	ImGui::StyleColorsLight();
-
-	ImGui_ImplWin32_Init(Core::GetHwnd());
-	ImGui_ImplDX12_Init(Render::GetInstance()->GetDevice(), 2,
-		DXGI_FORMAT_R8G8B8A8_UNORM,
-		m_imguiSrvHeap->GetCPUDescriptorHandleForHeapStart(),
-		m_imguiSrvHeap->GetGPUDescriptorHandleForHeapStart());
+	m_hdr2SdrSystem->Init();
+	m_imguiSystem->Init();
 
 
 	// Create Synchronization Objects
@@ -441,153 +408,7 @@ void SampleApp::LoadAssets()
 	}
 }
 
-void SampleApp::PopulateCommandList()
-{
-	auto render = alexis::Render::GetInstance();
-	auto commandManager = render->GetCommandManager();
 
-	auto clearTargetCommandContext = commandManager->CreateCommandContext();
-	auto pbsCommandContext = commandManager->CreateCommandContext();
-	auto shadowContext = commandManager->CreateCommandContext();
-	auto lightingCommandContext = commandManager->CreateCommandContext();
-	auto hdrCommandContext = commandManager->CreateCommandContext();
-	auto imguiContext = commandManager->CreateCommandContext();
-
-	//const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-	const float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
-
-	auto gbuffer = render->GetRTManager()->GetRenderTarget(L"GB");
-	auto hdrRT = render->GetRTManager()->GetRenderTarget(L"HDR");
-	auto shadowRT = render->GetRTManager()->GetRenderTarget(L"Shadow Map");
-
-#if defined(MULTITHREAD_CONTEXTS)
-	auto clearTargetsTask = std::async([this, clearTargetCommandContext, gbuffer, hdrRT, clearColor]()
-#endif
-		{
-			// Clear G-Buffer
-			auto& gbDepthStencil = gbuffer->GetTexture(RenderTarget::DepthStencil);
-
-			for (int i = RenderTarget::Slot::Slot0; i < RenderTarget::Slot::DepthStencil; ++i)
-			{
-				auto& texture = gbuffer->GetTexture(static_cast<RenderTarget::Slot>(i));
-				if (texture.IsValid())
-				{
-					clearTargetCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-					clearTargetCommandContext->ClearTexture(texture, clearColor);
-				}
-			}
-
-			clearTargetCommandContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			clearTargetCommandContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
-
-			// Clear HDR
-			auto& texture = hdrRT->GetTexture(static_cast<RenderTarget::Slot>(RenderTarget::Slot::Slot0));
-			clearTargetCommandContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			clearTargetCommandContext->ClearTexture(texture, clearColor);
-
-			{
-				auto& shadowDepth = shadowRT->GetTexture(RenderTarget::DepthStencil);
-				clearTargetCommandContext->TransitionResource(shadowDepth, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				clearTargetCommandContext->ClearDepthStencil(shadowDepth, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
-			}
-		}
-#if defined(MULTITHREAD_CONTEXTS)
-	);
-#endif
-
-#if defined(MULTITHREAD_CONTEXTS)
-	auto pbsTask = std::async([this, pbsCommandContext, clearColor, gbuffer]()
-#endif
-		{
-			pbsCommandContext->SetRenderTarget(*gbuffer);
-			pbsCommandContext->SetViewport(gbuffer->GetViewport());
-			pbsCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
-
-			m_modelSystem->Render(pbsCommandContext);
-		}
-#if defined(MULTITHREAD_CONTEXTS)
-	);
-#endif
-
-	{
-		shadowContext->List->RSSetScissorRects(1, &m_scissorRect);
-
-		m_shadowSystem->Render(shadowContext);
-	}
-
-
-#if defined(MULTITHREAD_CONTEXTS)
-	auto resolveLightingTask = std::async([this, lightingCommandContext, clearColor]
-#endif
-		{
-			lightingCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
-			m_lightingSystem->Render(lightingCommandContext);
-		}
-#if defined(MULTITHREAD_CONTEXTS)
-	);
-#endif
-
-
-	const auto& backbuffer = render->GetBackbufferRT();
-	const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
-
-#if defined(MULTITHREAD_CONTEXTS)
-	auto hdr2sdrTask = std::async([this, hdrCommandContext, &backbuffer, &backTexture]
-#endif
-		{
-			hdrCommandContext->List->RSSetScissorRects(1, &m_scissorRect);
-			// TODO create HDR2SDR system
-			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			
-			hdrCommandContext->SetRenderTarget(backbuffer);
-			hdrCommandContext->SetViewport(backbuffer.GetViewport());
-
-			m_hdr2sdrMaterial->SetupToRender(hdrCommandContext);
-
-			m_fsQuad->Draw(hdrCommandContext);
-
-			hdrCommandContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		}
-#if defined(MULTITHREAD_CONTEXTS)
-	);
-#endif
-
-#if defined(MULTITHREAD_CONTEXTS)
-	auto imguiTask = std::async([this, imguiContext, &backbuffer, &backTexture]
-#endif
-		{
-			imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
-
-			imguiContext->SetRenderTarget(backbuffer);
-			imguiContext->SetViewport(backbuffer.GetViewport());
-			imguiContext->List->RSSetScissorRects(1, &m_scissorRect);
-
-			ID3D12DescriptorHeap* imguiHeap[] = { m_imguiSrvHeap.Get() };
-			imguiContext->List->SetDescriptorHeaps(_countof(imguiHeap), imguiHeap);
-			ImGui::Render();
-			ImGui_ImplDX12_RenderDrawData(ImGui::GetDrawData(), imguiContext->List.Get());
-
-			imguiContext->TransitionResource(backTexture, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PRESENT);
-		}
-#if defined(MULTITHREAD_CONTEXTS)
-	);
-#endif
-
-#if defined(MULTITHREAD_CONTEXTS)
-	clearTargetsTask.wait();
-	pbsTask.wait();
-	resolveLightingTask.wait();
-	hdr2sdrTask.wait();
-	imguiTask.wait();
-#endif
-
-	clearTargetCommandContext->Finish();
-	pbsCommandContext->Finish();
-	shadowContext->Finish();
-	lightingCommandContext->Finish();
-	hdrCommandContext->Finish();
-	imguiContext->Finish();
-}
 
 void SampleApp::UpdateGUI()
 {
@@ -648,7 +469,7 @@ void SampleApp::UpdateGUI()
 
 			auto posTextSize = ImGui::CalcTextSize(buffer);
 
-			ImGui::SetWindowSize(ImVec2(g_clientWidth, posTextSize.y));
+			ImGui::SetWindowSize(ImVec2(static_cast<float>(g_clientWidth), posTextSize.y));
 			ImGui::SetWindowPos(ImVec2(0, g_clientHeight - posTextSize.y - 10.0f));
 
 			ImGui::End();

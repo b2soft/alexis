@@ -18,10 +18,12 @@ void ReportLiveObjects()
 #include "SampleApp.h"
 
 #include <Core/Core.h>
-#include <Core/Render.h>
+#include <Render/Render.h>
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
 {
+	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_WNDW);
+
 	// Set the working directory to the path of the executable
 	WCHAR path[MAX_PATH];
 	HMODULE hModule = GetModuleHandle(NULL);

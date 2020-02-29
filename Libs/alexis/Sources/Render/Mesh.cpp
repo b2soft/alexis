@@ -10,7 +10,7 @@
 
 #include <Core/Core.h>
 #include <Core/CommandManager.h>
-#include <Core/Render.h>
+#include <Render/Render.h>
 
 using namespace DirectX;
 using namespace Microsoft::WRL;

@@ -103,7 +103,6 @@ namespace alexis
 		friend extern LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 		void CreateRenderWindow();
-		void InitImgui();
 
 		std::unique_ptr<ecs::World> m_ecs;
 		std::unique_ptr<Scene> m_scene;

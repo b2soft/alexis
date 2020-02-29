@@ -14,6 +14,7 @@ namespace alexis
 	{
 	public:
 		virtual void SetupToRender(CommandContext* commandContext) = 0;
+		virtual ~MaterialBase() = default;
 
 		const RootSignature& GetRootSignature()const
 		{

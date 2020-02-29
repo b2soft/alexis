@@ -26,9 +26,6 @@
     <Filter Include="Sources\ECS">
       <UniqueIdentifier>{774e1729-7fb0-4a05-ab26-b2f1b938ae7f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Render\Commands">
-      <UniqueIdentifier>{4b1dde96-f7c0-4d93-9f3c-b464d0c992ad}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Render\Materials">
       <UniqueIdentifier>{6a59af77-f88c-46b0-b2e5-20bbb18b5446}</UniqueIdentifier>
     </Filter>
@@ -38,9 +35,6 @@
       <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Core\Core.cpp">
-      <Filter>Sources\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Core\Render.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Core\CommandManager.cpp">
@@ -85,17 +79,11 @@
     <ClCompile Include="Sources\ECS\CameraSystem.cpp">
       <Filter>Sources\ECS</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Scene.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Core\ResourceManager.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\ECS\LightingSystem.cpp">
-      <Filter>Sources</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp">
       <Filter>Sources\Render\Materials</Filter>
@@ -112,6 +100,24 @@
     <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\Render.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\Hdr2SdrSystem.cpp">
+      <Filter>Sources\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\LightingSystem.cpp">
+      <Filter>Sources\ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\FrameRenderGraph.cpp">
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Scene.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\ImguiSystem.cpp">
+      <Filter>Sources\ECS</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -127,9 +133,6 @@
       <Filter>Sources\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\Core.h">
-      <Filter>Sources\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Core\Render.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\CommandManager.h">
@@ -189,9 +192,6 @@
     <ClInclude Include="Sources\ECS\CameraSystem.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Scene.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\ECS\ModelComponent.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
@@ -227,6 +227,21 @@
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h">
       <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Render.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\FrameRenderGraph.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Hdr2SdrSystem.h">
+      <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Scene.h">
+      <Filter>Sources</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\ImguiSystem.h">
+      <Filter>Sources\ECS</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
