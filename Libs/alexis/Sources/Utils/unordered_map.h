@@ -14,7 +14,13 @@ namespace alexis
 	template <typename C, typename T, typename A>
 	struct basic_string_hash
 	{
+
+#if _MSC_VER > 1924 
+		// Needed by new standard https://developercommunity.visualstudio.com/content/problem/909973/heterogeneous-lookup-for-unordered-containers-does.html
 		using is_transparent = std::equal_to<>;
+#else
+		using transparent_key_equal = std::equal_to<>;
+#endif
 		using hash_type = std::hash<std::basic_string_view<C, T>>;
 		std::size_t operator()(std::basic_string_view<C, T> txt) const { return hash_type{}(txt); }
 		std::size_t operator()(const std::basic_string<C, T, A>& txt) const { return hash_type{}(txt); }
