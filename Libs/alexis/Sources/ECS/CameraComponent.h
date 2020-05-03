@@ -26,8 +26,8 @@ namespace alexis
 			CameraComponent(const CameraComponent& other) :
 				Fov(other.Fov),
 				AspectRatio(other.AspectRatio),
-				NearZ(NearZ),
-				FarZ(FarZ),
+				NearZ(other.NearZ),
+				FarZ(other.FarZ),
 				IsOrtho(other.IsOrtho)
 			{
 				CameraData = static_cast<AlignedCameraData*>(_aligned_malloc(sizeof(AlignedCameraData), 16));

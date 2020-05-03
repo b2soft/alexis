@@ -33,10 +33,14 @@ namespace alexis
 
 		auto device = Render::GetInstance()->GetDevice();
 
+
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
+
 		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize),
+			&resourceDesc,
 			D3D12_RESOURCE_STATE_COMMON,
 			clearValue,
 			IID_PPV_ARGS(&m_resource)));
@@ -95,10 +99,13 @@ namespace alexis
 
 		auto device = Render::GetInstance()->GetDevice();
 
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
+
 		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize),
+			&resourceDesc,
 			D3D12_RESOURCE_STATE_COMMON,
 			nullptr,
 			IID_PPV_ARGS(&m_resource)));
@@ -146,8 +153,10 @@ namespace alexis
 
 		auto device = Render::GetInstance()->GetDevice();
 
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
 		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
 			&resourceDesc,
 			D3D12_RESOURCE_STATE_COMMON,
@@ -174,8 +183,10 @@ namespace alexis
 
 			auto device = Render::GetInstance()->GetDevice();
 
+			auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+
 			ThrowIfFailed(device->CreateCommittedResource(
-				&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+				&heapProperties,
 				D3D12_HEAP_FLAG_NONE,
 				&resDesc,
 				D3D12_RESOURCE_STATE_COMMON,
@@ -201,7 +212,7 @@ namespace alexis
 		{
 			srvDesc.Format = resDesc.Format;
 		}
-		
+
 		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 		srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 

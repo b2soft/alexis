@@ -29,9 +29,11 @@ namespace alexis
 	void Mesh::Draw(CommandContext* commandContext)
 	{
 		// todo: bundle it?
+		auto vertexBufferView = m_vertexBuffer.GetVertexBufferView();
+		auto indexBufferView = m_indexBuffer.GetIndexBufferView();
 		commandContext->List->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-		commandContext->List->IASetVertexBuffers(0, 1, &m_vertexBuffer.GetVertexBufferView());
-		commandContext->List->IASetIndexBuffer(&m_indexBuffer.GetIndexBufferView());
+		commandContext->List->IASetVertexBuffers(0, 1, &vertexBufferView);
+		commandContext->List->IASetIndexBuffer(&indexBufferView);
 		commandContext->DrawIndexedInstanced(m_indexCount);
 	}
 

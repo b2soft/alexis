@@ -178,7 +178,8 @@ namespace alexis
 
 	void CommandContext::TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES oldState, D3D12_RESOURCE_STATES newState)
 	{
-		List->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(resource.GetResource(), oldState, newState));
+		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.GetResource(), oldState, newState);
+		List->ResourceBarrier(1, &barrier);
 	}
 
 	void CommandContext::CopyBuffer(GpuBuffer& destination, const void* data, std::size_t numElements, std::size_t elementSize)

@@ -66,17 +66,21 @@ namespace alexis
 	}
 
 	UploadBufferManager::Page::Page(std::size_t sizeInBytes) :
-		m_pageSize(sizeInBytes),
-		m_offset(0),
 		m_cpuPtr(nullptr),
-		m_gpuPtr(D3D12_GPU_VIRTUAL_ADDRESS(0))
+		m_gpuPtr(D3D12_GPU_VIRTUAL_ADDRESS(0)),
+		m_pageSize(sizeInBytes),
+		m_offset(0)
 	{
 		auto device = Render::GetInstance()->GetDevice();
 
+
+		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD);
+		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_pageSize);
+
 		ThrowIfFailed(device->CreateCommittedResource(
-			&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+			&heapProperties,
 			D3D12_HEAP_FLAG_NONE,
-			&CD3DX12_RESOURCE_DESC::Buffer(m_pageSize),
+			&resourceDesc,
 			D3D12_RESOURCE_STATE_GENERIC_READ,
 			nullptr,
 			IID_PPV_ARGS(&m_resource)
