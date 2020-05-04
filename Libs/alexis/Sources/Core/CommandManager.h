@@ -92,6 +92,8 @@ namespace alexis
 				return m_computeCommandQueue;
 			case D3D12_COMMAND_LIST_TYPE_COPY:
 				return m_copyCommandQueue;
+			default:
+				return m_directCommandQueue;
 			}
 
 			return m_directCommandQueue;

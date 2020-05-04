@@ -9,6 +9,16 @@ namespace alexis
 	class GpuBuffer
 	{
 	public:
+		GpuBuffer() = default;
+
+		GpuBuffer(const GpuBuffer&) = delete;
+		GpuBuffer& operator=(const GpuBuffer&) = delete;
+
+		GpuBuffer(GpuBuffer&&) = default;
+		GpuBuffer& operator=(GpuBuffer&&) = default;
+
+		virtual ~GpuBuffer() = default;
+
 		void Create(std::size_t numElements, std::size_t elementsSize, const D3D12_CLEAR_VALUE* clearValue = nullptr);
 
 		ID3D12Resource* GetResource() const
