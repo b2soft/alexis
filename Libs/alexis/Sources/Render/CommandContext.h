@@ -59,8 +59,8 @@ namespace alexis
 
 		void Reset();
 
-		ComPtr<ID3D12CommandAllocator> Allocator;
-		ComPtr<ID3D12GraphicsCommandList> List;
+		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> Allocator;
+		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> List;
 		std::array<DynamicDescriptorHeap*, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> DynamicDescriptors;
 		std::array<ID3D12DescriptorHeap*, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> DescriptorHeap;
 

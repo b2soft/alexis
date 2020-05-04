@@ -153,7 +153,7 @@ namespace alexis
 			std::unordered_map<Entity, std::size_t> m_indexToEntityMap;
 
 			// Total number of valid entries in array
-			std::size_t m_size;
+			std::size_t m_size{ 0 };
 		};
 
 		// Component Manager

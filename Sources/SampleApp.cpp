@@ -2,28 +2,15 @@
 
 #include "SampleApp.h"
 
-#include <CoreHelpers.h>
-#include <d3dcompiler.h>
-#include <future>
-
-#include <imgui.h>
-#include <imgui_impl_dx12.h>
-#include <imgui_impl_win32.h>
-
 #include <Scene.h>
 #include <Core/Core.h>
 #include <Render/Render.h>
-#include <Core/CommandManager.h>
 
 #include <Render/Mesh.h>
 
 #include <ECS/ECS.h>
 #include <ECS/CameraComponent.h>
-#include <ECS/ModelComponent.h>
 #include <ECS/TransformComponent.h>
-#include <ECS/LightComponent.h>
-
-#include <Core/ResourceManager.h>
 
 using namespace alexis;
 using namespace DirectX;
@@ -35,7 +22,6 @@ static const float k_cameraTurnSpeed = 0.1f;
 
 SampleApp::SampleApp() :
 	m_viewport(0.0f, 0.0f, static_cast<float>(alexis::g_clientWidth), static_cast<float>(alexis::g_clientHeight)),
-	m_scissorRect(0, 0, LONG_MAX, LONG_MAX),
 	m_aspectRatio(static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight))
 {
 }
@@ -48,59 +34,11 @@ bool SampleApp::Initialize()
 
 	ResetMousePos();
 
-	auto ecsWorld = Core::Get().GetECS();
-
-	ecsWorld->Init();
-
-	ecsWorld->RegisterComponent<ecs::ModelComponent>();
-	ecsWorld->RegisterComponent<ecs::TransformComponent>();
-	ecsWorld->RegisterComponent<ecs::CameraComponent>();
-	ecsWorld->RegisterComponent<ecs::LightComponent>();
-
-	// Model System
-	m_modelSystem = ecsWorld->RegisterSystem<ecs::ModelSystem>();
-
-	ecs::ComponentMask modelSystemMask;
-	modelSystemMask.set(ecsWorld->GetComponentType<ecs::ModelComponent>());
-	modelSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
-	ecsWorld->SetSystemComponentMask<ecs::ModelSystem>(modelSystemMask);
-
-	// Shadow System
-	m_shadowSystem = ecsWorld->RegisterSystem<ecs::ShadowSystem>();
-
-	ecs::ComponentMask shadowSystemMask;
-	shadowSystemMask.set(ecsWorld->GetComponentType<ecs::ModelComponent>());
-	shadowSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
-	ecsWorld->SetSystemComponentMask<ecs::ShadowSystem>(shadowSystemMask);
-
-	// Camera System
-	m_cameraSystem = ecsWorld->RegisterSystem<ecs::CameraSystem>();
-
-	ecs::ComponentMask cameraSystemMask;
-	cameraSystemMask.set(ecsWorld->GetComponentType<ecs::CameraComponent>());
-	cameraSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
-	ecsWorld->SetSystemComponentMask<ecs::CameraSystem>(cameraSystemMask);
-
-	// Lighting System
-	m_lightingSystem = ecsWorld->RegisterSystem<ecs::LightingSystem>();
-
-	ecs::ComponentMask lightingSystemMask;
-	lightingSystemMask.set(ecsWorld->GetComponentType<ecs::LightComponent>());
-	//lightingSystemMask.set(ecsWorld->GetComponentType<ecs::TransformComponent>());
-	ecsWorld->SetSystemComponentMask<ecs::LightingSystem>(lightingSystemMask);
-
-	m_hdr2SdrSystem = ecsWorld->RegisterSystem<ecs::Hdr2SdrSystem>();
-
-	m_imguiSystem = ecsWorld->RegisterSystem<ecs::ImguiSystem>();
-
 	return true;
 }
 
 void SampleApp::OnUpdate(float dt)
 {
-	m_modelSystem->Update(dt);
-
-	m_imguiSystem->Update();
 	UpdateGUI();
 
 	m_frameCount++;
@@ -109,15 +47,15 @@ void SampleApp::OnUpdate(float dt)
 
 	if (m_timeCount > 1.f)
 	{
-		m_fps = m_frameCount / m_timeCount;
+		m_fps = static_cast<float>(m_frameCount) / m_timeCount;
 		m_timeCount = 0.f;
 		m_frameCount = 0;
 	}
 
 	if (!m_isCameraFixed)
 	{
-		m_yaw += m_deltaMouseX * k_cameraTurnSpeed;
-		m_pitch += m_deltaMouseY * k_cameraTurnSpeed;
+		m_yaw += static_cast<float>(m_deltaMouseX) * k_cameraTurnSpeed;
+		m_pitch += static_cast<float>(m_deltaMouseY) * k_cameraTurnSpeed;
 
 		m_deltaMouseX = 0;
 		m_deltaMouseY = 0;
@@ -127,23 +65,28 @@ void SampleApp::OnUpdate(float dt)
 		XMVECTOR newPos = cameraTransformComponent.Position + XMVector3Rotate(posOffset, cameraTransformComponent.Rotation);
 		newPos = XMVectorSetW(newPos, 1.0f);
 
-		m_cameraSystem->SetPosition(m_sceneCamera, newPos);
+		auto* ecsWorld = Core::Get().GetECS();
+		auto cameraSystem = ecsWorld->GetSystem<alexis::ecs::CameraSystem>();
+
+		cameraSystem->SetPosition(m_sceneCamera, newPos);
 
 		XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
-		m_cameraSystem->SetRotation(m_sceneCamera, cameraRotationQuat);
+		cameraSystem->SetRotation(m_sceneCamera, cameraRotationQuat);
 	}
 }
 
 void SampleApp::OnRender()
 {
-
 }
 
 void SampleApp::OnResize(int width, int height)
 {
 	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 
-	m_cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
+	auto* ecsWorld = Core::Get().GetECS();
+	auto cameraSystem = ecsWorld->GetSystem<alexis::ecs::CameraSystem>();
+
+	cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
 
 	Render::GetInstance()->GetRTManager()->Resize(width, height);
 }
@@ -292,124 +235,6 @@ void SampleApp::Destroy()
 {
 }
 
-void SampleApp::LoadPipeline()
-{
-
-}
-
-void SampleApp::LoadAssets()
-{
-	//----- Loading
-	auto render = alexis::Render::GetInstance();
-	//------
-
-	// Depth
-	//DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
-	DXGI_FORMAT depthFormat = DXGI_FORMAT_R24G8_TYPELESS;
-	auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthFormat, alexis::g_clientWidth, alexis::g_clientHeight);
-	depthDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-	D3D12_CLEAR_VALUE depthClearValue;
-	depthClearValue.Format = depthDesc.Format;
-	depthClearValue.DepthStencil = { 1.0f, 0 };
-
-	TextureBuffer depthTexture;
-	depthTexture.Create(depthDesc, &depthClearValue);
-
-	// Create a G-Buffer
-	{
-		auto gbuffer = std::make_unique<RenderTarget>();
-
-		//DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
-		DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
-		auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(gbufferColorFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
-		colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-		D3D12_CLEAR_VALUE colorClearValue;
-		colorClearValue.Format = colorDesc.Format;
-		colorClearValue.Color[0] = 0.0f;
-		colorClearValue.Color[1] = 0.0f;
-		colorClearValue.Color[2] = 0.5f;
-		colorClearValue.Color[3] = 1.0f;
-
-		TextureBuffer gb0;
-		gb0.Create(colorDesc, &colorClearValue); // Base color
-		gbuffer->AttachTexture(gb0, RenderTarget::Slot::Slot0);
-		gb0.GetResource()->SetName(L"GB 0");
-
-		TextureBuffer gb1;
-		gb1.Create(colorDesc, &colorClearValue); // Normals
-		gbuffer->AttachTexture(gb1, RenderTarget::Slot::Slot1);
-		gb1.GetResource()->SetName(L"GB 1");
-
-		TextureBuffer gb2;
-		gb2.Create(colorDesc, &colorClearValue); // Base color
-		gbuffer->AttachTexture(gb2, RenderTarget::Slot::Slot2);
-		gb2.GetResource()->SetName(L"GB 2");
-
-		gbuffer->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
-		depthTexture.GetResource()->SetName(L"GB Depth");
-
-		render->GetRTManager()->EmplaceTarget(L"GB", std::move(gbuffer));
-	}
-
-	// Create an HDR RT
-	{
-		auto hdrTarget = std::make_unique<RenderTarget>();
-		DXGI_FORMAT hdrFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
-
-		auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(hdrFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
-		colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-		D3D12_CLEAR_VALUE colorClearValue;
-		colorClearValue.Format = colorDesc.Format;
-		colorClearValue.Color[0] = 0.0f;
-		colorClearValue.Color[1] = 0.0f;
-		colorClearValue.Color[2] = 0.0f;
-		colorClearValue.Color[3] = 1.0f;
-
-		TextureBuffer hdrTexture;
-		hdrTexture.Create(colorDesc, &colorClearValue);
-		hdrTexture.GetResource()->SetName(L"HDR Texture");
-
-		hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
-		//hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
-
-		render->GetRTManager()->EmplaceTarget(L"HDR", std::move(hdrTarget));
-	}
-
-	// Create shadow map target
-	{
-		DXGI_FORMAT shadowFormat = DXGI_FORMAT_R24G8_TYPELESS;
-		auto shadowDesc = CD3DX12_RESOURCE_DESC::Tex2D(shadowFormat, 1024, 1024);
-		shadowDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-		D3D12_CLEAR_VALUE shadowDepthClearValue;
-		shadowDepthClearValue.Format = shadowDesc.Format;
-		shadowDepthClearValue.DepthStencil = { 1.0f, 0 };
-
-		TextureBuffer shadowDepthTexture;
-		shadowDepthTexture.Create(shadowDesc, &shadowDepthClearValue);
-
-		auto shadowRT = std::make_unique<RenderTarget>();
-		shadowRT->AttachTexture(shadowDepthTexture, RenderTarget::DepthStencil);
-		render->GetRTManager()->EmplaceTarget(L"Shadow Map", std::move(shadowRT));
-	}
-
-	m_lightingSystem->Init();
-	m_shadowSystem->Init();
-	m_hdr2SdrSystem->Init();
-	m_imguiSystem->Init();
-
-
-	// Create Synchronization Objects
-	{
-		render->GetCommandManager()->WaitForGpu();
-	}
-}
-
-
-
 void SampleApp::UpdateGUI()
 {
 	static bool showDemoWindow = false;
@@ -507,15 +332,15 @@ void SampleApp::ResetMousePos()
 
 bool SampleApp::LoadContent()
 {
-	LoadPipeline();
-	LoadAssets();
-
 	auto scene = Core::Get().GetScene();
 	//scene->LoadFromJson(L"Resources/main.scene");
 	scene->LoadFromJson(L"Resources/shaderball.scene");
 	//scene->LoadFromJson(L"Resources/main_sphere.scene");
 
-	m_sceneCamera = m_cameraSystem->GetActiveCamera();
+	auto* ecsWorld = Core::Get().GetECS();
+	auto cameraSystem = ecsWorld->GetSystem<alexis::ecs::CameraSystem>();
+
+	m_sceneCamera = cameraSystem->GetActiveCamera();
 
 	return true;
 }

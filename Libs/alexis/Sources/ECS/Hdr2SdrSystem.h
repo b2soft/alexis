@@ -2,9 +2,10 @@
 
 #include <ECS/ECS.h>
 
+#include <Render/Materials/MaterialBase.h>
+
 namespace alexis
 {
-	class MaterialBase;
 	class CommandContext;
 	class Mesh;
 

@@ -12,6 +12,5 @@ namespace alexis
 
 	private:
 		CD3DX12_RECT m_scissorRect{ 0, 0, LONG_MAX, LONG_MAX };
-
 	};
 }

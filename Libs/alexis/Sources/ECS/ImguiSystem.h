@@ -7,7 +7,6 @@ struct ImGuiContext;
 
 namespace alexis
 {
-	class MaterialBase;
 	class CommandContext;
 	class Mesh;
 
@@ -19,7 +18,7 @@ namespace alexis
 			~ImguiSystem();
 
 			void Init();
-			void Update();
+			void Update(float dt);
 			void Render(CommandContext* context);
 
 			Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_imguiSrvHeap;

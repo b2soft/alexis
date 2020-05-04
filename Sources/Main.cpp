@@ -20,7 +20,7 @@ void ReportLiveObjects()
 #include <Core/Core.h>
 #include <Render/Render.h>
 
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int nCmdShow)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
 	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_WNDW);
 

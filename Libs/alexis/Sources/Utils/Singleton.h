@@ -4,7 +4,7 @@
 
 namespace alexis
 {
-	template<typename T>
+	template<class T>
 	class Singleton
 	{
 	public:
@@ -31,10 +31,10 @@ namespace alexis
 		}
 	};
 
-	template<typename T>
-	typename T* Singleton<T>::m_instance = 0;
+	template<class T>
+	T* Singleton<T>::m_instance = 0;
 
-	template<typename T>
+	template<class T>
 	T* Singleton<T>::GetInstance()
 	{
 		if (!m_instance)
@@ -44,14 +44,14 @@ namespace alexis
 
 		return m_instance;
 	}
-	template<typename T>
+	template<class T>
 	bool Singleton<T>::HasInstance()
 	{
 		return m_instance != nullptr;
 	}
 
 
-	template<typename T>
+	template<class T>
 	void Singleton<T>::DestroyInstance()
 	{
 		delete Singleton<T>::m_instance;

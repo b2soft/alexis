@@ -34,8 +34,8 @@ public:
 
 	virtual bool Initialize() override;
 
-	virtual bool LoadContent();
-	virtual void UnloadContent();
+	virtual bool LoadContent() override;
+	virtual void UnloadContent() override;
 
 	virtual void OnUpdate(float dt) override;
 	virtual void OnRender() override;
@@ -53,9 +53,8 @@ private:
 
 	// Pipeline objects
 	CD3DX12_VIEWPORT m_viewport;
-	CD3DX12_RECT m_scissorRect;
 
-	alexis::ecs::Entity m_sceneCamera;
+	alexis::ecs::Entity m_sceneCamera{ 0 };
 
 	float m_aspectRatio{ 1.0f };
 
@@ -76,9 +75,6 @@ private:
 	float m_pitch{ 30.0f };
 	float m_yaw{ 0.0 };
 
-	void LoadPipeline();
-	void LoadAssets();
-
 	void UpdateGUI();
 
 	void ToggleFixedCamera();
@@ -86,11 +82,4 @@ private:
 	int m_deltaMouseX{ 0 };
 	int m_deltaMouseY{ 0 };
 	bool m_isCameraFixed{ true };
-
-	std::shared_ptr<alexis::ecs::ModelSystem> m_modelSystem;
-	std::shared_ptr<alexis::ecs::ShadowSystem> m_shadowSystem;
-	std::shared_ptr<alexis::ecs::CameraSystem> m_cameraSystem;
-	std::shared_ptr<alexis::ecs::LightingSystem> m_lightingSystem;
-	std::shared_ptr<alexis::ecs::Hdr2SdrSystem> m_hdr2SdrSystem;
-	std::shared_ptr<alexis::ecs::ImguiSystem> m_imguiSystem;
 };

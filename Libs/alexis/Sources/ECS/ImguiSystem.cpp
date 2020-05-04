@@ -44,7 +44,7 @@ namespace alexis
 				m_imguiSrvHeap->GetGPUDescriptorHandleForHeapStart());
 		}
 
-		void ImguiSystem::Update()
+		void ImguiSystem::Update(float dt)
 		{
 			ImGui::SetCurrentContext(m_context);
 			ImGui_ImplDX12_NewFrame();

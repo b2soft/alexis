@@ -118,6 +118,15 @@
     <ClCompile Include="Sources\ECS\ImguiSystem.cpp">
       <Filter>Sources\ECS</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Core\SystemsHolder.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Core\FrameUpdateGraph.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -242,6 +251,12 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\ImguiSystem.h">
       <Filter>Sources\ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\SystemsHolder.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Core\FrameUpdateGraph.h">
+      <Filter>Sources\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

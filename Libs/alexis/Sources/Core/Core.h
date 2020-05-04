@@ -46,6 +46,8 @@ namespace alexis
 
 	class Scene;
 	class ResourceManager;
+	class SystemsHolder;
+	class FrameUpdateGraph;
 
 	class Core
 	{
@@ -91,6 +93,11 @@ namespace alexis
 			return m_resourceManager.get();
 		}
 
+		// Global Core Update
+		void Update(float dt);
+
+		void Render();
+
 	protected:
 		// Create app instance
 		Core(HINSTANCE hInstance);
@@ -107,6 +114,8 @@ namespace alexis
 		std::unique_ptr<ecs::World> m_ecs;
 		std::unique_ptr<Scene> m_scene;
 		std::unique_ptr<ResourceManager> m_resourceManager;
+		std::unique_ptr<SystemsHolder> m_systemsHolder;
+		std::unique_ptr<FrameUpdateGraph> m_frameUpdateGraph;
 
 		static HighResolutionClock s_updateClock;
 

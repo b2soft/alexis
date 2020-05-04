@@ -10,6 +10,8 @@
 
 #include <Render/Render.h>
 #include "CoreHelpers.h"
+#include "SystemsHolder.h"
+#include "FrameUpdateGraph.h"
 
 #include <ECS/ImguiSystem.h>
 
@@ -153,6 +155,28 @@ namespace alexis
 		PostQuitMessage(returnCode);
 	}
 
+	void Core::Update(float dt)
+	{
+		// Internal Update
+		m_frameUpdateGraph->Update(dt);
+
+		// Game-Specific Update
+		s_game->OnUpdate(dt);
+	}
+
+	void Core::Render()
+	{
+		// Internal Render Graph
+		auto render = Render::GetInstance();
+		render->BeginRender();
+
+		// Game-specific Render
+		s_game->OnRender();
+
+		// Present to screen
+		render->Present();
+	}
+
 	Core::Core(HINSTANCE hInstance)
 	{
 		// Windows 10 Creators update adds Per Monitor V2 DPI awareness context.
@@ -178,9 +202,17 @@ namespace alexis
 		Render::GetInstance()->Initialize(g_clientWidth, g_clientHeight);
 		s_frameCount = 0;
 
-		m_ecs = std::make_unique<ecs::World>();
-		m_scene = std::make_unique<Scene>();
 		m_resourceManager = std::make_unique<ResourceManager>();
+
+		m_ecs = std::make_unique<ecs::World>();
+		m_ecs->Init();
+
+		m_systemsHolder = std::make_unique<SystemsHolder>();
+		m_systemsHolder->Init();
+
+		m_scene = std::make_unique<Scene>();
+
+		m_frameUpdateGraph = std::make_unique<FrameUpdateGraph>();
 	}
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -205,17 +237,9 @@ namespace alexis
 
 			float dt = Core::s_updateClock.GetDeltaSeconds();
 
-			Core::s_game->OnUpdate(Core::s_updateClock.GetDeltaSeconds());
+			Core::Get().Update(dt);
 
-			// Evaluate render graph
-			auto render = Render::GetInstance();
-			render->BeginRender();
-
-			// Populate game command lists to render
-			Core::s_game->OnRender();
-
-			// Present to screen
-			render->Present();
+			Core::Get().Render();
 		}
 		break;
 

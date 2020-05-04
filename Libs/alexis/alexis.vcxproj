@@ -22,9 +22,11 @@
     <ClInclude Include="Sources\Core\CommandManager.h" />
     <ClInclude Include="Sources\Core\Core.h" />
     <ClInclude Include="Sources\Core\Events.h" />
+    <ClInclude Include="Sources\Core\FrameUpdateGraph.h" />
     <ClInclude Include="Sources\Core\HighResolutionClock.h" />
     <ClInclude Include="Sources\Core\KeyCodes.h" />
     <ClInclude Include="Sources\CoreHelpers.h" />
+    <ClInclude Include="Sources\Core\SystemsHolder.h" />
     <ClInclude Include="Sources\d3dx12.h" />
     <ClInclude Include="Sources\ECS\CameraComponent.h" />
     <ClInclude Include="Sources\ECS\CameraSystem.h" />
@@ -64,8 +66,10 @@
   <ItemGroup>
     <ClCompile Include="Sources\Core\CommandManager.cpp" />
     <ClCompile Include="Sources\Core\Core.cpp" />
+    <ClCompile Include="Sources\Core\FrameUpdateGraph.cpp" />
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp" />
     <ClCompile Include="Sources\Core\ResourceManager.cpp" />
+    <ClCompile Include="Sources\Core\SystemsHolder.cpp" />
     <ClCompile Include="Sources\ECS\CameraSystem.cpp" />
     <ClCompile Include="Sources\ECS\Hdr2SdrSystem.cpp" />
     <ClCompile Include="Sources\ECS\ImguiSystem.cpp" />
@@ -86,6 +90,7 @@
     <ClCompile Include="Sources\Render\FrameRenderGraph.cpp" />
     <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />
+    <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp" />
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp" />
     <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp" />
@@ -146,7 +151,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>ClangCL</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
@@ -180,6 +185,8 @@
     <OutDir>Build\$(Configuration)\</OutDir>
     <TargetName>$(ProjectName)</TargetName>
     <ClangTidyChecks>-*, cppcoreguidelines-*</ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
@@ -191,6 +198,8 @@
     <LinkIncremental>false</LinkIncremental>
     <IntDir>Temp\$(Configuration)\</IntDir>
     <OutDir>Build\$(Configuration)\</OutDir>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -218,8 +227,10 @@
     </FxCompile>
     <Lib>
       <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <TargetMachine>MachineX64</TargetMachine>
     </Lib>
+    <ProjectReference />
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>

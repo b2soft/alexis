@@ -85,7 +85,7 @@ namespace alexis
 		DescriptorAllocation m_cbv;
 	};
 
-	class TextureBuffer :public GpuBuffer
+	class TextureBuffer : public GpuBuffer
 	{
 	public:
 		void Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips = 1, const D3D12_CLEAR_VALUE* clearValue = nullptr);

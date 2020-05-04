@@ -21,8 +21,6 @@ namespace alexis
 
 		InitDevice();
 
-		InitPipeline();
-
 		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
 		{
 			m_descriptorAllocators[i] = std::make_unique<DescriptorAllocator>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
@@ -34,6 +32,8 @@ namespace alexis
 		m_frameRenderGraph = std::make_unique<FrameRenderGraph>();
 
 		UpdateRenderTargetViews();
+
+		InitPipeline();
 	}
 
 	void Render::Destroy()
@@ -337,6 +337,101 @@ namespace alexis
 
 	void Render::InitPipeline()
 	{
+		// Depth
+		//DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
+		DXGI_FORMAT depthFormat = DXGI_FORMAT_R24G8_TYPELESS;
+		auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthFormat, alexis::g_clientWidth, alexis::g_clientHeight);
+		depthDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+		D3D12_CLEAR_VALUE depthClearValue;
+		depthClearValue.Format = depthDesc.Format;
+		depthClearValue.DepthStencil = { 1.0f, 0 };
+
+		TextureBuffer depthTexture;
+		depthTexture.Create(depthDesc, &depthClearValue);
+
+		// Create a G-Buffer
+		{
+			auto gbuffer = std::make_unique<RenderTarget>();
+
+			//DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
+			DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
+			auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(gbufferColorFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
+			colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+			D3D12_CLEAR_VALUE colorClearValue;
+			colorClearValue.Format = colorDesc.Format;
+			colorClearValue.Color[0] = 0.0f;
+			colorClearValue.Color[1] = 0.0f;
+			colorClearValue.Color[2] = 0.5f;
+			colorClearValue.Color[3] = 1.0f;
+
+			TextureBuffer gb0;
+			gb0.Create(colorDesc, &colorClearValue); // Base color
+			gbuffer->AttachTexture(gb0, RenderTarget::Slot::Slot0);
+			gb0.GetResource()->SetName(L"GB 0");
+
+			TextureBuffer gb1;
+			gb1.Create(colorDesc, &colorClearValue); // Normals
+			gbuffer->AttachTexture(gb1, RenderTarget::Slot::Slot1);
+			gb1.GetResource()->SetName(L"GB 1");
+
+			TextureBuffer gb2;
+			gb2.Create(colorDesc, &colorClearValue); // Base color
+			gbuffer->AttachTexture(gb2, RenderTarget::Slot::Slot2);
+			gb2.GetResource()->SetName(L"GB 2");
+
+			gbuffer->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+			depthTexture.GetResource()->SetName(L"GB Depth");
+
+			m_rtManager->EmplaceTarget(L"GB", std::move(gbuffer));
+		}
+
+		// Create an HDR RT
+		{
+			auto hdrTarget = std::make_unique<RenderTarget>();
+			DXGI_FORMAT hdrFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+			auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(hdrFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
+			colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+			D3D12_CLEAR_VALUE colorClearValue;
+			colorClearValue.Format = colorDesc.Format;
+			colorClearValue.Color[0] = 0.0f;
+			colorClearValue.Color[1] = 0.0f;
+			colorClearValue.Color[2] = 0.0f;
+			colorClearValue.Color[3] = 1.0f;
+
+			TextureBuffer hdrTexture;
+			hdrTexture.Create(colorDesc, &colorClearValue);
+			hdrTexture.GetResource()->SetName(L"HDR Texture");
+
+			hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
+			//hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+
+			m_rtManager->EmplaceTarget(L"HDR", std::move(hdrTarget));
+		}
+
+		// Create shadow map target
+		{
+			DXGI_FORMAT shadowFormat = DXGI_FORMAT_R24G8_TYPELESS;
+			auto shadowDesc = CD3DX12_RESOURCE_DESC::Tex2D(shadowFormat, 1024, 1024);
+			shadowDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+			D3D12_CLEAR_VALUE shadowDepthClearValue;
+			shadowDepthClearValue.Format = shadowDesc.Format;
+			shadowDepthClearValue.DepthStencil = { 1.0f, 0 };
+
+			TextureBuffer shadowDepthTexture;
+			shadowDepthTexture.Create(shadowDesc, &shadowDepthClearValue);
+
+			auto shadowRT = std::make_unique<RenderTarget>();
+			shadowRT->AttachTexture(shadowDepthTexture, RenderTarget::DepthStencil);
+			m_rtManager->EmplaceTarget(L"Shadow Map", std::move(shadowRT));
+		}
+
+		// Wait
+		m_commandManager->WaitForGpu();
 
 	}
 
