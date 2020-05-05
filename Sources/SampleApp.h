@@ -15,11 +15,6 @@ class SampleApp : public alexis::IGame
 public:
 	SampleApp();
 
-	struct SceneConstantBuffer
-	{
-		DirectX::XMFLOAT4 offset{ 1.0f, 0.0f, 1.0f, 1.0f };
-	};
-
 	virtual bool Initialize() override;
 
 	virtual bool LoadContent() override;
@@ -38,9 +33,6 @@ public:
 
 private:
 	static const UINT k_frameCount = 3;
-
-	// Pipeline objects
-	CD3DX12_VIEWPORT m_viewport;
 
 	alexis::ecs::Entity m_sceneCamera{ 0 };
 

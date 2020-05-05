@@ -3,10 +3,10 @@
 #include "LightingSystem.h"
 
 #include <ECS/ECS.h>
-#include <ECS/CameraSystem.h>
-#include <ECS/ShadowSystem.h>
-#include <ECS/TransformComponent.h>
-#include <ECS/LightComponent.h>
+#include <ECS/Systems/CameraSystem.h>
+#include <ECS/Systems/ShadowSystem.h>
+#include <ECS/Components/TransformComponent.h>
+#include <ECS/Components/LightComponent.h>
 
 #include <Core/Core.h>
 #include <Core/ResourceManager.h>

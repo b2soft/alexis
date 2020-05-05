@@ -3,7 +3,7 @@
 #include <DirectXMath.h>
 
 #include <ECS/ECS.h>
-#include <ECS/CameraComponent.h>
+#include <ECS/Components/CameraComponent.h>
 
 namespace alexis
 {

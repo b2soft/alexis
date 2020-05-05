@@ -9,9 +9,9 @@
 #include <Render/Mesh.h>
 
 #include <ECS/ECS.h>
-#include <ECS/CameraSystem.h>
-#include <ECS/CameraComponent.h>
-#include <ECS/TransformComponent.h>
+#include <ECS/Systems/CameraSystem.h>
+#include <ECS/Components/CameraComponent.h>
+#include <ECS/Components/TransformComponent.h>
 
 using namespace alexis;
 using namespace DirectX;
@@ -22,7 +22,6 @@ static const float k_cameraSpeed = 20.0f;
 static const float k_cameraTurnSpeed = 0.1f;
 
 SampleApp::SampleApp() :
-	m_viewport(0.0f, 0.0f, static_cast<float>(alexis::g_clientWidth), static_cast<float>(alexis::g_clientHeight)),
 	m_aspectRatio(static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight))
 {
 }

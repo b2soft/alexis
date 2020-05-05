@@ -27,17 +27,17 @@
     <ClInclude Include="Sources\CoreHelpers.h" />
     <ClInclude Include="Sources\Core\SystemsHolder.h" />
     <ClInclude Include="Sources\d3dx12.h" />
-    <ClInclude Include="Sources\ECS\CameraComponent.h" />
-    <ClInclude Include="Sources\ECS\CameraSystem.h" />
+    <ClInclude Include="Sources\ECS\Components\CameraComponent.h" />
+    <ClInclude Include="Sources\ECS\Components\LightComponent.h" />
+    <ClInclude Include="Sources\ECS\Components\ModelComponent.h" />
+    <ClInclude Include="Sources\ECS\Components\TransformComponent.h" />
     <ClInclude Include="Sources\ECS\ECS.h" />
-    <ClInclude Include="Sources\ECS\Hdr2SdrSystem.h" />
-    <ClInclude Include="Sources\ECS\ImguiSystem.h" />
-    <ClInclude Include="Sources\ECS\LightComponent.h" />
-    <ClInclude Include="Sources\ECS\LightingSystem.h" />
-    <ClInclude Include="Sources\ECS\ModelComponent.h" />
-    <ClInclude Include="Sources\ECS\ModelSystem.h" />
-    <ClInclude Include="Sources\ECS\ShadowSystem.h" />
-    <ClInclude Include="Sources\ECS\TransformComponent.h" />
+    <ClInclude Include="Sources\ECS\Systems\CameraSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\Hdr2SdrSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\ImguiSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\LightingSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\ModelSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\ShadowSystem.h" />
     <ClInclude Include="Sources\Precompiled.h" />
     <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h" />
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />
@@ -70,12 +70,12 @@
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp" />
     <ClCompile Include="Sources\Core\ResourceManager.cpp" />
     <ClCompile Include="Sources\Core\SystemsHolder.cpp" />
-    <ClCompile Include="Sources\ECS\CameraSystem.cpp" />
-    <ClCompile Include="Sources\ECS\Hdr2SdrSystem.cpp" />
-    <ClCompile Include="Sources\ECS\ImguiSystem.cpp" />
-    <ClCompile Include="Sources\ECS\LightingSystem.cpp" />
-    <ClCompile Include="Sources\ECS\ModelSystem.cpp" />
-    <ClCompile Include="Sources\ECS\ShadowSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\CameraSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\Hdr2SdrSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\ImguiSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\LightingSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\ModelSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\ShadowSystem.cpp" />
     <ClCompile Include="Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

@@ -4,8 +4,8 @@
 
 #include <Core/Core.h>
 
-#include <ECS/ModelSystem.h>
-#include <ECS/ImguiSystem.h>
+#include <ECS/Systems/ModelSystem.h>
+#include <ECS/Systems/ImguiSystem.h>
 
 namespace alexis
 {

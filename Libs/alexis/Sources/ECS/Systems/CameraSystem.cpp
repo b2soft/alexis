@@ -3,8 +3,8 @@
 #include "CameraSystem.h"
 
 #include <Core/Core.h>
-#include <ECS/CameraComponent.h>
-#include <ECS/TransformComponent.h>
+#include <ECS/Components/CameraComponent.h>
+#include <ECS/Components/TransformComponent.h>
 
 namespace alexis
 {

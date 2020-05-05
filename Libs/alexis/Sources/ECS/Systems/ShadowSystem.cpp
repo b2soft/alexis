@@ -8,12 +8,12 @@
 #include <Render/CommandContext.h>
 #include <Render/Materials/ShadowMaterial.h>
 
-#include <ECS/CameraSystem.h>
-#include <ECS/LightingSystem.h>
+#include <ECS/Systems/CameraSystem.h>
+#include <ECS/Systems/LightingSystem.h>
 
-#include <ECS/ModelComponent.h>
-#include <ECS/TransformComponent.h>
-#include <ECS/LightComponent.h>
+#include <ECS/Components/ModelComponent.h>
+#include <ECS/Components/TransformComponent.h>
+#include <ECS/Components/LightComponent.h>
 
 namespace alexis
 {
