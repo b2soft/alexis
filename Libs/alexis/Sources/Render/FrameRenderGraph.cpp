@@ -2,23 +2,23 @@
 
 #include "FrameRenderGraph.h"
 
-#include <ECS/ECS.h>
 #include <Core/Core.h>
 #include <Render/Render.h>
 
-#include <ECS/ModelSystem.h>
-#include <ECS/CameraSystem.h>
-#include <ECS/ShadowSystem.h>
-#include <ECS/LightingSystem.h>
-#include <ECS/Hdr2SdrSystem.h>
-#include <ECS/ImguiSystem.h>
+#include <ECS/ECS.h>
+#include <ECS/Systems/ModelSystem.h>
+#include <ECS/Systems/CameraSystem.h>
+#include <ECS/Systems/ShadowSystem.h>
+#include <ECS/Systems/LightingSystem.h>
+#include <ECS/Systems/Hdr2SdrSystem.h>
+#include <ECS/Systems/ImguiSystem.h>
 
 namespace alexis
 {
 
 	void FrameRenderGraph::Render()
 	{
-		auto ecsWorld = Core::Get().GetECS();
+		auto& ecsWorld = Core::Get().GetECSWorld();
 		auto render = alexis::Render::GetInstance();
 		auto commandManager = render->GetCommandManager();
 
@@ -63,45 +63,45 @@ namespace alexis
 
 		// PBR models rendering
 		auto pbsContext = commandManager->CreateCommandContext();
-		auto pbrTask = [pbsContext, gbuffer, ecsWorld]
+		auto pbrTask = [pbsContext, gbuffer, &ecsWorld]
 		{
-			auto modelSystem = ecsWorld->GetSystem<ecs::ModelSystem>();
+			auto modelSystem = ecsWorld.GetSystem<ecs::ModelSystem>();
 			modelSystem->Render(pbsContext);
 		};
 		pbrTask();
 
 		// Shadows Cast
 		auto shadowContext = commandManager->CreateCommandContext();
-		auto shadowTask = [shadowContext, ecsWorld]
+		auto shadowTask = [shadowContext, &ecsWorld]
 		{
-			auto shadowSystem = ecsWorld->GetSystem<ecs::ShadowSystem>();
+			auto shadowSystem = ecsWorld.GetSystem<ecs::ShadowSystem>();
 			shadowSystem->Render(shadowContext);
 		};
 		shadowTask();
 
 		// Lighting Resolve
 		auto lightingContext = commandManager->CreateCommandContext();
-		auto lightingTask = [lightingContext, ecsWorld]
+		auto lightingTask = [lightingContext, &ecsWorld]
 		{
-			auto lightingSystem = ecsWorld->GetSystem<ecs::LightingSystem>();
+			auto lightingSystem = ecsWorld.GetSystem<ecs::LightingSystem>();
 			lightingSystem->Render(lightingContext);
 		};
 		lightingTask();
 
 		// HDR resolve
 		auto hdrContext = commandManager->CreateCommandContext();
-		auto hdrTask = [hdrContext, ecsWorld]
+		auto hdrTask = [hdrContext, &ecsWorld]
 		{
-			auto hdr2SdrSystem = ecsWorld->GetSystem<ecs::Hdr2SdrSystem>();
+			auto hdr2SdrSystem = ecsWorld.GetSystem<ecs::Hdr2SdrSystem>();
 			hdr2SdrSystem->Render(hdrContext);
 		};
 		hdrTask();
 
 		// ImGUI
 		auto imguiContext = commandManager->CreateCommandContext();
-		auto imguiTask = [imguiContext, ecsWorld]
+		auto imguiTask = [imguiContext, &ecsWorld]
 		{
-			auto imguiSystem = ecsWorld->GetSystem<ecs::ImguiSystem>();
+			auto imguiSystem = ecsWorld.GetSystem<ecs::ImguiSystem>();
 			imguiSystem->Render(imguiContext);
 		};
 		imguiTask();

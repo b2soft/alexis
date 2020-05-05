@@ -13,7 +13,7 @@
 #include "SystemsHolder.h"
 #include "FrameUpdateGraph.h"
 
-#include <ECS/ImguiSystem.h>
+#include <ECS/Systems/ImguiSystem.h>
 
 // TODO: rework it! Needed to get app's icon
 #include "../../Resources/resource.h"

@@ -11,9 +11,9 @@ namespace alexis
 {
 	void FrameUpdateGraph::Update(float dt)
 	{
-		auto ecsWorld = Core::Get().GetECS();
+		auto& ecsWorld = Core::Get().GetECSWorld();
 
-		ecsWorld->GetSystem<ecs::ModelSystem>()->Update(dt);
-		ecsWorld->GetSystem<ecs::ImguiSystem>()->Update(dt);
+		ecsWorld.GetSystem<ecs::ModelSystem>()->Update(dt);
+		ecsWorld.GetSystem<ecs::ImguiSystem>()->Update(dt);
 	}
 }

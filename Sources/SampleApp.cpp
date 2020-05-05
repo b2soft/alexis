@@ -60,14 +60,14 @@ void SampleApp::OnUpdate(float dt)
 		m_deltaMouseX = 0;
 		m_deltaMouseY = 0;
 
+		auto& ecsWorld = Core::Get().GetECSWorld();
+
 		XMVECTOR posOffset = XMVectorSet(m_rightMovement - m_leftMovement, m_upMovement - m_downMovement, m_fwdMovement - m_aftMovement, 1.0f) * k_cameraSpeed * static_cast<float>(dt);
-		auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
+		auto cameraTransformComponent = ecsWorld.GetComponent<ecs::TransformComponent>(m_sceneCamera);
 		XMVECTOR newPos = cameraTransformComponent.Position + XMVector3Rotate(posOffset, cameraTransformComponent.Rotation);
 		newPos = XMVectorSetW(newPos, 1.0f);
 
-		auto* ecsWorld = Core::Get().GetECS();
-		auto cameraSystem = ecsWorld->GetSystem<alexis::ecs::CameraSystem>();
-
+		auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
 		cameraSystem->SetPosition(m_sceneCamera, newPos);
 
 		XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
@@ -83,8 +83,8 @@ void SampleApp::OnResize(int width, int height)
 {
 	m_aspectRatio = static_cast<float>(alexis::g_clientWidth) / static_cast<float>(alexis::g_clientHeight);
 
-	auto* ecsWorld = Core::Get().GetECS();
-	auto cameraSystem = ecsWorld->GetSystem<alexis::ecs::CameraSystem>();
+	auto& ecsWorld = Core::Get().GetECSWorld();
+	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
 
 	cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
 
@@ -288,7 +288,7 @@ void SampleApp::UpdateGUI()
 			ImGui::Begin("BottomBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs |
 				ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-			auto cameraTransformComponent = Core::Get().GetECS()->GetComponent<ecs::TransformComponent>(m_sceneCamera);
+			auto cameraTransformComponent = Core::Get().GetECSWorld().GetComponent<ecs::TransformComponent>(m_sceneCamera);
 			sprintf_s(buffer, _countof(buffer), "Camera Pos{ X: %.2f Y: %.2f Z: %.2f }", XMVectorGetX(cameraTransformComponent.Position), XMVectorGetY(cameraTransformComponent.Position), XMVectorGetZ(cameraTransformComponent.Position));
 			ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), buffer);
 
@@ -337,8 +337,8 @@ bool SampleApp::LoadContent()
 	scene->LoadFromJson(L"Resources/shaderball.scene");
 	//scene->LoadFromJson(L"Resources/main_sphere.scene");
 
-	auto* ecsWorld = Core::Get().GetECS();
-	auto cameraSystem = ecsWorld->GetSystem<alexis::ecs::CameraSystem>();
+	auto& ecsWorld = Core::Get().GetECSWorld();
+	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
 
 	m_sceneCamera = cameraSystem->GetActiveCamera();
 

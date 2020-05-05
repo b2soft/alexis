@@ -11,16 +11,16 @@
 #include <Core/ResourceManager.h>
 
 #include <ECS/ECS.h>
-#include <ECS/ModelComponent.h>
-#include <ECS/CameraComponent.h>
-#include <ECS/TransformComponent.h>
-#include <ECS/LightComponent.h>
+#include <ECS/Components/ModelComponent.h>
+#include <ECS/Components/CameraComponent.h>
+#include <ECS/Components/TransformComponent.h>
+#include <ECS/Components/LightComponent.h>
 
 namespace alexis
 {
 	void Scene::LoadFromJson(const std::wstring& filename)
 	{
-		auto ecsWorld = Core::Get().GetECS();
+		auto& ecsWorld = Core::Get().GetECSWorld();
 
 		fs::path filePath(filename);
 
@@ -38,7 +38,7 @@ namespace alexis
 
 		for (auto& entityJson : entities)
 		{
-			auto entity = ecsWorld->CreateEntity();
+			auto entity = ecsWorld.CreateEntity();
 
 			for (auto& component : entityJson["components"])
 			{
@@ -52,7 +52,7 @@ namespace alexis
 					float nearZ = componentKV.value()["nearZ"];
 					float farZ = componentKV.value()["farZ"];
 					bool isOrtho = (componentKV.value()["isOrtho"] == 1);
-					ecsWorld->AddComponent(entity, ecs::CameraComponent{ fov, aspectRatio, nearZ, farZ, isOrtho });
+					ecsWorld.AddComponent(entity, ecs::CameraComponent{ fov, aspectRatio, nearZ, farZ, isOrtho });
 				}
 				else if (componentName == "TransformComponent")
 				{
@@ -64,7 +64,7 @@ namespace alexis
 					XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(rotJson["x"]), XMConvertToRadians(rotJson["y"]), XMConvertToRadians(rotJson["z"]));
 					float scale = scaleJson;
 
-					ecsWorld->AddComponent(entity, ecs::TransformComponent{ position, rotation, scale });
+					ecsWorld.AddComponent(entity, ecs::TransformComponent{ position, rotation, scale });
 				}
 				else if (componentName == "ModelComponent")
 				{
@@ -77,7 +77,7 @@ namespace alexis
 					auto material = resourceManager->GetMaterial(ToWStr(materialPath));
 
 					// TODO: Move semantics for adding components
-					ecsWorld->AddComponent(entity, ecs::ModelComponent{ mesh, material });
+					ecsWorld.AddComponent(entity, ecs::ModelComponent{ mesh, material });
 				}
 				else if (componentName == "LightComponent")
 				{
@@ -91,7 +91,7 @@ namespace alexis
 						auto dirJson = componentKV.value()["direction"];
 						XMVECTOR direction = XMVectorSet(dirJson["x"], dirJson["y"], dirJson["z"], 1.f);
 
-						ecsWorld->AddComponent(entity, ecs::LightComponent{ ecs::LightComponent::LightType::Directional, direction, color });
+						ecsWorld.AddComponent(entity, ecs::LightComponent{ ecs::LightComponent::LightType::Directional, direction, color });
 					}
 				}
 			}

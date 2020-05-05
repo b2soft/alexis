@@ -48,11 +48,11 @@ namespace alexis
 		{
 			m_lightingMaterial->SetupToRender(context);
 
-			auto ecsWorld = Core::Get().GetECS();
-			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			auto activeCamera = cameraSystem->GetActiveCamera();
 
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(activeCamera);
+			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(activeCamera);
 
 			CameraParams cameraParams;
 			cameraParams.CameraPos = transformComponent.Position;
@@ -64,7 +64,7 @@ namespace alexis
 
 			for (const auto& entity : Entities)
 			{
-				auto& lightComponent = ecsWorld->GetComponent<LightComponent>(entity);
+				auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
 				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
 				{
 					directionalLights[0].Color = lightComponent.Color;
@@ -76,7 +76,7 @@ namespace alexis
 
 			ShadowMapParams depthParams;
 			
-			auto shadowSystem = ecsWorld->GetSystem<ShadowSystem>();
+			auto shadowSystem = ecsWorld.GetSystem<ShadowSystem>();
 			depthParams.LightSpaceMatrix = shadowSystem->GetShadowMatrix();
 
 			context->SetDynamicCBV(2, sizeof(depthParams), &depthParams);
@@ -88,9 +88,9 @@ namespace alexis
 		{
 			for (const auto& entity : Entities)
 			{
-				auto ecsWorld = Core::Get().GetECS();
+				auto& ecsWorld = Core::Get().GetECSWorld();
 
-				auto& lightComponent = ecsWorld->GetComponent<LightComponent>(entity);
+				auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
 				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
 				{
 					return lightComponent.Direction;

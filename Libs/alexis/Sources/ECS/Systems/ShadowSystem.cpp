@@ -29,26 +29,26 @@ namespace alexis
 		{
 			m_shadowMaterial = std::make_unique<ShadowMaterial>();
 
-			auto ecsWorld = Core::Get().GetECS();
-			auto entity = ecsWorld->CreateEntity();
-			ecsWorld->AddComponent(entity, ecs::CameraComponent{ 0.1f, 1.0f, 0.01f, 100.f, true });
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto entity = ecsWorld.CreateEntity();
+			ecsWorld.AddComponent(entity, ecs::CameraComponent{ 0.1f, 1.0f, 0.01f, 100.f, true });
 			m_phantomCamera = entity;
 
-			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
+			auto lightingSystem = ecsWorld.GetSystem<LightingSystem>();
 			XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(90.f), 0.f, 0);
-			ecsWorld->AddComponent(entity, ecs::TransformComponent{ -lightingSystem->GetSunDirection(), rotation, {1.f} });
+			ecsWorld.AddComponent(entity, ecs::TransformComponent{ -lightingSystem->GetSunDirection(), rotation, {1.f} });
 			
-			//auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			//auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			//cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 		}
 
 		// TODO: remove XMMATRIX viewProj arg
 		void XM_CALLCONV ShadowSystem::Render(CommandContext* context)
 		{
-			auto ecsWorld = Core::Get().GetECS();
+			auto& ecsWorld = Core::Get().GetECSWorld();
 
-			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
-			auto lightingSystem = ecsWorld->GetSystem<LightingSystem>();
+			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
+			auto lightingSystem = ecsWorld.GetSystem<LightingSystem>();
 			cameraSystem->SetPosition(m_phantomCamera, -lightingSystem->GetSunDirection());
 			cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 
@@ -69,7 +69,7 @@ namespace alexis
 
 			for (const auto& entity : Entities)
 			{
-				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
+				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
 
 				depthParams.modelMatrix = modelComponent.ModelMatrix;
 
@@ -80,9 +80,9 @@ namespace alexis
 
 		DirectX::XMMATRIX ShadowSystem::GetShadowMatrix() const
 		{
-			auto ecsWorld = Core::Get().GetECS();
+			auto& ecsWorld = Core::Get().GetECSWorld();
 
-			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 
 			auto modelMatrix = XMMatrixIdentity();
 			auto viewMatrix = cameraSystem->GetViewMatrix(m_phantomCamera);

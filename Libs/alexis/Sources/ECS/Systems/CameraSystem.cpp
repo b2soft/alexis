@@ -19,9 +19,9 @@ namespace alexis
 
 		void XM_CALLCONV CameraSystem::SetPosition(Entity entity, DirectX::FXMVECTOR position)
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
+			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
 			transformComponent.Position = position;
 
@@ -31,9 +31,9 @@ namespace alexis
 
 		void XM_CALLCONV CameraSystem::SetRotation(Entity entity, DirectX::FXMVECTOR rotation)
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
+			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
 			transformComponent.Rotation = rotation;
 
@@ -43,9 +43,9 @@ namespace alexis
 
 		void XM_CALLCONV CameraSystem::SetTransform(Entity entity, DirectX::FXMVECTOR position, DirectX::FXMVECTOR rotation)
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
+			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
 			transformComponent.Position = position;
 			transformComponent.Rotation = rotation;
@@ -56,8 +56,8 @@ namespace alexis
 
 		DirectX::XMMATRIX CameraSystem::GetViewMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsViewDirty)
 			{
@@ -69,8 +69,8 @@ namespace alexis
 
 		DirectX::XMMATRIX CameraSystem::GetInvViewMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsInvViewDirty)
 			{
@@ -82,8 +82,8 @@ namespace alexis
 
 		DirectX::XMMATRIX CameraSystem::GetProjMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsProjDirty)
 			{
@@ -95,8 +95,8 @@ namespace alexis
 
 		DirectX::XMMATRIX CameraSystem::GetInvProjMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsInvProjDirty)
 			{
@@ -108,8 +108,8 @@ namespace alexis
 
 		void CameraSystem::SetFov(Entity entity, float fov)
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (!IsEqual(cameraComponent.Fov, fov))
 			{
@@ -121,8 +121,8 @@ namespace alexis
 
 		void CameraSystem::SetProjectionParams(Entity entity, float fov, float aspectRatio, float nearZ, float farZ)
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			cameraComponent.Fov = fov;
 			cameraComponent.AspectRatio = aspectRatio;
@@ -135,9 +135,9 @@ namespace alexis
 
 		void CameraSystem::LookAt(Entity entity, DirectX::XMVECTOR targetPos, DirectX::XMVECTOR up) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
+			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
 			auto mat = XMMatrixLookAtLH(transformComponent.Position, targetPos, up);
 			transformComponent.Rotation = XMQuaternionRotationMatrix(XMMatrixTranspose(mat));
@@ -148,9 +148,9 @@ namespace alexis
 
 		void CameraSystem::UpdateViewMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
-			auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
+			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
 			XMMATRIX translationMatrix = XMMatrixTranslationFromVector(-(transformComponent.Position));
 			XMMATRIX rotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(transformComponent.Rotation));
@@ -163,8 +163,8 @@ namespace alexis
 
 		void CameraSystem::UpdateInvViewMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsViewDirty)
 			{
@@ -177,8 +177,8 @@ namespace alexis
 
 		void CameraSystem::UpdateProjMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsOrtho)
 			{
@@ -195,8 +195,8 @@ namespace alexis
 
 		void CameraSystem::UpdateInvProjMatrix(Entity entity) const
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto& cameraComponent = ecsWorld->GetComponent<CameraComponent>(entity);
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(entity);
 
 			if (cameraComponent.IsProjDirty)
 			{

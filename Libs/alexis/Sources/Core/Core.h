@@ -78,9 +78,9 @@ namespace alexis
 			return s_frameCount;
 		}
 
-		inline ecs::World* GetECS()
+		inline ecs::World& GetECSWorld() const
 		{
-			return m_ecs.get();
+			return *m_ecs;
 		}
 
 		inline Scene* GetScene()

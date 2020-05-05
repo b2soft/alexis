@@ -8,11 +8,11 @@
 #include <Render/CommandContext.h>
 #include <Render/Materials/MaterialBase.h>
 
-#include <ECS/CameraSystem.h>
+#include <ECS/Systems/CameraSystem.h>
 
-#include <ECS/CameraComponent.h>
-#include <ECS/ModelComponent.h>
-#include <ECS/TransformComponent.h>
+#include <ECS/Components/CameraComponent.h>
+#include <ECS/Components/ModelComponent.h>
+#include <ECS/Components/TransformComponent.h>
 
 namespace alexis
 {
@@ -26,11 +26,11 @@ namespace alexis
 
 		void ModelSystem::Update(float dt)
 		{
-			auto ecsWorld = Core::Get().GetECS();
+			auto& ecsWorld = Core::Get().GetECSWorld();
 			for (const auto& entity : Entities)
 			{
-				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
-				auto& transformComponent = ecsWorld->GetComponent<TransformComponent>(entity);
+				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
+				auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
 				if (modelComponent.IsTransformDirty)
 				{
@@ -49,8 +49,8 @@ namespace alexis
 		// TODO: remove XMMATRIX viewProj arg
 		void XM_CALLCONV ModelSystem::Render(CommandContext* context)
 		{
-			auto ecsWorld = Core::Get().GetECS();
-			auto cameraSystem = ecsWorld->GetSystem<CameraSystem>();
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			auto activeCamera = cameraSystem->GetActiveCamera();
 
 			auto viewMatrix = cameraSystem->GetViewMatrix(activeCamera);
@@ -67,7 +67,7 @@ namespace alexis
 
 			for (const auto& entity : Entities)
 			{
-				auto& modelComponent = ecsWorld->GetComponent<ModelComponent>(entity);
+				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
 				CameraCB cameraCB;
 				cameraCB.viewMatrix = viewMatrix;
 				cameraCB.viewProjMatrix = viewProjMatrix;
