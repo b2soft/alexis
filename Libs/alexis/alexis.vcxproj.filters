@@ -37,9 +37,6 @@
     <ClCompile Include="Sources\Core\Core.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Core\CommandManager.cpp">
-      <Filter>Sources\Core</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
@@ -127,6 +124,9 @@
     <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
       <Filter>Sources</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\Render\CommandManager.cpp">
+      <Filter>Sources\Core</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -142,9 +142,6 @@
       <Filter>Sources\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\Core.h">
-      <Filter>Sources\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Core\CommandManager.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\HighResolutionClock.h">
@@ -256,6 +253,9 @@
       <Filter>Sources\Core</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Core\FrameUpdateGraph.h">
+      <Filter>Sources\Core</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\CommandManager.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
   </ItemGroup>

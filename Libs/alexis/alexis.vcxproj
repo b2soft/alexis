@@ -19,7 +19,6 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Sources\Core\CommandManager.h" />
     <ClInclude Include="Sources\Core\Core.h" />
     <ClInclude Include="Sources\Core\Events.h" />
     <ClInclude Include="Sources\Core\FrameUpdateGraph.h" />
@@ -43,6 +42,7 @@
     <ClInclude Include="Sources\Render\Buffers\GpuBuffer.h" />
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />
     <ClInclude Include="Sources\Render\CommandContext.h" />
+    <ClInclude Include="Sources\Render\CommandManager.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
     <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
@@ -64,7 +64,6 @@
     <ClInclude Include="Sources\Utils\unordered_map.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Sources\Core\CommandManager.cpp" />
     <ClCompile Include="Sources\Core\Core.cpp" />
     <ClCompile Include="Sources\Core\FrameUpdateGraph.cpp" />
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp" />
@@ -83,6 +82,7 @@
     <ClCompile Include="Sources\Render\Buffers\GpuBuffer.cpp" />
     <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp" />
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
+    <ClCompile Include="Sources\Render\CommandManager.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
     <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />

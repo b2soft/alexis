@@ -8,7 +8,7 @@
 
 #include <Utils/Singleton.h>
 
-#include <Core/CommandManager.h>
+#include <Render/CommandManager.h>
 
 #include <Render/RenderTarget.h>
 #include <Render/Buffers/UploadBufferManager.h>

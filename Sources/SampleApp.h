@@ -6,19 +6,7 @@
 #include <Core/Core.h>
 #include <Core/Events.h>
 
-#include <Render/RootSignature.h>
-#include <Render/Buffers/GpuBuffer.h>
-#include <Render/Mesh.h>
-#include <Render/RenderTarget.h>
-
-#include <ECS/ModelSystem.h>
-#include <ECS/ShadowSystem.h>
-#include <ECS/CameraSystem.h>
-#include <ECS/LightingSystem.h>
-#include <ECS/Hdr2SdrSystem.h>
-#include <ECS/ImguiSystem.h>
-
-#include <Render/Materials/MaterialBase.h>
+#include <ECS/ECS.h>
 
 using Microsoft::WRL::ComPtr;
 

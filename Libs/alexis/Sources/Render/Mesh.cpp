@@ -9,7 +9,7 @@
 #include <Render/CommandContext.h>
 
 #include <Core/Core.h>
-#include <Core/CommandManager.h>
+#include <Render/CommandManager.h>
 #include <Render/Render.h>
 
 using namespace DirectX;
@@ -35,87 +35,6 @@ namespace alexis
 		commandContext->List->IASetVertexBuffers(0, 1, &vertexBufferView);
 		commandContext->List->IASetIndexBuffer(&indexBufferView);
 		commandContext->DrawIndexedInstanced(m_indexCount);
-	}
-
-	std::unique_ptr<alexis::Mesh> Mesh::LoadFBXFromFile(const std::wstring& path)
-	{
-		//TODO replace with res manager
-		auto commandManager = Render::GetInstance()->GetCommandManager();
-		CommandContext* commandContext = commandManager->CreateCommandContext();
-
-		Assimp::Importer importer;
-
-		std::string convertedPath(path.begin(), path.end());
-
-		auto scene = importer.ReadFile(convertedPath, aiProcess_ConvertToLeftHanded |
-			//aiProcess_RemoveRedundantMaterials |
-			/*aiProcess_CalcTangentSpace |*/
-			//aiProcess_Triangulate |
-			//aiProcess_FlipUVs |
-			//aiProcess_JoinIdenticalVertices |
-			aiProcess_ValidateDataStructure /*|
-			aiProcess_PreTransformVertices*/);
-
-		if (!scene || scene->mFlags == AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
-		{
-			std::string errorStr = "Failed to load " + convertedPath + " with error: " + importer.GetErrorString();
-			throw std::exception(errorStr.c_str());
-		}
-
-		using namespace DirectX;
-
-		VertexCollection vertices;
-		IndexCollection indices;
-
-		for (std::size_t i = 0; i < scene->mNumMeshes; ++i)
-		{
-			const aiMesh* mesh = scene->mMeshes[i];
-
-			for (unsigned int t = 0; t < mesh->mNumFaces; ++t)
-			{
-				const aiFace* face = &mesh->mFaces[t];
-
-				indices.emplace_back(face->mIndices[0]);
-				indices.emplace_back(face->mIndices[1]);
-				indices.emplace_back(face->mIndices[2]);
-			}
-
-			vertices.reserve(mesh->mNumVertices);
-
-			if (!mesh->HasPositions() || !mesh->HasNormals() || !mesh->HasTangentsAndBitangents() || !mesh->HasTextureCoords(0))
-			{
-				std::string errorStr = "Failed to load " + convertedPath + " : invalid model";
-				throw std::exception(errorStr.c_str());
-			}
-
-			for (std::size_t vertexId = 0; vertexId < mesh->mNumVertices; ++vertexId)
-			{
-				VertexDef def;
-				const auto& vertexPos = mesh->mVertices[vertexId];
-				def.Position = XMFLOAT3{ vertexPos.x, vertexPos.y,vertexPos.z };
-
-				const auto& normal = mesh->mNormals[vertexId];
-				def.Normal = XMFLOAT3{ normal.x, normal.y, normal.z };
-
-				const auto& tangent = mesh->mTangents[vertexId];
-				def.Tangent = XMFLOAT3{ tangent.x, tangent.y, tangent.z };
-
-				const auto& bitangent = mesh->mBitangents[vertexId];
-				def.Bitangent = XMFLOAT3{ bitangent.x, bitangent.y, bitangent.z };
-
-				const auto& uv0 = mesh->mTextureCoords[0][vertexId];
-				def.UV0 = XMFLOAT2{ uv0.x, uv0.y };
-
-				vertices.emplace_back(def);
-			}
-		}
-
-		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
-		mesh->Initialize(commandContext, vertices, indices);
-
-		commandContext->Finish(true);
-
-		return mesh;
 	}
 
 	std::unique_ptr<alexis::Mesh> Mesh::FullScreenQuad(CommandContext* commandContext)

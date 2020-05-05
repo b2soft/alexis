@@ -3,7 +3,7 @@
 #include "CommandContext.h"
 
 #include <Render/Render.h>
-#include <Core/CommandManager.h>
+#include <Render/CommandManager.h>
 #include <Render/Buffers/UploadBufferManager.h>
 
 namespace alexis

@@ -9,6 +9,7 @@
 #include <Render/Mesh.h>
 
 #include <ECS/ECS.h>
+#include <ECS/CameraSystem.h>
 #include <ECS/CameraComponent.h>
 #include <ECS/TransformComponent.h>
 

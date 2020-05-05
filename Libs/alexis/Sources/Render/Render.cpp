@@ -3,7 +3,7 @@
 #include "Render.h"
 
 #include <Core/Core.h>
-#include <Core/CommandManager.h>
+#include <Render/CommandManager.h>
 
 //#define ENABLE_DEBUG_LAYER
 

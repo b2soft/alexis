@@ -3,7 +3,7 @@
 #include "ResourceManager.h"
 
 #include <Render/Render.h>
-#include <Core/CommandManager.h>
+#include <Render/CommandManager.h>
 #include <Render/CommandContext.h>
 
 // Mesh

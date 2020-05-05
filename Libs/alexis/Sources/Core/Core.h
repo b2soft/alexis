@@ -96,6 +96,7 @@ namespace alexis
 		// Global Core Update
 		void Update(float dt);
 
+		// Global Core Render
 		void Render();
 
 	protected:
