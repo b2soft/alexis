@@ -258,6 +258,9 @@
     <ClInclude Include="Sources\Render\CommandManager.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
+    <ClInclude Include="Sources\Render\Viewport.h">
+      <Filter>Sources\Render</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Resources\ImGui_ps.hlsl">

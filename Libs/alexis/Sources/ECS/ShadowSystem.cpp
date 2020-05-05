@@ -3,6 +3,7 @@
 #include "ShadowSystem.h"
 
 #include <Core/Core.h>
+#include <Render/Render.h>
 #include <Render/Mesh.h>
 #include <Render/CommandContext.h>
 #include <Render/Materials/ShadowMaterial.h>
@@ -51,12 +52,18 @@ namespace alexis
 			cameraSystem->SetPosition(m_phantomCamera, -lightingSystem->GetSunDirection());
 			cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 
-
 			DepthCB depthParams;
 
 			auto m2 = cameraSystem->GetViewMatrix(m_phantomCamera);
 			auto proj2 = cameraSystem->GetProjMatrix(m_phantomCamera);
 			depthParams.viewProjMatrix = XMMatrixMultiply(m2, proj2);
+
+			auto* render = alexis::Render::GetInstance();
+			auto* rtManager = render->GetRTManager();
+			auto* shadowRT = rtManager->GetRenderTarget(L"Shadow Map");
+
+			context->SetRenderTarget(*shadowRT);
+			context->SetViewport(shadowRT->GetViewport());
 
 			m_shadowMaterial->SetupToRender(context);
 

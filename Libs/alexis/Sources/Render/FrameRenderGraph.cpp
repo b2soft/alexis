@@ -15,7 +15,6 @@
 
 namespace alexis
 {
-	FrameRenderGraph::~FrameRenderGraph() = default;
 
 	void FrameRenderGraph::Render()
 	{
@@ -64,12 +63,8 @@ namespace alexis
 
 		// PBR models rendering
 		auto pbsContext = commandManager->CreateCommandContext();
-		auto pbrTask = [pbsContext, gbuffer, scissorRect = m_scissorRect, ecsWorld]
+		auto pbrTask = [pbsContext, gbuffer, ecsWorld]
 		{
-			pbsContext->SetRenderTarget(*gbuffer);
-			pbsContext->SetViewport(gbuffer->GetViewport());
-			pbsContext->List->RSSetScissorRects(1, &scissorRect);
-
 			auto modelSystem = ecsWorld->GetSystem<ecs::ModelSystem>();
 			modelSystem->Render(pbsContext);
 		};
@@ -77,10 +72,8 @@ namespace alexis
 
 		// Shadows Cast
 		auto shadowContext = commandManager->CreateCommandContext();
-		auto shadowTask = [shadowContext, scissorRect = m_scissorRect, ecsWorld]
+		auto shadowTask = [shadowContext, ecsWorld]
 		{
-			shadowContext->List->RSSetScissorRects(1, &scissorRect);
-
 			auto shadowSystem = ecsWorld->GetSystem<ecs::ShadowSystem>();
 			shadowSystem->Render(shadowContext);
 		};
@@ -88,10 +81,8 @@ namespace alexis
 
 		// Lighting Resolve
 		auto lightingContext = commandManager->CreateCommandContext();
-		auto lightingTask = [lightingContext, scissorRect = m_scissorRect, ecsWorld]
+		auto lightingTask = [lightingContext, ecsWorld]
 		{
-			lightingContext->List->RSSetScissorRects(1, &scissorRect);
-
 			auto lightingSystem = ecsWorld->GetSystem<ecs::LightingSystem>();
 			lightingSystem->Render(lightingContext);
 		};
@@ -99,10 +90,8 @@ namespace alexis
 
 		// HDR resolve
 		auto hdrContext = commandManager->CreateCommandContext();
-		auto hdrTask = [hdrContext, scissorRect = m_scissorRect, ecsWorld]
+		auto hdrTask = [hdrContext, ecsWorld]
 		{
-			hdrContext->List->RSSetScissorRects(1, &scissorRect);
-
 			auto hdr2SdrSystem = ecsWorld->GetSystem<ecs::Hdr2SdrSystem>();
 			hdr2SdrSystem->Render(hdrContext);
 		};
@@ -110,10 +99,8 @@ namespace alexis
 
 		// ImGUI
 		auto imguiContext = commandManager->CreateCommandContext();
-		auto imguiTask = [imguiContext, scissorRect = m_scissorRect, ecsWorld]
+		auto imguiTask = [imguiContext, ecsWorld]
 		{
-			imguiContext->List->RSSetScissorRects(1, &scissorRect);
-
 			auto imguiSystem = ecsWorld->GetSystem<ecs::ImguiSystem>();
 			imguiSystem->Render(imguiContext);
 		};

@@ -4,6 +4,7 @@
 #include <DirectXMath.h>
 
 #include <Render/Buffers/GpuBuffer.h>
+#include <Render/Viewport.h>
 
 namespace alexis
 {
@@ -37,7 +38,7 @@ namespace alexis
 
 		DirectX::XMUINT2 GetSize() const;
 
-		D3D12_VIEWPORT GetViewport(DirectX::XMFLOAT2 scale = { 1.0f, 1.0f }, DirectX::XMFLOAT2 bias = { 0.0f, 0.0f }, float minDepth = 0.0f, float maxDepth = 1.0f) const;
+		Viewport GetViewport(DirectX::XMFLOAT2 scale = { 1.0f, 1.0f }, DirectX::XMFLOAT2 bias = { 0.0f, 0.0f }, float minDepth = 0.0f, float maxDepth = 1.0f) const;
 		const std::vector<TextureBuffer>& GetTextures() const;
 
 		D3D12_RT_FORMAT_ARRAY GetFormat() const;

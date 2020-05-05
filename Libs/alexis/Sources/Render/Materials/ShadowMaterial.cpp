@@ -76,19 +76,6 @@ namespace alexis
 
 	void ShadowMaterial::SetupToRender(CommandContext* commandContext)
 	{
-		// TODO: get RTs on init once instead getting every frame
-
-		auto render = Render::GetInstance();
-		auto rtManager = render->GetRTManager();
-		auto shadowRT = rtManager->GetRenderTarget(L"Shadow Map");
-
-		//auto& depth = shadowRT->GetTexture(RenderTarget::DepthStencil);
-		//
-		//commandContext->TransitionResource(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
-		commandContext->SetRenderTarget(*shadowRT);
-		commandContext->SetViewport(shadowRT->GetViewport());
-
 		commandContext->SetPipelineState(m_pso.Get());
 		commandContext->SetRootSignature(m_rootSignature);
 	}

@@ -50,8 +50,10 @@ namespace alexis
 		return m_size;
 	}
 
-	D3D12_VIEWPORT RenderTarget::GetViewport(DirectX::XMFLOAT2 scale /*= { 1.0f, 1.0f }*/, DirectX::XMFLOAT2 bias /*= { 0.0f, 0.0f }*/, float minDepth /*= 0.0f*/, float maxDepth /*= 1.0f*/) const
+	Viewport RenderTarget::GetViewport(DirectX::XMFLOAT2 scale /*= { 1.0f, 1.0f }*/, DirectX::XMFLOAT2 bias /*= { 0.0f, 0.0f }*/, float minDepth /*= 0.0f*/, float maxDepth /*= 1.0f*/) const
 	{
+		Viewport viewport;
+
 		UINT64 width = 0;
 		UINT height = 0;
 
@@ -65,7 +67,7 @@ namespace alexis
 			}
 		}
 
-		D3D12_VIEWPORT viewport =
+		viewport.Viewport =
 		{
 			(width * bias.x),
 			(height * bias.y),
@@ -74,6 +76,8 @@ namespace alexis
 			minDepth,
 			maxDepth
 		};
+
+		viewport.ScissorRect = CD3DX12_RECT(0, 0, width, height);
 
 		return viewport;
 	}

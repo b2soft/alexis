@@ -3,6 +3,7 @@
 #include "ModelSystem.h"
 
 #include <Core/Core.h>
+#include <Render/Render.h>
 #include <Render/Mesh.h>
 #include <Render/CommandContext.h>
 #include <Render/Materials/MaterialBase.h>
@@ -56,6 +57,13 @@ namespace alexis
 			auto projMatrix = cameraSystem->GetProjMatrix(activeCamera);
 
 			auto viewProjMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
+
+			auto* render = alexis::Render::GetInstance();
+			auto* rtManager = render->GetRTManager();
+			auto* gbuffer = rtManager->GetRenderTarget(L"GB");
+
+			context->SetRenderTarget(*gbuffer);
+			context->SetViewport(gbuffer->GetViewport());
 
 			for (const auto& entity : Entities)
 			{

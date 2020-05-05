@@ -4,6 +4,7 @@
 #include <map>
 #include <mutex>
 
+#include <Render/Viewport.h>
 #include <Render/RootSignature.h>
 #include <Render/Buffers/GpuBuffer.h>
 #include <Render/RenderTarget.h>
@@ -44,8 +45,8 @@ namespace alexis
 		void ClearDepthStencil(const TextureBuffer& texture, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);
 
 		void SetRenderTarget(const RenderTarget& renderTarget);
-		void SetViewport(const D3D12_VIEWPORT& viewport);
-		void SetViewports(const std::vector<D3D12_VIEWPORT>& viewports);
+		void SetViewport(const Viewport& viewport);
+		void SetViewports(const std::vector<Viewport>& viewports);
 
 		void TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES oldState, D3D12_RESOURCE_STATES newState);
 

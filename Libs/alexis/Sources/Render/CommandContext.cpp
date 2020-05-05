@@ -164,16 +164,30 @@ namespace alexis
 		List->OMSetRenderTargets(static_cast<UINT>(renderTargetDescriptors.size()), renderTargetDescriptors.data(), FALSE, dsv);
 	}
 
-	void CommandContext::SetViewport(const D3D12_VIEWPORT& viewport)
+	void CommandContext::SetViewport(const Viewport& viewport)
 	{
-		SetViewports({ viewport });
+		List->RSSetViewports(1, &viewport.Viewport);
+		List->RSSetScissorRects(1, &viewport.ScissorRect);
 	}
 
-	void CommandContext::SetViewports(const std::vector<D3D12_VIEWPORT>& viewports)
+	void CommandContext::SetViewports(const std::vector<Viewport>& viewports)
 	{
 		assert(viewports.size() < D3D12_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE);
-		List->RSSetViewports(static_cast<UINT>(viewports.size()),
-			viewports.data());
+
+		std::vector<D3D12_VIEWPORT> dv;
+		dv.resize(viewports.size());
+
+		std::vector<CD3DX12_RECT> ds;
+		ds.resize(viewports.size());
+
+		for (auto& v : viewports)
+		{
+			dv.push_back(v.Viewport);
+			ds.push_back(v.ScissorRect);
+		}
+
+		List->RSSetViewports(static_cast<UINT>(viewports.size()), dv.data());
+		List->RSSetScissorRects(static_cast<UINT>(viewports.size()), ds.data());
 	}
 
 	void CommandContext::TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES oldState, D3D12_RESOURCE_STATES newState)

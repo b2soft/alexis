@@ -59,6 +59,7 @@
     <ClInclude Include="Sources\Render\RenderTarget.h" />
     <ClInclude Include="Sources\Render\RenderTargetManager.h" />
     <ClInclude Include="Sources\Render\RootSignature.h" />
+    <ClInclude Include="Sources\Render\Viewport.h" />
     <ClInclude Include="Sources\Scene.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
     <ClInclude Include="Sources\Utils\unordered_map.h" />
