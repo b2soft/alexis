@@ -16,9 +16,12 @@ namespace alexis
 
 		void Resize(uint32_t width, uint32_t height)
 		{
-			for (auto& rt : m_managedTargets)
+			for (auto& [_, rt] : m_managedTargets)
 			{
-				rt.second->Resize(width, height);
+				if (rt->IsFullscreen())
+				{
+					rt->Resize(width, height);
+				}
 			}
 		}
 

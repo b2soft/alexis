@@ -352,7 +352,7 @@ namespace alexis
 
 		// Create a G-Buffer
 		{
-			auto gbuffer = std::make_unique<RenderTarget>();
+			auto gbuffer = std::make_unique<RenderTarget>(true);
 
 			//DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 			DXGI_FORMAT gbufferColorFormat = DXGI_FORMAT_R16G16B16A16_UNORM;
@@ -389,7 +389,7 @@ namespace alexis
 
 		// Create an HDR RT
 		{
-			auto hdrTarget = std::make_unique<RenderTarget>();
+			auto hdrTarget = std::make_unique<RenderTarget>(true);
 			DXGI_FORMAT hdrFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
 
 			auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(hdrFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);

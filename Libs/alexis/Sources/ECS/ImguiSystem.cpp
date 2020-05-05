@@ -8,6 +8,7 @@
 
 #include <Core/Core.h>
 #include <Render/Render.h>
+#include <Render/RenderTarget.h>
 
 namespace alexis
 {

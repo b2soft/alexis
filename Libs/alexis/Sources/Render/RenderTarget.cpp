@@ -6,10 +6,10 @@
 namespace alexis
 {
 
-	RenderTarget::RenderTarget() :
-		m_textures(Slot::NumAttachmentPoints)
+	RenderTarget::RenderTarget(bool isFullscreen) :
+		m_textures(Slot::NumAttachmentPoints),
+		m_isFullscreen(isFullscreen)
 	{
-
 	}
 
 	void RenderTarget::AttachTexture(const TextureBuffer& texture, Slot slot)
@@ -111,5 +111,10 @@ namespace alexis
 		return dsvFormat;
 	}
 
+
+	bool RenderTarget::IsFullscreen() const
+	{
+		return m_isFullscreen;
+	}
 
 }

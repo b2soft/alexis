@@ -3,8 +3,10 @@
 
 #include <Core/Core.h>
 #include <Core/ResourceManager.h>
+
 #include <Render/Render.h>
 #include <Render/CommandContext.h>
+#include <Render/RenderTarget.h>
 
 #include <Render/Materials/Hdr2SdrMaterial.h>
 

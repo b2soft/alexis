@@ -21,7 +21,7 @@ namespace alexis
 			NumAttachmentPoints
 		};
 
-		RenderTarget();
+		RenderTarget(bool isFullscreen = false);
 
 		RenderTarget(const RenderTarget&) = default;
 		RenderTarget& operator=(const RenderTarget&) = default;
@@ -43,9 +43,12 @@ namespace alexis
 		D3D12_RT_FORMAT_ARRAY GetFormat() const;
 		DXGI_FORMAT GetDSFormat() const;
 
+		bool IsFullscreen() const;
+
 	private:
 		std::vector<TextureBuffer> m_textures;
 		DirectX::XMUINT2 m_size{ 0,0 };
+		bool m_isFullscreen{ false }; // will be resized with window size
 	};
 
 }
