@@ -50,14 +50,17 @@ namespace alexis
 		rootParameters[LightingParameters::ShadowMap].InitAsDescriptorTable(1, &shadowMapDescriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_STATIC_SAMPLER_DESC pointSampler(0, D3D12_FILTER_MIN_MAG_MIP_POINT);
-		CD3DX12_STATIC_SAMPLER_DESC clampSampler(1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
+		CD3DX12_STATIC_SAMPLER_DESC shadowSampler(1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER, D3D12_TEXTURE_ADDRESS_MODE_BORDER);
 
-		CD3DX12_STATIC_SAMPLER_DESC samplers[2] = { pointSampler, clampSampler };
+		CD3DX12_STATIC_SAMPLER_DESC samplers[2] = { pointSampler, shadowSampler };
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, _countof(samplers), samplers, rootSignatureFlags);
 
 		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, D3D_ROOT_SIGNATURE_VERSION_1_1);
+
+		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
 
 		// TODO create generic PSO class
 		struct PipelineStateStream
@@ -68,6 +71,7 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
 			CD3DX12_PIPELINE_STATE_STREAM_PS ps;
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
+			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
 		} pipelineStateStream;
 
 		auto render = Render::GetInstance();
@@ -79,6 +83,7 @@ namespace alexis
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
 		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"HDR");
+		pipelineStateStream.Rasterizer = rasterizerDesc;
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{

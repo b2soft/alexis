@@ -57,7 +57,7 @@
          "components":[
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/Plane.fbx",
+                  "mesh":"Resources/Models/Platform.fbx",
 				  "material":"Resources/Materials/Grid_Debug.material"
                }
             },
@@ -73,7 +73,107 @@
                      "y":0.0,
                      "z":0.0
                   },
-				  "scale":100.0
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+	  {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/Cube.fbx",
+				  "material":"Resources/Materials/Grid_Debug.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":2.0,
+                     "y":2.0,
+                     "z":3.0
+                  },
+                  "rotation":{
+                     "x":10.0,
+                     "y":20.0,
+                     "z":30.0
+                  },
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+	  {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/Cube.fbx",
+				  "material":"Resources/Materials/Grid_Debug.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":-5.0,
+                     "y":4.0,
+                     "z":1.0
+                  },
+                  "rotation":{
+                     "x":45.0,
+                     "y":78.0,
+                     "z":112.0
+                  },
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+	  {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/Cube.fbx",
+				  "material":"Resources/Materials/Grid_Debug.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":0.0,
+                     "y":6.0,
+                     "z":4.5
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":35.0,
+                     "z":70.0
+                  },
+				  "scale":1.0
+               }
+            }
+         ]
+      },
+	  {
+         "components":[
+            {
+               "ModelComponent":{
+                  "mesh":"Resources/Models/Cube.fbx",
+				  "material":"Resources/Materials/Grid_Debug.material"
+               }
+            },
+            {
+               "TransformComponent":{
+                  "position":{
+                     "x":-3.0,
+                     "y":1.0,
+                     "z":-3.0
+                  },
+                  "rotation":{
+                     "x":0.0,
+                     "y":0.0,
+                     "z":0.0
+                  },
+				  "scale":1.0
                }
             }
          ]

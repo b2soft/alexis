@@ -1,5 +1,7 @@
 #include "PBS_helpers.hlsl"
 
+#define USE_PCF9
+
 struct CameraParams
 {
 	float4 CameraPos;
@@ -35,7 +37,7 @@ Texture2D depthTexture : register(t3); // Depth 24-bit + Stencil 8-bit
 Texture2D shadowMap : register(t4); // Shadow Map
 
 SamplerState PointSampler : register(s0);
-SamplerState ClampSampler : register(s1);
+SamplerState ShadowSampler : register(s1);
 
 float3 GetWorldPosFromDepth(float depth, float2 uv)
 {
@@ -87,12 +89,27 @@ float4 main(PSInput input) : SV_TARGET
 	depthUV.x = depthUV.x * 0.5 + 0.5;
 	depthUV.y = -depthUV.y * 0.5 + 0.5;
 
-	float depthFromMap = shadowMap.Sample(ClampSampler, depthUV).r;
+	float depthFromMap = shadowMap.SampleLevel(ShadowSampler, depthUV, 0).r;
 	float pointDepth = lightSpacePos.z;
 
-	float bias = 0.005;
+	float bias = max(0.01 * (1.0 - dot(N, L)), 0.005);
+
+#if defined(USE_PCF9)
+	//PCF 9 shadows
+	float shadow = 0.0;
+	float2 texelSize = 1.0 / 1024.0;
+	for (int x = -1; x <= 1; ++x)
+	{
+		for (int y = -1; y <= 1; ++y)
+		{
+			float pcfDepth = shadowMap.SampleLevel(ShadowSampler, depthUV + float2(x, y) * texelSize, 0).r;
+			shadow += pointDepth - bias > pcfDepth ? 1.0 : 0.0;
+		}
+	}
+	shadow /= 9.0;
+#else
 	float shadow = pointDepth - bias > depthFromMap ? 1.0 : 0.0;
-	//return shadow;
+#endif
 
 	finalColor = ambient + finalColor * (1.0 - shadow);
 
