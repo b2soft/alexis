@@ -35,7 +35,7 @@ Texture2D depthTexture : register(t3); // Depth 24-bit + Stencil 8-bit
 Texture2D shadowMap : register(t4); // Shadow Map
 
 SamplerState PointSampler : register(s0);
-SamplerState ShadowSampler : register(s1);
+SamplerState ClampSampler : register(s1);
 
 float3 GetWorldPosFromDepth(float depth, float2 uv)
 {
@@ -80,26 +80,19 @@ float4 main(PSInput input) : SV_TARGET
 	float3 ambient = baseColor.rgb * 0.15f; // fake indirect
 
 	float4 lightSpacePos = mul(ShadowMapCB.LightSpaceMatrix, float4(worldPos, 1.0));
-	//return lightSpacePos.w;
+
 	lightSpacePos.xyz /= lightSpacePos.w;
-	lightSpacePos.z = 0.5 * lightSpacePos.z + 0.5;
 
 	float2 depthUV = lightSpacePos.xy;
 	depthUV.x = depthUV.x * 0.5 + 0.5;
 	depthUV.y = -depthUV.y * 0.5 + 0.5;
 
-	float depthFromMap = shadowMap.Sample(ShadowSampler, depthUV).r;
+	float depthFromMap = shadowMap.Sample(ClampSampler, depthUV).r;
 	float pointDepth = lightSpacePos.z;
 
-	float bias = max(0.05 * (1.0 - dot(N, L)), 0.005);
+	float bias = 0.005;
 	float shadow = pointDepth - bias > depthFromMap ? 1.0 : 0.0;
-	
-	//return float4(input.uv0, 0.0, 1.0);
-
-	//return depthFromMap;
-
-	//if (depthUV.z > 1.0)
-	//	shadow = 0.0f;
+	//return shadow;
 
 	finalColor = ambient + finalColor * (1.0 - shadow);
 

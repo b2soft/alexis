@@ -50,13 +50,9 @@ namespace alexis
 		rootParameters[LightingParameters::ShadowMap].InitAsDescriptorTable(1, &shadowMapDescriptorRange, D3D12_SHADER_VISIBILITY_PIXEL);
 
 		CD3DX12_STATIC_SAMPLER_DESC pointSampler(0, D3D12_FILTER_MIN_MAG_MIP_POINT);
-		CD3DX12_STATIC_SAMPLER_DESC shadowSampler(1, D3D12_FILTER_MIN_MAG_MIP_POINT);
-		shadowSampler.AddressU = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		shadowSampler.AddressV = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		shadowSampler.AddressW = D3D12_TEXTURE_ADDRESS_MODE_BORDER;
-		shadowSampler.BorderColor = D3D12_STATIC_BORDER_COLOR_OPAQUE_WHITE;
+		CD3DX12_STATIC_SAMPLER_DESC clampSampler(1, D3D12_FILTER_MIN_MAG_MIP_POINT, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP, D3D12_TEXTURE_ADDRESS_MODE_CLAMP);
 
-		CD3DX12_STATIC_SAMPLER_DESC samplers[2] = { pointSampler, shadowSampler };
+		CD3DX12_STATIC_SAMPLER_DESC samplers[2] = { pointSampler, clampSampler };
 
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
 		rootSignatureDescription.Init_1_1(LightingParameters::NumLightingParameters, rootParameters, _countof(samplers), samplers, rootSignatureFlags);

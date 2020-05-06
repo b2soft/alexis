@@ -339,4 +339,3 @@ ASALocalRun/
 # BeatPulse healthcheck temp database
 healthchecksdb
 Libs/b2nder/Resources/Generated/
-Build/imgui.ini
