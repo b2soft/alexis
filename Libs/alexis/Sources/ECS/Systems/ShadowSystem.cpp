@@ -17,6 +17,8 @@
 
 namespace alexis
 {
+	static XMMATRIX v1;
+	static XMMATRIX v2;
 	namespace ecs
 	{
 		__declspec(align(16)) struct DepthCB
@@ -56,7 +58,7 @@ namespace alexis
 
 			auto m2 = cameraSystem->GetViewMatrix(m_phantomCamera);
 			auto proj2 = cameraSystem->GetProjMatrix(m_phantomCamera);
-			depthParams.viewProjMatrix = XMMatrixMultiply(m2, proj2);
+			depthParams.viewProjMatrix = GetShadowMatrix();// XMMatrixMultiply(m2, proj2);
 
 			auto* render = alexis::Render::GetInstance();
 			auto* rtManager = render->GetRTManager();
@@ -84,13 +86,11 @@ namespace alexis
 
 			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 
-			auto modelMatrix = XMMatrixIdentity();
 			auto viewMatrix = cameraSystem->GetViewMatrix(m_phantomCamera);
 			auto projMatrix = cameraSystem->GetProjMatrix(m_phantomCamera);
 
-			auto modelView = XMMatrixMultiply(modelMatrix, viewMatrix);
-
-			return XMMatrixMultiply(modelView, projMatrix);
+			auto viewProj = XMMatrixMultiply(viewMatrix, projMatrix);
+			return viewProj;
 		}
 
 	}

@@ -57,7 +57,7 @@
          "components":[
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/Plane.fbx",
+                  "mesh":"Resources/Models/Platform.fbx",
 				  "material":"Resources/Materials/Grid_Debug.material"
                }
             },
@@ -65,7 +65,7 @@
                "TransformComponent":{
                   "position":{
                      "x":0.0,
-                     "y":0.0,
+                     "y":-2.0,
                      "z":0.0
                   },
                   "rotation":{
@@ -73,7 +73,7 @@
                      "y":0.0,
                      "z":0.0
                   },
-				  "scale":100.0
+				  "scale":1.0
                }
             }
          ]
@@ -89,9 +89,9 @@
 						"b":1.0
 					},
 					"direction":{
-						"x":0,
-						"y":-10.0,
-						"z":15.0
+						"x":0.5,
+						"y":-1.0,
+						"z":0.0
 					}
 				}
 			}

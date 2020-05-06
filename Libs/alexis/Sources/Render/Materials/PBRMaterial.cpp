@@ -54,6 +54,9 @@ namespace alexis
 
 		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, D3D_ROOT_SIGNATURE_VERSION_1_1);
 
+		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_BACK;
+
 		struct PipelineStateStream
 		{
 			CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE rootSignature;
@@ -64,6 +67,7 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT dsvFormat;
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS rtvFormats;
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL depthStencil;
+			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
 		} pipelineStateStream;
 
 		auto rtManager = Render::GetInstance()->GetRTManager();
@@ -80,6 +84,7 @@ namespace alexis
 		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"GB");
 		pipelineStateStream.dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;// rtManager->GetDSFormat(L"GB"); // 
 		pipelineStateStream.depthStencil = dsDesc;
+		pipelineStateStream.Rasterizer = rasterizerDesc;
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{

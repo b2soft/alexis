@@ -35,12 +35,13 @@ namespace alexis
 		CD3DX12_ROOT_PARAMETER1 rootParameters[ShadowParameters::NumShadowParameters];
 		rootParameters[ShadowParameters::ShadowParams].InitAsConstantBufferView(0, 0, D3D12_ROOT_DESCRIPTOR_FLAG_NONE, D3D12_SHADER_VISIBILITY_VERTEX);
 
-		CD3DX12_STATIC_SAMPLER_DESC pointSampler(0, D3D12_FILTER_MIN_MAG_MIP_POINT);
-
 		CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSignatureDescription;
-		rootSignatureDescription.Init_1_1(ShadowParameters::NumShadowParameters, rootParameters, 1, &pointSampler, rootSignatureFlags);
+		rootSignatureDescription.Init_1_1(ShadowParameters::NumShadowParameters, rootParameters, 0, {}, rootSignatureFlags);
 
 		m_rootSignature.SetRootSignatureDesc(rootSignatureDescription.Desc_1_1, D3D_ROOT_SIGNATURE_VERSION_1_1);
+
+		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
+		rasterizerDesc.CullMode = D3D12_CULL_MODE_FRONT;
 
 		// TODO create generic PSO class
 		struct PipelineStateStream
@@ -51,6 +52,7 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_VS vs;
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT dsvFormat;
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL depthStencil;
+			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
 		} pipelineStateStream;
 
 		auto render = Render::GetInstance();
@@ -65,6 +67,7 @@ namespace alexis
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
 		pipelineStateStream.dsvFormat = pipelineStateStream.dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 		pipelineStateStream.depthStencil = dsDesc;
+		pipelineStateStream.Rasterizer = rasterizerDesc;
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
 		{
