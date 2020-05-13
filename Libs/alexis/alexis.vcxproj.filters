@@ -109,9 +109,6 @@
     <ClCompile Include="Sources\Core\FrameUpdateGraph.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Render\CommandManager.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
@@ -132,6 +129,9 @@
     </ClCompile>
     <ClCompile Include="Sources\ECS\Systems\ShadowSystem.cpp">
       <Filter>Sources\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
+      <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
