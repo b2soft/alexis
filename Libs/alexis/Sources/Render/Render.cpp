@@ -60,8 +60,6 @@ namespace alexis
 		auto fv = queue.SignalFence();
 		m_fenceValues[m_frameIndex] = fv;
 
-		//ReleaseStaleDescriptors(CommandManager::GetInstance()->GetLastCompletedFence());
-
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
 		queue.WaitForFence(m_fenceValues[m_frameIndex]);
