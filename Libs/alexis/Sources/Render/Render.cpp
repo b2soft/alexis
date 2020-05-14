@@ -56,14 +56,15 @@ namespace alexis
 		UINT presetFlags = m_isTearingSupported && !m_vSync ? DXGI_PRESENT_ALLOW_TEARING : 0;
 		ThrowIfFailed(m_swapChain->Present(syncInterval, presetFlags));
 
-		//auto fv = CommandManager::GetInstance()->SignalFence();
-		//m_fenceValues[m_frameIndex] = fv;
+		auto& queue = m_commandManager->GetGraphicsQueue();
+		auto fv = queue.SignalFence();
+		m_fenceValues[m_frameIndex] = fv;
 
 		//ReleaseStaleDescriptors(CommandManager::GetInstance()->GetLastCompletedFence());
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
-		//CommandManager::GetInstance()->WaitForFence(m_fenceValues[m_frameIndex]);
+		queue.WaitForFence(m_fenceValues[m_frameIndex]);
 	}
 
 	void Render::OnResize(int width, int height)

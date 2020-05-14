@@ -35,11 +35,6 @@ namespace alexis
 		}
 
 		AllocateContext(type);
-
-		std::wstring c;
-		c = L"Allocated: " + std::to_wstring(m_commandContextPool.size()) + L"\n";
-
-		OutputDebugString(c.c_str());
 		return m_commandContextPool.at(m_commandContextPool.size() - 1).get();
 	}
 
@@ -97,7 +92,7 @@ namespace alexis
 	{
 		assert(!IsReady());
 
-	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
+		D3D12_COMMAND_QUEUE_DESC queueDesc = {};
 		queueDesc.Type = m_type;
 		queueDesc.NodeMask = 0;
 
