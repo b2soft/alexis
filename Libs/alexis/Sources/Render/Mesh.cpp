@@ -64,9 +64,9 @@ namespace alexis
 
 	void Mesh::Initialize(CommandContext* commandContext, VertexCollection& vertices, IndexCollection& indices)
 	{
-		if (vertices.size() >= USHRT_MAX)
+		if (vertices.size() >= UINT_MAX)
 		{
-			throw std::exception("Too many vertices for 16-bit index buffer!");
+			throw std::exception("Too many vertices for 32-bit index buffer!");
 		}
 		m_indexCount = static_cast<UINT>(indices.size());
 

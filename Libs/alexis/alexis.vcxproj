@@ -208,12 +208,12 @@
       <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>FBXSDK_SHARED;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;$(FBX_SDK)include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -227,8 +227,8 @@
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename)_d.cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
-      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib;libfbxsdk.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;$(FBX_SDK)lib\vs2017\x64\release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <TargetMachine>MachineX64</TargetMachine>
     </Lib>
     <ProjectReference />

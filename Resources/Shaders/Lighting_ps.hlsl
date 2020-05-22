@@ -94,6 +94,8 @@ float4 main(PSInput input) : SV_TARGET
 
 	float bias = max(0.01 * (1.0 - dot(N, L)), 0.005);
 
+	return float4(N, 1.0);
+
 #if defined(USE_PCF9)
 	//PCF 9 shadows
 	float shadow = 0.0;

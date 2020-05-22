@@ -32,7 +32,7 @@
          "components":[
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/Stargate_Base.fbx",
+                  "mesh":"Resources/Models/test.DAE",
 				  "material":"Resources/Materials/Grid_Debug.material"
                }
             },

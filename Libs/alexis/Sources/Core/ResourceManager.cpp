@@ -17,6 +17,8 @@
 #include <Render/Materials/PBRMaterial.h>
 #include <Render/Materials/PBS_Simple.h>
 
+#include <fbxsdk.h>
+
 namespace alexis
 {
 
@@ -145,6 +147,102 @@ namespace alexis
 			return m_meshes.emplace(path, std::move(mesh)).first;
 		}
 
+#if defined(COCK)
+
+		using namespace DirectX;
+
+		VertexCollection vertices;
+		IndexCollection indices;
+
+		FbxManager* sdkManager = FbxManager::Create();
+		FbxImporter* importer = FbxImporter::Create(sdkManager, "");
+
+		std::string s(path.begin(), path.end());
+		if (importer->Initialize(s.c_str(), -1))
+		{
+			FbxScene* scene = FbxScene::Create(sdkManager, "fbxScene");
+
+			importer->Import(scene);
+			importer->Destroy();
+
+			FbxAxisSystem directXAxisSys = FbxAxisSystem::DirectX;
+
+			auto coordSystem = scene->GetGlobalSettings().GetAxisSystem();
+			if (coordSystem != directXAxisSys)
+			{
+				directXAxisSys.ConvertScene(scene);
+			}
+
+			//FbxSystemUnit sceneSystemUnit = scene->GetGlobalSettings().GetSystemUnit();
+			//if (sceneSystemUnit != FbxSystemUnit::m)
+			//{
+			//	FbxSystemUnit::m.ConvertScene(scene);
+			//}
+		
+			FbxNode* rootNode = scene->GetRootNode();
+			if (rootNode)
+			{
+				for (int i = 0; i < rootNode->GetChildCount(); ++i)
+				{
+					FbxNode* node = rootNode->GetChild(i);
+
+					if (FbxMesh* mesh = node->GetMesh())
+					{
+						if (!mesh->IsTriangleMesh())
+						{
+							FbxGeometryConverter converter{ sdkManager };
+							FbxNodeAttribute* convertedNode = converter.Triangulate(mesh, true);
+							if (convertedNode && convertedNode->GetAttributeType() == FbxNodeAttribute::eMesh)
+							{
+								mesh = convertedNode->GetNode()->GetMesh();
+							}
+						}
+
+						uint32_t vertexCount = mesh->GetPolygonVertexCount();
+						const int* polygonVertices = mesh->GetPolygonVertices();
+
+						FbxArray<FbxVector4> normals;
+						mesh->GetPolygonVertexNormals(normals);
+
+						int uvCount = mesh->GetUVLayerCount();
+						FbxArray<FbxVector2> uvs;
+						if (uvCount > 0)
+						{
+							mesh->GetPolygonVertexUVs(mesh->GetElementUV(0)->GetName(), uvs);
+						}
+
+						for (uint32_t polygonVertex = 0; polygonVertex < vertexCount; ++polygonVertex)
+						{
+							VertexDef vertex;
+
+							int vertexIndex = polygonVertices[polygonVertex];
+							auto point = mesh->GetControlPointAt(vertexIndex);
+							auto& normal = normals[polygonVertex];
+
+							vertex.Position = XMFLOAT3{ static_cast<float>(point.mData[0]), static_cast<float>(point.mData[1]), static_cast<float>(point.mData[2]) };
+							vertex.Normal = XMFLOAT3{ static_cast<float>(normal.mData[0]), static_cast<float>(normal.mData[1]), static_cast<float>(normal.mData[2]) };
+
+							if (uvCount > 0)
+							{
+								auto& uv = uvs[polygonVertex];
+								vertex.UV0 = XMFLOAT2{ static_cast<float>(uv.mData[0]), 1.0f - static_cast<float>(uv.mData[1]) };
+							}
+
+							vertices.emplace_back(std::move(vertex));
+							indices.emplace_back(polygonVertex);
+						}
+					}
+				}
+			}
+
+		}
+		else
+		{
+			auto status = importer->GetStatus();
+			OutputDebugString(L"Failed to import!");
+		}
+#else
+
 		Assimp::Importer importer;
 
 		std::string convertedPath(path.begin(), path.end());
@@ -215,6 +313,8 @@ namespace alexis
 
 			offset += mesh->mNumVertices;
 		}
+
+#endif
 
 		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
 		mesh->Initialize(m_copyContext, vertices, indices);
