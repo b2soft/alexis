@@ -30,7 +30,7 @@ namespace alexis
 		auto clearTargetContext = commandManager->CreateCommandContext();
 		auto clearTask = [gbuffer, hdrRT, shadowRT, clearTargetContext]()
 		{
-			static constexpr float clearColor[] = { 0.0f, 0.2f, 0.4f, 1.0f };
+			static constexpr float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
 
 			// Clear G-Buffer
 			auto& gbDepthStencil = gbuffer->GetTexture(RenderTarget::DepthStencil);

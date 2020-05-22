@@ -362,8 +362,8 @@ namespace alexis
 			colorClearValue.Format = colorDesc.Format;
 			colorClearValue.Color[0] = 0.0f;
 			colorClearValue.Color[1] = 0.0f;
-			colorClearValue.Color[2] = 0.5f;
-			colorClearValue.Color[3] = 1.0f;
+			colorClearValue.Color[2] = 0.0f;
+			colorClearValue.Color[3] = 0.0f;
 
 			TextureBuffer gb0;
 			gb0.Create(colorDesc, &colorClearValue); // Base color

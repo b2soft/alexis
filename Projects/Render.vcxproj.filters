@@ -69,9 +69,6 @@
     <FxCompile Include="..\Resources\Shaders\PixelShader.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\PBS_Helpers.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\Resources\Shaders\PBS_object_simple_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
@@ -81,5 +78,10 @@
     <FxCompile Include="..\Resources\Shaders\Shadows_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\PBS_Helpers.hlsli">
+      <Filter>Resources\Shaders</Filter>
+    </None>
   </ItemGroup>
 </Project>
