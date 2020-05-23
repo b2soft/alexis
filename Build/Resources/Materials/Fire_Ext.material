@@ -1,0 +1,6 @@
+{
+   "type" : "PBS",
+   "baseColor":"Resources/Textures/Fire_Ext/fireext_BaseColor.dds",
+   "normalMap":"Resources/Textures/Fire_Ext/fireext_Normal.dds",
+   "metalRoughness":"Resources/Textures/Fire_Ext/fireext_MeRo.dds"
+}

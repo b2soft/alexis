@@ -33,10 +33,9 @@ PSOutput main(PSInput input)
 
 	PSOutput output;
 	//output.gb0 = texColor;
-	output.gb0 = float4(1.0, 1.0, 1.0, 1.0);
+	output.gb0 = pow(texColor, 2.2);
 	output.gb1 = normal;
-	//output.gb2 = metalRoughness;
-	output.gb2 = float4(0.0, 0.0, 0.0, 0.0);
+	output.gb2 = metalRoughness;
 
 	return output;
 }

@@ -68,83 +68,67 @@ float LinearizeDepth(float depth)
 float4 main(PSInput input) : SV_TARGET
 {
 	float4 baseColor = gb0.Sample(PointSampler, input.uv0);
-	//float4 baseColor = float4(1.0, 1.0, 1.0, gb0.Sample(PointSampler, input.uv0).a);
 	float4 normal = gb1.Sample(PointSampler, input.uv0);
 	float4 metalRoughness = gb2.Sample(PointSampler, input.uv0);
 
 	float depth = depthTexture.Sample(PointSampler, input.uv0).r;
 	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
 
-	float3 lightPos = float3(30.0, 30.0, -30.0);
+	float3 lightPos = float3(5, 5.0, -5.0);
+	//float3 lightColor = float3(70.0f, 70.0f, 70.0f);
+	float3 lightColor = float3(5, 5, 5);
 
 	float3 N = normal.xyz * 2.0f - 1.0f;
 	//float3 L = normalize(DirectionalLightsCB[0].Direction.xyz - worldPos);
-	float3 L = normalize(lightPos - worldPos);
 	float3 V = normalize(CamCB.CameraPos.xyz - worldPos);
-	float3 H = normalize(L + V);
 
 	[flatten] if (depth >= 1.0f)
 	{
 		discard;
 	}
 
-	float roughness = 0.1;
-	[flatten] if (worldPos.x >= 1.5 && worldPos.x < 4.5)
-	{
-		roughness = 0.3;
-	}
-	else
-	[flatten] if (worldPos.x >= 4.5 && worldPos.x < 7.5)
-	{
-		roughness = 0.5;
-	}
-	else
-	[flatten] if (worldPos.x >= 7.5 && worldPos.x < 10.5)
-	{
-		roughness = 0.8;
-	}
-	else
-	[flatten] if (worldPos.x >= 10.5)
-	{
-		roughness = 1.0;
-	}
+	float metalness = metalRoughness.r;
+	float roughness = metalRoughness.g;
 
-	float metalness = 0.0;
-	[flatten] if (worldPos.z >= 1.5 && worldPos.z < 4.5)
-	{
-		metalness = 0.3;
-	}
-	else
-		[flatten] if (worldPos.z >= 4.5 && worldPos.z < 7.5)
-	{
-		metalness = 0.5;
-	}
-		else
-		[flatten] if (worldPos.z >= 7.5 && worldPos.z < 10.5)
-	{
-		metalness = 0.8;
-	}
-		else
-		[flatten] if (worldPos.z >= 10.5)
-	{
-		metalness = 1.0;
-	}
+	float3 Lo = 0.0f;
 
-	float a = roughness * roughness;
-	float kDirect = ((a + 1.0f) * (a + 1.0f)) / 8.0f;
-	float kIBL = a * a / 2.0f;
+	// For each light
+	float3 L = normalize(lightPos - worldPos);
+	float3 H = normalize(V + L);
 
-	float3 F0 = 0.04;
+	float distance = length(lightPos - worldPos);
+	float attenuation = 1.0;// / (distance * distance);
+	float3 radiance = lightColor * attenuation;
+
+	float3 F0 = float3(0.04f, 0.04f, 0.04f);
 	F0 = lerp(F0, baseColor.rgb, metalness);
+	float3 F = F_Schlick(max(dot(H, V), 0.0f), F0);
 
-	float D = D_TrowbridgeReitz(N, H, a);
-	float G = G_Smith(N, V, L, kDirect);
-	float3 F = F_Schlick(H, V, F0);
+	float D = D_TrowbridgeReitz(N, H, roughness);
+	float G = G_Smith(N, V, L, roughness);
+
+	float3 num = D * G * F;
+	float denom = 4.0f * max(dot(N, V), 0.0f) * max(dot(N, L), 0.0f) + 0.001f;
+	float3 specular = num / denom;
+
+	float3 kS = F;
+	float3 kD = float3(1.0f, 1.0f, 1.0f) - kS;
+
+	kD *= 1.0f - metalness;
+
+	float NdotL = max(dot(N, L), 0.0f);
+	Lo += (kD * baseColor.rgb * k_invPi + specular) * radiance * NdotL;
+
+	float ao = 1.0f;
+	float3 ambient = float3(0.03f, 0.03f, 0.03f) * baseColor.rgb * ao;
+	float3 color = ambient + Lo;
+
+	return float4(color, 1.0f);
 
 	//return float4(1.0, 0.0, 0.0, 1.0);
 
-	return float4(F, 1.0);
-	return float4(G, G, G, 1.0);
+	//return float4(F, 1.0);
+	//return float4(G, G, G, 1.0);
 
 	//return saturate(dot(N, L));
 

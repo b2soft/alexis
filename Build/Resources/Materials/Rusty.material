@@ -1,0 +1,6 @@
+{
+   "type" : "PBS",
+   "baseColor":"Resources/Textures/Rusty/rustediron2_basecolor.dds",
+   "normalMap":"Resources/Textures/Rusty/rustediron2_normal.dds",
+   "metalRoughness":"Resources/Textures/Rusty/rustediron2_mero.dds"
+}
