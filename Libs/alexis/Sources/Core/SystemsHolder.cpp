@@ -16,6 +16,7 @@
 #include <ECS/Systems/LightingSystem.h>
 #include <ECS/Systems/Hdr2SdrSystem.h>
 #include <ECS/Systems/ImguiSystem.h>
+#include <ECS/Systems/EnvironmentSystem.h>
 
 namespace alexis
 {
@@ -69,6 +70,8 @@ namespace alexis
 		m_hdr2SdrSystem = ecsWorld.RegisterSystem<ecs::Hdr2SdrSystem>();
 
 		m_imguiSystem = ecsWorld.RegisterSystem<ecs::ImguiSystem>();
+
+		m_environmentSystem = ecsWorld.RegisterSystem<ecs::EnvironmentSystem>();
 	}
 
 	void SystemsHolder::InitInternal()
@@ -77,6 +80,7 @@ namespace alexis
 		m_shadowSystem->Init();
 		m_hdr2SdrSystem->Init();
 		m_imguiSystem->Init();
+		m_environmentSystem->Init();
 	}
 
 }

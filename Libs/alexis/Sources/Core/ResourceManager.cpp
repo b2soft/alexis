@@ -249,16 +249,16 @@ namespace alexis
 			auto material = std::make_unique<PBRMaterial>(params);
 			return m_materials.emplace(path, std::move(material)).first;
 		}
-		else if (type == "PBS_Simple")
-		{
-			PBSMaterialParams params;
-			params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
-			params.Metallic = j["metallic"];
-			params.Roughness = j["roughness"];
-
-			auto material = std::make_unique<PBSSimple>(params);
-			return m_materials.emplace(path, std::move(material)).first;
-		}
+		//else if (type == "PBS_Simple")
+		//{
+		//	PBSMaterialParams params;
+		//	params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
+		//	params.Metallic = j["metallic"];
+		//	params.Roughness = j["roughness"];
+		//
+		//	auto material = std::make_unique<PBSSimple>(params);
+		//	return m_materials.emplace(path, std::move(material)).first;
+		//}
 
 		return m_materials.end();
 	}

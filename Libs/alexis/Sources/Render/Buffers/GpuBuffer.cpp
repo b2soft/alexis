@@ -213,7 +213,15 @@ namespace alexis
 			srvDesc.Format = resDesc.Format;
 		}
 
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		if (resDesc.DepthOrArraySize == 6)
+		{
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+		}
+		else
+		{
+			srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+		}
+		
 		srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 
 		auto render = Render::GetInstance();
@@ -234,8 +242,29 @@ namespace alexis
 
 		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 /*&& rtFormatSupport*/)
 		{
-			m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-			device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
+			if (resDesc.DepthOrArraySize == 6)
+			{
+				m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, resDesc.DepthOrArraySize);
+				for (int i = 0; i < resDesc.DepthOrArraySize; ++i)
+				{
+					D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+					rtvDesc.Format = resDesc.Format;
+					
+					rtvDesc.Texture2DArray.FirstArraySlice = 0;
+					rtvDesc.Texture2DArray.PlaneSlice = 0;
+					rtvDesc.Texture2DArray.MipSlice = 0;
+					rtvDesc.Texture2DArray.ArraySize = 1;
+					rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+
+					device->CreateRenderTargetView(m_resource.Get(), &rtvDesc, m_rtv.GetDescriptorHandle(i));
+				}
+			}
+			else
+			{
+				m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV, resDesc.DepthOrArraySize);
+				device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
+			}
+			
 		}
 
 		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 /*&& dsFormatSupport*/)

@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
-  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2020-05-22T13:30:23Z</created><keywords></keywords><modified>2020-05-22T13:30:23Z</modified><revision></revision><subject></subject><title></title><unit meter="1.000000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
+  <asset><contributor><author></author><authoring_tool>FBX COLLADA exporter</authoring_tool><comments></comments></contributor><created>2020-05-25T22:09:26Z</created><keywords></keywords><modified>2020-05-25T22:09:26Z</modified><revision></revision><subject></subject><title></title><unit meter="1.000000" name="centimeter"></unit><up_axis>Y_UP</up_axis></asset>
   <library_geometries>
     <geometry id="Box002-lib" name="Box002Mesh">
       <mesh>
         <source id="Box002-POSITION">
           <float_array id="Box002-POSITION-array" count="24">
--0.500000 -0.500000 0.000000
-0.500000 -0.500000 0.000000
--0.500000 0.500000 0.000000
-0.500000 0.500000 0.000000
--0.500000 -0.500000 1.000000
-0.500000 -0.500000 1.000000
--0.500000 0.500000 1.000000
-0.500000 0.500000 1.000000
+-0.500000 -0.500000 -0.500000
+0.500000 -0.500000 -0.500000
+-0.500000 0.500000 -0.500000
+0.500000 0.500000 -0.500000
+-0.500000 -0.500000 0.500000
+0.500000 -0.500000 0.500000
+-0.500000 0.500000 0.500000
+0.500000 0.500000 0.500000
 </float_array>
           <technique_common>
             <accessor source="#Box002-POSITION-array" count="8" stride="3">

@@ -14,9 +14,9 @@
              {
                 "TransformComponent":{
                    "position":{
-                      "x":6,
-                      "y":8,
-                      "z":-24
+                      "x":0,
+                      "y":0,
+                      "z":0
                    },
                    "rotation":{
                       "x":0.0,
@@ -28,31 +28,7 @@
              }
           ]
        },
-      {
-         "components":[
-            {
-               "ModelComponent":{
-                  "mesh":"Resources/Models/PBS_Spheres.dae",
-				  "material":"Resources/Materials/Metal.material"
-               }
-            },
-            {
-               "TransformComponent":{
-                  "position":{
-                     "x":0.0,
-                     "y":1,
-                     "z":0.0
-                  },
-                  "rotation":{
-                     "x":0.0,
-                     "y":0.0,
-                     "z":0.0
-                  },
-				  "scale":1.0
-               }
-            }
-         ]
-      },
+
 	  {
 		"components":[
 			{

@@ -26,7 +26,7 @@ namespace alexis
 		ComPtr<ID3DBlob> pixelShaderBlob;
 #if defined(_DEBUG)
 		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_vs_d.cso", &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_ps_d.cso", &pixelShaderBlob));
+		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_testbed_ps_d.cso", &pixelShaderBlob));
 #else 
 		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_vs.cso", &vertexShaderBlob));
 		ThrowIfFailed(D3DReadFileToBlob(L"Resources/Shaders/Lighting_ps.cso", &pixelShaderBlob));
@@ -74,8 +74,8 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
 		} pipelineStateStream;
 
-		auto render = Render::GetInstance();
-		auto rtManager = render->GetRTManager();
+		auto* render = Render::GetInstance();
+		auto* rtManager = render->GetRTManager();
 
 		pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
 		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };

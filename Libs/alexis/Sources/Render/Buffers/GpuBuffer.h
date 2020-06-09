@@ -107,9 +107,9 @@ namespace alexis
 			return m_srv.GetDescriptorHandle();
 		}
 
-		D3D12_CPU_DESCRIPTOR_HANDLE GetRTV() const
+		D3D12_CPU_DESCRIPTOR_HANDLE GetRTV(uint32_t offset = 0) const
 		{
-			return m_rtv.GetDescriptorHandle();
+			return m_rtv.GetDescriptorHandle(offset);
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE GetDSV() const

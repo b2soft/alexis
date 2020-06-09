@@ -5,7 +5,7 @@
 #include <Core/Core.h>
 #include <Render/CommandManager.h>
 
-//#define ENABLE_DEBUG_LAYER
+#define ENABLE_DEBUG_LAYER
 
 namespace alexis
 {

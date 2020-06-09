@@ -69,15 +69,14 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_RASTERIZER Rasterizer;
 		} pipelineStateStream;
 
-		auto rtManager = Render::GetInstance()->GetRTManager();
+		auto* render = Render::GetInstance();
 
 		pipelineStateStream.rootSignature = m_rootSignature.GetRootSignature().Get();
 		pipelineStateStream.inputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
 		pipelineStateStream.primitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pipelineStateStream.vs = CD3DX12_SHADER_BYTECODE(m_vertexShader.Get());
 		pipelineStateStream.ps = CD3DX12_SHADER_BYTECODE(m_pixelShader.Get());
-		pipelineStateStream.rtvFormats = rtManager->GetRTFormats(L"GB");
-		pipelineStateStream.dsvFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;// rtManager->GetDSFormat(L"GB"); // 
+		pipelineStateStream.rtvFormats = render->GetBackbufferRT().GetFormat();
 		pipelineStateStream.Rasterizer = rasterizerDesc;
 
 		D3D12_PIPELINE_STATE_STREAM_DESC pipelineStateStreamDesc =
@@ -85,7 +84,6 @@ namespace alexis
 			sizeof(PipelineStateStream), &pipelineStateStream
 		};
 
-		auto render = Render::GetInstance();
 		ThrowIfFailed(render->GetDevice()->CreatePipelineState(&pipelineStateStreamDesc, IID_PPV_ARGS(&m_pso)));
 	}
 

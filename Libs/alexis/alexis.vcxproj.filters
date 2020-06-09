@@ -82,9 +82,6 @@
     <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
@@ -131,6 +128,15 @@
       <Filter>Sources\ECS\Systems</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\Systems\EnvironmentSystem.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\EnvRectToCubeMaterial.cpp">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\Materials\SkyboxMaterial.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
   </ItemGroup>
@@ -207,9 +213,6 @@
     <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h">
       <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\PBS_Simple.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Utils\unordered_map.h">
       <Filter>Sources\Utils</Filter>
     </ClInclude>
@@ -266,6 +269,15 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\Components\TransformComponent.h">
       <Filter>Sources\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h">
+      <Filter>Sources\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\EnvRectToCubeMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Render\Materials\SkyboxMaterial.h">
+      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
