@@ -71,10 +71,10 @@ namespace alexis
 				CameraCB cameraCB;
 				cameraCB.viewMatrix = viewMatrix;
 				cameraCB.viewProjMatrix = viewProjMatrix;
-				modelComponent.Material->SetupToRender(context);
+
+				modelComponent.Material->Set(context);
 
 				context->SetDynamicCBV(0, sizeof(cameraCB), &cameraCB);
-				context->SetDynamicCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
 				modelComponent.Mesh->Draw(context);
 			}
 		}

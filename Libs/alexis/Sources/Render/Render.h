@@ -69,6 +69,21 @@ namespace alexis
 		void SetFullscreen(bool fullscreen);
 		void ToggleFullscreen();
 
+		struct DescriptorRecord
+		{
+			D3D12_CPU_DESCRIPTOR_HANDLE CpuPtr;
+			D3D12_GPU_DESCRIPTOR_HANDLE GpuPtr;
+			std::size_t OffsetInHeap;
+		};
+
+		DescriptorRecord AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
+		//D3D12_CPU_DESCRIPTOR_HANDLE AllocateDSV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
+		//D3D12_CPU_DESCRIPTOR_HANDLE AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
+		//D3D12_CPU_DESCRIPTOR_HANDLE AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
+
+
+		ID3D12DescriptorHeap* GetSrvUavHeap();
+
 		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
 
 		void ReleaseStaleDescriptors(uint64_t fenceValue);
@@ -98,6 +113,20 @@ namespace alexis
 
 		std::unique_ptr<CommandManager> m_commandManager;
 		std::unique_ptr<RenderTargetManager> m_rtManager;
+
+		// global simple heaps
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_srvUavHeap;
+		std::size_t m_allocatedSrvUavs{ 0 };
+		UINT m_incrementSrvUav{ 0 };
+
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_rtvHeap;
+		std::size_t m_allocatedRtvs{ 0 };
+		UINT m_incrementRtv{ 0 };
+
+		Microsoft::WRL::ComPtr<ID3D12DescriptorHeap> m_dsvHeap;
+		std::size_t m_allocatedDsvs{ 0 };
+		UINT m_incrementDsv{ 0 };
+
 
 		// Sync objects
 		UINT m_frameIndex{ 0 };

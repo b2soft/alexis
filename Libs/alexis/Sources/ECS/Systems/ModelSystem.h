@@ -17,6 +17,5 @@ namespace alexis
 			void Update(float dt);
 			void XM_CALLCONV Render(CommandContext* context);
 		};
-
 	}
 }

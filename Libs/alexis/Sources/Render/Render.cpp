@@ -5,7 +5,7 @@
 #include <Core/Core.h>
 #include <Render/CommandManager.h>
 
-//#define ENABLE_DEBUG_LAYER
+#define ENABLE_DEBUG_LAYER
 
 namespace alexis
 {
@@ -184,6 +184,28 @@ namespace alexis
 		SetFullscreen(!m_fullscreen);
 	}
 
+	Render::DescriptorRecord Render::AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc)
+	{
+		DescriptorRecord record;
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_srvUavHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedSrvUavs, m_incrementSrvUav);
+
+		m_device->CreateShaderResourceView(resource, &desc, handle);
+
+		//record.CpuPtr = handle.ptr;
+		//record.GpuPtr = handle.ptr;
+		record.OffsetInHeap = m_allocatedSrvUavs;
+
+		m_allocatedSrvUavs++;
+
+		return record;
+	}
+
+	ID3D12DescriptorHeap* Render::GetSrvUavHeap()
+	{
+		return m_srvUavHeap.Get();
+	}
+
 	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
 	{
 		return m_descriptorAllocators[type]->Allocate(numDescriptors);
@@ -336,6 +358,29 @@ namespace alexis
 
 	void Render::InitPipeline()
 	{
+		m_incrementSrvUav = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		m_incrementRtv = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		m_incrementDsv = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+		D3D12_DESCRIPTOR_HEAP_DESC srvUavDesc = {};
+		srvUavDesc.NumDescriptors = 4096;
+		srvUavDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvUavDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		m_device->CreateDescriptorHeap(&srvUavDesc, IID_PPV_ARGS(&m_srvUavHeap));
+
+		D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
+		rtvDesc.NumDescriptors = 4096;
+		rtvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		rtvDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		m_device->CreateDescriptorHeap(&rtvDesc, IID_PPV_ARGS(&m_rtvHeap));
+
+		D3D12_DESCRIPTOR_HEAP_DESC dsvDesc = {};
+		dsvDesc.NumDescriptors = 4096;
+		dsvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		dsvDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		m_device->CreateDescriptorHeap(&dsvDesc, IID_PPV_ARGS(&m_dsvHeap));
+
+
 		// Depth
 		//DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
 		DXGI_FORMAT depthFormat = DXGI_FORMAT_R24G8_TYPELESS;
