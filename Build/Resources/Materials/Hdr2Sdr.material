@@ -1,0 +1,6 @@
+{
+	"shader": "Hdr2Sdr",
+	"textures": ["$HDR"],
+	"rtv": "$backbuffer",
+	"DepthEnable":false
+}

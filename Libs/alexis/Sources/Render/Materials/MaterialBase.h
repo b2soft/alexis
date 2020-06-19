@@ -40,7 +40,9 @@ namespace alexis
 		std::wstring VSPath;
 		std::wstring PSPath;
 
-		std::array<std::wstring, 4> Textures;
+		std::vector<std::wstring> Textures;
+		std::wstring RTV;
+		bool DepthEnable;
 	};
 
 	class Material
@@ -64,6 +66,7 @@ namespace alexis
 		ComPtr<ID3D12RootSignature> m_rootSignature;
 		ComPtr<ID3D12PipelineState> m_pso;
 
+		int m_srvStartIndex{ 0 };
 		std::optional<std::size_t> m_srvOffset;
 
 		ComPtr<ID3DBlob> m_vertexShader;

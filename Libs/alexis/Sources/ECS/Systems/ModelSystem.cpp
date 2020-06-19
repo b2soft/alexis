@@ -21,7 +21,7 @@ namespace alexis
 		__declspec(align(16)) struct CameraCB
 		{
 			XMMATRIX viewMatrix;
-			XMMATRIX viewProjMatrix;
+			XMMATRIX projMatrix;
 		};
 
 		void ModelSystem::Update(float dt)
@@ -56,7 +56,7 @@ namespace alexis
 			auto viewMatrix = cameraSystem->GetViewMatrix(activeCamera);
 			auto projMatrix = cameraSystem->GetProjMatrix(activeCamera);
 
-			auto viewProjMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
+			//auto viewProjMatrix = XMMatrixMultiply(viewMatrix, projMatrix);
 
 			auto* render = alexis::Render::GetInstance();
 			auto* rtManager = render->GetRTManager();
@@ -70,11 +70,12 @@ namespace alexis
 				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
 				CameraCB cameraCB;
 				cameraCB.viewMatrix = viewMatrix;
-				cameraCB.viewProjMatrix = viewProjMatrix;
+				cameraCB.projMatrix = projMatrix;
 
 				modelComponent.Material->Set(context);
 
 				context->SetDynamicCBV(0, sizeof(cameraCB), &cameraCB);
+				context->SetDynamicCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
 				modelComponent.Mesh->Draw(context);
 			}
 		}

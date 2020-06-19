@@ -1,5 +1,3 @@
-//#include "PBS_helpers.hlsl"
-
 #include "PBS_helpers.hlsli"
 
 #define USE_PCF9

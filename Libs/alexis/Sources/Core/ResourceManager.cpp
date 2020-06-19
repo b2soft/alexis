@@ -293,9 +293,15 @@ namespace alexis
 		std::string shader = j["shader"];
 		MaterialLoadParams params;
 		params.VSPath = params.PSPath = ToWStr(shader);
-		params.Textures[0] = ToWStr(j["t0"]);
-		params.Textures[1] = ToWStr(j["t0"]);
-		params.Textures[2] = ToWStr(j["t0"]);
+
+		std::size_t i = 0;
+		for (auto& tex : j["textures"])
+		{
+			params.Textures.emplace_back(ToWStr(tex));
+		}
+
+		params.RTV = ToWStr(j["rtv"]);
+		params.DepthEnable = j["DepthEnable"];
 
 		auto material = std::make_unique<Material>(params);
 		return m_betterMaterials.emplace(path, std::move(material)).first;

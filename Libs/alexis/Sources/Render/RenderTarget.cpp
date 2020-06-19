@@ -1,7 +1,7 @@
 #include <Precompiled.h>
 
 #include "RenderTarget.h"
-
+#include <Render/Render.h>
 
 namespace alexis
 {
@@ -10,17 +10,56 @@ namespace alexis
 		m_textures(Slot::NumAttachmentPoints),
 		m_isFullscreen(isFullscreen)
 	{
+		m_rtvs.resize(Slot::NumAttachmentPoints, {});
 	}
 
 	void RenderTarget::AttachTexture(const TextureBuffer& texture, Slot slot)
 	{
-		auto texResource = texture.GetResource();
+		AttachTexture(texture.GetResource(), slot);
+	}
 
-		m_textures[slot].SetFromResource(texResource);
+	void RenderTarget::AttachTexture(ID3D12Resource* texture, Slot slot)
+	{
+		auto texDesc = texture->GetDesc();
 
-		if (texResource)
+		auto* render = Render::GetInstance();
+
+		m_textures[slot].SetFromResource(texture);
+
+		if (slot == Slot::DepthStencil)
 		{
-			auto desc = texResource->GetDesc();
+			if (m_dsv.ptr == 0)
+			{
+				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+				if (texDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+				{
+					dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+				}
+
+				auto dsvHandle = render->AllocateDSV(texture, dsvDesc);
+
+				m_dsv = dsvHandle.CpuPtr;
+			}
+		}
+		else
+		{
+			if (m_rtvs[slot].ptr == 0)
+			{
+				D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+				rtvDesc.Format = texDesc.Format;
+				auto rtvHandle = render->AllocateRTV(texture, rtvDesc);
+
+				m_rtvs[slot] = rtvHandle.CpuPtr;
+			}
+		}
+
+		if (texture)
+		{
+			auto desc = texture->GetDesc();
 			m_size.x = static_cast<uint32_t>(desc.Width);
 			m_size.y = static_cast<uint32_t>(desc.Height);
 		}
@@ -29,6 +68,22 @@ namespace alexis
 	const alexis::TextureBuffer& RenderTarget::GetTexture(Slot slot) const
 	{
 		return m_textures[slot];
+	}
+
+	alexis::TextureBuffer& RenderTarget::GetTexture(Slot slot)
+	{
+		return m_textures[slot];
+	}
+
+	void RenderTarget::Reset()
+	{
+		for (auto& texture : m_textures)
+		{
+			if (texture.IsValid())
+			{
+				texture.Reset();
+			}
+		}
 	}
 
 	void RenderTarget::Resize(uint32_t width, uint32_t height)
@@ -85,6 +140,21 @@ namespace alexis
 	const std::vector<alexis::TextureBuffer>& RenderTarget::GetTextures() const
 	{
 		return m_textures;
+	}
+
+	const std::vector<D3D12_CPU_DESCRIPTOR_HANDLE>& RenderTarget::GetRtvs() const
+	{
+		return m_rtvs;
+	}
+
+	const D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget::GetRtv(Slot slot) const
+	{
+		return m_rtvs[slot];
+	}
+
+	const D3D12_CPU_DESCRIPTOR_HANDLE RenderTarget::GetDsv() const
+	{
+		return m_dsv;
 	}
 
 	D3D12_RT_FORMAT_ARRAY RenderTarget::GetFormat() const

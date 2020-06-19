@@ -78,56 +78,6 @@ namespace alexis
 		m_view.SizeInBytes = static_cast<UINT>(m_bufferSize);
 	}
 
-	void ConstantBuffer::Create(std::size_t numElements, std::size_t elementSize)
-	{
-		m_numElements = numElements;
-		m_elementSize = elementSize;
-
-		m_bufferSize = Math::AlignUp(m_numElements * m_elementSize, 256);
-
-		D3D12_RESOURCE_DESC Desc = {};
-		Desc.Alignment = 0;
-		Desc.DepthOrArraySize = 1;
-		Desc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER;
-		Desc.Format = DXGI_FORMAT_UNKNOWN;
-		Desc.Height = 1;
-		Desc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-		Desc.MipLevels = 1;
-		Desc.SampleDesc.Count = 1;
-		Desc.SampleDesc.Quality = 0;
-		Desc.Width = m_bufferSize;
-
-		auto device = Render::GetInstance()->GetDevice();
-
-		auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
-		auto resourceDesc = CD3DX12_RESOURCE_DESC::Buffer(m_bufferSize);
-
-		ThrowIfFailed(device->CreateCommittedResource(
-			&heapProperties,
-			D3D12_HEAP_FLAG_NONE,
-			&resourceDesc,
-			D3D12_RESOURCE_STATE_COMMON,
-			nullptr,
-			IID_PPV_ARGS(&m_resource)));
-
-		CreateViews();
-	}
-
-	void ConstantBuffer::CreateViews()
-	{
-		auto resDesc = m_resource->GetDesc();
-
-		D3D12_CONSTANT_BUFFER_VIEW_DESC cbvDesc;
-		cbvDesc.BufferLocation = m_resource->GetGPUVirtualAddress();
-		cbvDesc.SizeInBytes = static_cast<UINT>(m_bufferSize); // Already aligned
-
-		auto render = Render::GetInstance();
-		auto device = render->GetDevice();
-		m_cbv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
-
-		device->CreateConstantBufferView(&cbvDesc, m_cbv.GetDescriptorHandle());
-	}
-
 	void TextureBuffer::Create(uint32_t width, uint32_t height, DXGI_FORMAT format, uint32_t numMips /*= 1*/, const D3D12_CLEAR_VALUE* clearValue /*= nullptr*/)
 	{
 		D3D12_RESOURCE_DESC textureDesc = {};
@@ -198,58 +148,58 @@ namespace alexis
 		}
 	}
 
-	void TextureBuffer::CreateViews()
-	{
-		auto resDesc = m_resource->GetDesc();
+	//void TextureBuffer::CreateViews()
+	//{
+	//	auto resDesc = m_resource->GetDesc();
 
-		D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-		srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-		if (resDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
-		{
-			srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-		}
-		else
-		{
-			srvDesc.Format = resDesc.Format;
-		}
+	//	D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+	//	srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+	//	if (resDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+	//	{
+	//		srvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+	//	}
+	//	else
+	//	{
+	//		srvDesc.Format = resDesc.Format;
+	//	}
 
-		srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-		srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
+	//	srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+	//	srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 
-		auto render = Render::GetInstance();
-		auto device = render->GetDevice();
+	//	auto render = Render::GetInstance();
+	//	auto device = render->GetDevice();
 
-		D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport{ resDesc.Format };
-		device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
+	//	D3D12_FEATURE_DATA_FORMAT_SUPPORT formatSupport{ resDesc.Format };
+	//	device->CheckFeatureSupport(D3D12_FEATURE_FORMAT_SUPPORT, &formatSupport, sizeof(D3D12_FEATURE_DATA_FORMAT_SUPPORT));
 
-		const bool rtFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_RENDER_TARGET) != 0;
-		const bool dsFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL) != 0;
-		const bool srvFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE) != 0;
+	//	const bool rtFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_RENDER_TARGET) != 0;
+	//	const bool dsFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_DEPTH_STENCIL) != 0;
+	//	const bool srvFormatSupport = (formatSupport.Support1 & D3D12_FORMAT_SUPPORT1_SHADER_SAMPLE) != 0;
 
-		if (/*srvFormatSupport*/ true)
-		{
-			m_srv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
-			device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetDescriptorHandle());
-		}
+	//	if (/*srvFormatSupport*/ true)
+	//	{
+	//		m_srv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, 1);
+	//		device->CreateShaderResourceView(m_resource.Get(), &srvDesc, m_srv.GetDescriptorHandle());
+	//	}
 
-		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 /*&& rtFormatSupport*/)
-		{
-			m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
-			device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
-		}
+	//	if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET) != 0 /*&& rtFormatSupport*/)
+	//	{
+	//		m_rtv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+	//		device->CreateRenderTargetView(m_resource.Get(), nullptr, m_rtv.GetDescriptorHandle());
+	//	}
 
-		if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 /*&& dsFormatSupport*/)
-		{
-			if (resDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
-			{
-				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-				dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+	//	if ((resDesc.Flags & D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL) != 0 /*&& dsFormatSupport*/)
+	//	{
+	//		if (resDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
+	//		{
+	//			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	//			dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+	//			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
 
-				m_dsv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
-				device->CreateDepthStencilView(m_resource.Get(), &dsvDesc, m_dsv.GetDescriptorHandle());
-			}
-		}
-	}
+	//			m_dsv = render->AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+	//			device->CreateDepthStencilView(m_resource.Get(), &dsvDesc, m_dsv.GetDescriptorHandle());
+	//		}
+	//	}
+	//}
 
 }

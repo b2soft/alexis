@@ -93,11 +93,11 @@ namespace alexis
 
 	void PBSSimple::SetupToRender(CommandContext* pbsCommandContext)
 	{
-		pbsCommandContext->SetPipelineState(m_pso.Get());
-		pbsCommandContext->SetRootSignature(m_rootSignature);
-
-		pbsCommandContext->SetSRV(PBSObjectParameters::BaseColor, 0, *m_baseColor);
-		pbsCommandContext->SetDynamicCBV(PBSObjectParameters::MetalRoughness, sizeof(XMVECTOR), &m_metallRoughness);
+		//pbsCommandContext->SetPipelineState(m_pso.Get());
+		//pbsCommandContext->SetRootSignature(m_rootSignature);
+		//
+		//pbsCommandContext->SetSRV(PBSObjectParameters::BaseColor, 0, *m_baseColor);
+		//pbsCommandContext->SetDynamicCBV(PBSObjectParameters::MetalRoughness, sizeof(XMVECTOR), &m_metallRoughness);
 	}
 
 }

@@ -21,19 +21,14 @@ namespace alexis
 
 		InitDevice();
 
-		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
-		{
-			m_descriptorAllocators[i] = std::make_unique<DescriptorAllocator>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
-		}
-
 		m_uploadBufferManager = std::make_unique<UploadBufferManager>();
 		m_rtManager = std::make_unique<RenderTargetManager>();
 
 		m_frameRenderGraph = std::make_unique<FrameRenderGraph>();
 
-		UpdateRenderTargetViews();
-
 		InitPipeline();
+
+		UpdateRenderTargetViews();
 	}
 
 	void Render::Destroy()
@@ -75,10 +70,10 @@ namespace alexis
 
 			m_commandManager->WaitForGpu();
 
-			m_backbufferRT.AttachTexture(TextureBuffer(), RenderTarget::Slot0);
+			m_backbuffers[m_frameIndex].AttachTexture(TextureBuffer(), RenderTarget::Slot0);
 			for (int i = 0; i < k_frameCount; ++i)
 			{
-				m_backbufferTextures[i].Reset();
+				m_backbuffers[i].Reset();
 			}
 
 			DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
@@ -93,8 +88,7 @@ namespace alexis
 
 	const RenderTarget& Render::GetBackbufferRT() const
 	{
-		m_backbufferRT.AttachTexture(m_backbufferTextures[m_frameIndex], RenderTarget::Slot::Slot0);
-		return m_backbufferRT;
+		return m_backbuffers[m_frameIndex];
 	}
 
 	const CD3DX12_VIEWPORT& Render::GetDefaultViewport() const
@@ -186,7 +180,7 @@ namespace alexis
 
 	Render::DescriptorRecord Render::AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc)
 	{
-		DescriptorRecord record;
+		DescriptorRecord record{};
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_srvUavHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedSrvUavs, m_incrementSrvUav);
 
@@ -201,15 +195,53 @@ namespace alexis
 		return record;
 	}
 
-	ID3D12DescriptorHeap* Render::GetSrvUavHeap()
+	alexis::Render::DescriptorRecord Render::AllocateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc)
+	{
+		DescriptorRecord record{};
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedRtvs, m_incrementRtv);
+
+		m_device->CreateRenderTargetView(resource, &desc, handle);
+
+		record.CpuPtr = handle;
+		record.OffsetInHeap = m_allocatedRtvs;
+
+		m_allocatedRtvs++;
+
+		return record;
+	}
+
+	alexis::Render::DescriptorRecord Render::AllocateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc)
+	{
+		DescriptorRecord record{};
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_dsvHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedDsvs, m_incrementDsv);
+
+		m_device->CreateDepthStencilView(resource, &desc, handle);
+
+		record.CpuPtr = handle;
+		record.OffsetInHeap = m_allocatedDsvs;
+
+		m_allocatedDsvs++;
+
+		return record;
+	}
+
+	ID3D12DescriptorHeap* Render::GetSrvUavHeap() const
 	{
 		return m_srvUavHeap.Get();
 	}
 
-	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
+	ID3D12DescriptorHeap* Render::GetRtvHeap() const
 	{
-		return m_descriptorAllocators[type]->Allocate(numDescriptors);
+		return m_rtvHeap.Get();
 	}
+
+	ID3D12DescriptorHeap* Render::GetDsvHeap() const
+	{
+		return m_dsvHeap.Get();
+	}
+
 
 	void Render::InitDevice()
 	{
@@ -479,14 +511,6 @@ namespace alexis
 
 	}
 
-	void Render::ReleaseStaleDescriptors(uint64_t fenceValue)
-	{
-		for (auto& allocator : m_descriptorAllocators)
-		{
-			allocator->ReleaseStaleDescriptors(fenceValue);
-		}
-	}
-
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> Render::GetHardwareAdapter(IDXGIFactory4* factory)
 	{
 		ComPtr<IDXGIFactory4> dxgiFactory;
@@ -534,7 +558,7 @@ namespace alexis
 			ComPtr<ID3D12Resource> backBuffer;
 			ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
 
-			m_backbufferTextures[i].SetFromResource(backBuffer.Get());
+			m_backbuffers[i].AttachTexture(backBuffer.Get(), RenderTarget::Slot0);
 		}
 	}
 	}

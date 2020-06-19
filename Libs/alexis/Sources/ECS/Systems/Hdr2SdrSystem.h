@@ -18,7 +18,7 @@ namespace alexis
 			void Render(CommandContext* context);
 
 		private:
-			std::unique_ptr<MaterialBase> m_hdr2SdrMaterial;
+			Material* m_hdr2SdrMaterial{ nullptr };
 			Mesh* m_fsQuad{ nullptr };
 		};
 	}

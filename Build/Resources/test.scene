@@ -33,7 +33,7 @@
             {
                "ModelComponent":{
                   "mesh":"Resources/Models/Cube.DAE",
-				  "material":"Resources/Materials/test.material"
+				  "material":"Resources/Materials/Rusty.material"
                }
             },
             {

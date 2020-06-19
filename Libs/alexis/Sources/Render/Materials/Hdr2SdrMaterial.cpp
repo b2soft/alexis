@@ -93,7 +93,7 @@ namespace alexis
 
 		commandContext->TransitionResource(hdrRT->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-		commandContext->SetSRV(Hdr2SdrParameters::HDR, 0, hdrRT->GetTexture(RenderTarget::Slot::Slot0));
+	//	commandContext->SetSRV(Hdr2SdrParameters::HDR, 0, hdrRT->GetTexture(RenderTarget::Slot::Slot0));
 	}
 
 }

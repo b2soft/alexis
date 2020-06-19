@@ -9,15 +9,10 @@
 #include <Utils/Singleton.h>
 
 #include <Render/CommandManager.h>
-
-#include <Render/RenderTarget.h>
 #include <Render/Buffers/UploadBufferManager.h>
-
-#include <Render/Descriptors/DescriptorAllocation.h>
-#include <Render/Descriptors/DescriptorAllocator.h>
-#include <Render/RenderTargetManager.h>
-
 #include <Render/FrameRenderGraph.h>
+#include <Render/RenderTarget.h>
+#include <Render/RenderTargetManager.h>
 
 using Microsoft::WRL::ComPtr;
 
@@ -77,16 +72,12 @@ namespace alexis
 		};
 
 		DescriptorRecord AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
-		//D3D12_CPU_DESCRIPTOR_HANDLE AllocateDSV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
-		//D3D12_CPU_DESCRIPTOR_HANDLE AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
-		//D3D12_CPU_DESCRIPTOR_HANDLE AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc);
+		DescriptorRecord AllocateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc);
+		DescriptorRecord AllocateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc);
 
-
-		ID3D12DescriptorHeap* GetSrvUavHeap();
-
-		DescriptorAllocation AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors = 1);
-
-		void ReleaseStaleDescriptors(uint64_t fenceValue);
+		ID3D12DescriptorHeap* GetSrvUavHeap() const;
+		ID3D12DescriptorHeap* GetRtvHeap() const;
+		ID3D12DescriptorHeap* GetDsvHeap() const;
 
 	private:
 		void InitDevice();
@@ -103,10 +94,8 @@ namespace alexis
 		ComPtr<ID3D12Device2> m_device;
 		ComPtr<IDXGISwapChain4> m_swapChain;
 
-		TextureBuffer m_backbufferTextures[k_frameCount];
-		mutable RenderTarget m_backbufferRT;
+		std::array<RenderTarget, k_frameCount> m_backbuffers;
 
-		std::unique_ptr<DescriptorAllocator> m_descriptorAllocators[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES];
 		std::unique_ptr<UploadBufferManager> m_uploadBufferManager;
 
 		std::unique_ptr<FrameRenderGraph> m_frameRenderGraph;

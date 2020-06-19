@@ -43,10 +43,6 @@
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />
     <ClInclude Include="Sources\Render\CommandContext.h" />
     <ClInclude Include="Sources\Render\CommandManager.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h" />
     <ClInclude Include="Sources\Render\FrameRenderGraph.h" />
     <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h" />
     <ClInclude Include="Sources\Render\Materials\LightingMaterial.h" />
@@ -61,6 +57,7 @@
     <ClInclude Include="Sources\Render\RootSignature.h" />
     <ClInclude Include="Sources\Render\Viewport.h" />
     <ClInclude Include="Sources\Scene.h" />
+    <ClInclude Include="Sources\Utils\RenderUtils.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
     <ClInclude Include="Sources\Utils\unordered_map.h" />
   </ItemGroup>
@@ -84,10 +81,6 @@
     <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp" />
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
     <ClCompile Include="Sources\Render\CommandManager.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp" />
     <ClCompile Include="Sources\Render\FrameRenderGraph.cpp" />
     <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />

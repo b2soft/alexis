@@ -17,9 +17,6 @@
     <Filter Include="Sources\Render">
       <UniqueIdentifier>{4e92aeb6-9b96-4796-b46a-2664775cf086}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Render\Descriptors">
-      <UniqueIdentifier>{3ecf5158-7518-4930-8a16-e67d73ceef9b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Render\Buffers">
       <UniqueIdentifier>{86550b38-517d-4247-88a9-e05607dfcd70}</UniqueIdentifier>
     </Filter>
@@ -45,18 +42,6 @@
     </ClCompile>
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp">
       <Filter>Sources\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\RootSignature.cpp">
       <Filter>Sources\Render</Filter>
@@ -152,18 +137,6 @@
     </ClInclude>
     <ClInclude Include="Sources\Core\HighResolutionClock.h">
       <Filter>Sources\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h">
-      <Filter>Sources\Render\Descriptors</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\RootSignature.h">
       <Filter>Sources\Render</Filter>
@@ -266,6 +239,9 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\Components\TransformComponent.h">
       <Filter>Sources\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Utils\RenderUtils.h">
+      <Filter>Sources\Utils</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
