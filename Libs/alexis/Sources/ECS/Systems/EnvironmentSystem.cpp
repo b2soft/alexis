@@ -75,25 +75,25 @@ namespace alexis
 
 		for (int i = 0; i < viewMatrices.size(); ++i)
 		{
-			m_envRectToCubeMaterial->SetupToRender(context);
+			//m_envRectToCubeMaterial->SetupToRender(context);
 
-			D3D12_CPU_DESCRIPTOR_HANDLE rtv[] = { m_cubemap.GetRTV(i) };
-			const float clearColor[4] = { 0, 0, 0, 0 };
-			context->List->ClearRenderTargetView(m_cubemap.GetRTV(i), clearColor, 0, nullptr);
-			context->List->OMSetRenderTargets(1, rtv, FALSE, nullptr);
+			//D3D12_CPU_DESCRIPTOR_HANDLE rtv[] = { m_cubemap.GetRTV(i) };
+			//const float clearColor[4] = { 0, 0, 0, 0 };
+			//context->List->ClearRenderTargetView(m_cubemap.GetRTV(i), clearColor, 0, nullptr);
+			//context->List->OMSetRenderTargets(1, rtv, FALSE, nullptr);
 
-			//context->SetRenderTarget(*hdrRt);
-			D3D12_VIEWPORT viewport{ 0, 0, 512, 512 };
+			////context->SetRenderTarget(*hdrRt);
+			//D3D12_VIEWPORT viewport{ 0, 0, 512, 512 };
 
-			context->SetViewport(Viewport{ viewport, Render::GetInstance()->GetDefaultScissorRect() });
+			//context->SetViewport(Viewport{ viewport, Render::GetInstance()->GetDefaultScissorRect() });
 
-			CameraParams cameraParams;
-			cameraParams.ViewMatrix = viewMatrices[i];
-			cameraParams.ProjMatrix = projMatrix;
-			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
-			context->SetSRV(1, 0, *m_envMap);
+			//CameraParams cameraParams;
+			//cameraParams.ViewMatrix = viewMatrices[i];
+			//cameraParams.ProjMatrix = projMatrix;
+			//context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+			//context->SetSRV(1, 0, *m_envMap);
 
-			m_cubeMesh->Draw(context);
+			//m_cubeMesh->Draw(context);
 		}
 	}
 
@@ -120,9 +120,9 @@ namespace alexis
 		cameraParams.ViewMatrix = cameraSystem->GetViewMatrix(activeCamera);
 		cameraParams.ProjMatrix = cameraSystem->GetProjMatrix(activeCamera);
 		context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
-		context->SetSRV(1, 0, m_cubemap);
+		//context->SetSRV(1, 0, m_cubemap);
 
-		m_cubeMesh->Draw(context);
+		//m_cubeMesh->Draw(context);
 	}
 
 }
