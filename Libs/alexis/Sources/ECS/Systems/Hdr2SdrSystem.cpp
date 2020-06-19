@@ -16,9 +16,10 @@ namespace alexis
 	{
 		void Hdr2SdrSystem::Init()
 		{
-			m_hdr2SdrMaterial = std::make_unique<Hdr2SdrMaterial>();
+			auto* resMgr = Core::Get().GetResourceManager();
+			m_hdr2SdrMaterial = resMgr->GetBetterMaterial(L"Resources/Materials/Hdr2Sdr.material");
 
-			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
+			m_fsQuad = resMgr->GetMesh(L"$FS_QUAD");
 		}
 
 		void Hdr2SdrSystem::Render(CommandContext* context)
@@ -27,12 +28,16 @@ namespace alexis
 			const auto& backbuffer = render->GetBackbufferRT();
 			const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
 
+			auto rtManager = render->GetRTManager();
+			auto hdrRT = rtManager->GetRenderTarget(L"HDR");
+
 			context->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			context->TransitionResource(hdrRT->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 			context->SetRenderTarget(backbuffer);
 			context->SetViewport(backbuffer.GetViewport());
 		
-			m_hdr2SdrMaterial->SetupToRender(context);
+			m_hdr2SdrMaterial->Set(context);
 		
 			m_fsQuad->Draw(context);
 		

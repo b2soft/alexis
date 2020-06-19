@@ -42,22 +42,22 @@ namespace alexis
 				if (texture.IsValid())
 				{
 					clearTargetContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-					clearTargetContext->ClearTexture(texture, clearColor);
+					clearTargetContext->ClearRTV(gbuffer->GetRtv(static_cast<RenderTarget::Slot>(i)), clearColor);
 				}
 			}
 
 			clearTargetContext->TransitionResource(gbDepthStencil, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-			clearTargetContext->ClearDepthStencil(gbDepthStencil, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
+			clearTargetContext->ClearDSV(gbuffer->GetDsv(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
 
 			// Clear HDR
-			auto& texture = hdrRT->GetTexture(static_cast<RenderTarget::Slot>(RenderTarget::Slot::Slot0));
+			auto& texture = hdrRT->GetTexture(RenderTarget::Slot::Slot0);
 			clearTargetContext->TransitionResource(texture, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-			clearTargetContext->ClearTexture(texture, clearColor);
+			clearTargetContext->ClearRTV(hdrRT->GetRtv(RenderTarget::Slot0), clearColor);
 
 			{
 				auto& shadowDepth = shadowRT->GetTexture(RenderTarget::DepthStencil);
 				clearTargetContext->TransitionResource(shadowDepth, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
-				clearTargetContext->ClearDepthStencil(shadowDepth, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
+				clearTargetContext->ClearDSV(shadowRT->GetDsv(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
 			}
 		};
 		clearTask();

@@ -1,0 +1,6 @@
+{
+	"shader": "Test",
+	"textures": ["Resources/Textures/metal_base.dds", "Resources/Textures/metal_normal.dds", "Resources/Textures/metal_mero.dds"],
+	"rtv": "$GB",
+	"DepthEnable":true
+}

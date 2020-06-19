@@ -64,6 +64,19 @@ namespace alexis
 		return it->second.get();
 	}
 
+	alexis::Material* ResourceManager::GetBetterMaterial(std::wstring_view path)
+	{
+		auto it = m_betterMaterials.find(path);
+
+		if (it != m_betterMaterials.end())
+		{
+			return it->second.get();
+		}
+
+		it = LoadBetterMaterial(path);
+		return it->second.get();
+	}
+
 	ResourceManager::TextureMap::iterator ResourceManager::LoadTexture(std::wstring_view path)
 	{
 		fs::path filePath(path);
@@ -261,6 +274,37 @@ namespace alexis
 		//}
 
 		return m_materials.end();
+	}
+
+	ResourceManager::BetterMaterialMap::iterator ResourceManager::LoadBetterMaterial(std::wstring_view path)
+	{
+		fs::path filePath(path);
+
+		if (!fs::exists(filePath))
+		{
+			throw std::exception("File not found!");
+		}
+
+		using json = nlohmann::json;
+
+		std::ifstream ifs(path);
+		json j = nlohmann::json::parse(ifs);
+
+		std::string shader = j["shader"];
+		MaterialLoadParams params;
+		params.VSPath = params.PSPath = ToWStr(shader);
+
+		std::size_t i = 0;
+		for (auto& tex : j["textures"])
+		{
+			params.Textures.emplace_back(ToWStr(tex));
+		}
+
+		params.RTV = ToWStr(j["rtv"]);
+		params.DepthEnable = j["DepthEnable"];
+
+		auto material = std::make_unique<Material>(params);
+		return m_betterMaterials.emplace(path, std::move(material)).first;
 	}
 
 }

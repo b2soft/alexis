@@ -120,12 +120,12 @@ namespace alexis
 		commandContext->SetPipelineState(m_pso.Get());
 		commandContext->SetRootSignature(m_rootSignature);
 
-		commandContext->SetSRV(LightingParameters::GBuffer, 0, gbuffer->GetTexture(RenderTarget::Slot::Slot0));
-		commandContext->SetSRV(LightingParameters::GBuffer, 1, gbuffer->GetTexture(RenderTarget::Slot::Slot1));
-		commandContext->SetSRV(LightingParameters::GBuffer, 2, gbuffer->GetTexture(RenderTarget::Slot::Slot2));
-		commandContext->SetSRV(LightingParameters::GBuffer, 3, depth);
-
-		commandContext->SetSRV(LightingParameters::ShadowMap, 0, shadowMap);
+		//commandContext->SetSRV(LightingParameters::GBuffer, 0, gbuffer->GetTexture(RenderTarget::Slot::Slot0));
+		//commandContext->SetSRV(LightingParameters::GBuffer, 1, gbuffer->GetTexture(RenderTarget::Slot::Slot1));
+		//commandContext->SetSRV(LightingParameters::GBuffer, 2, gbuffer->GetTexture(RenderTarget::Slot::Slot2));
+		//commandContext->SetSRV(LightingParameters::GBuffer, 3, depth);
+		
+		//commandContext->SetSRV(LightingParameters::ShadowMap, 0, shadowMap);
 	}
 
 }

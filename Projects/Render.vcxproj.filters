@@ -45,6 +45,9 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\PBS_object_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
     <FxCompile Include="..\Resources\Shaders\PBS_object_ps.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
@@ -69,22 +72,10 @@
     <FxCompile Include="..\Resources\Shaders\Shadows_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\Lighting_testbed_ps.hlsl">
+    <FxCompile Include="..\Resources\Shaders\Test_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\EnvRectToCube_vs.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\EnvRectToCube_ps.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\PBS_object_vs.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\Skybox_ps.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\Skybox_vs.hlsl">
+    <FxCompile Include="..\Resources\Shaders\Test_ps.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
   </ItemGroup>

@@ -92,9 +92,9 @@ namespace alexis
 		pbsCommandContext->SetPipelineState(m_pso.Get());
 		pbsCommandContext->SetRootSignature(m_rootSignature);
 
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, *m_baseColor);
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, *m_normalMap);
-		pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, *m_metalRoughness);
+		//pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 0, *m_baseColor);
+		//pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 1, *m_normalMap);
+		//pbsCommandContext->SetSRV(PBSObjectParameters::Textures, 2, *m_metalRoughness);
 	}
 
 }

@@ -44,43 +44,27 @@ namespace alexis
 		}
 
 		commandManager->CacheContext(this, fenceValue);
-		Render::GetInstance()->ReleaseStaleDescriptors(fenceValue);
 
 		return fenceValue;
 	}
 
 	void CommandContext::DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount, UINT startVertexLocation, UINT startInstanceLocation)
 	{
-		for (auto& descriptor : DynamicDescriptors)
-		{
-			descriptor->CommitStagedDescriptorsForDraw(this);
-		}
-
 		List->DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
 	}
 
 	void CommandContext::DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount, UINT startIndexLocation, INT baseVertexLocation, UINT startInstanceLocation)
 	{
-		for (auto& descriptor : DynamicDescriptors)
-		{
-			descriptor->CommitStagedDescriptorsForDraw(this);
-		}
-
 		List->DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
 	}
 
 	void CommandContext::SetRootSignature(const RootSignature& rootSignature)
 	{
-		auto resource = rootSignature.GetRootSignature().Get();
+		auto* resource = rootSignature.GetRootSignature().Get();
 
 		if (m_rootSignature != resource)
 		{
 			m_rootSignature = resource;
-
-			for (auto& descriptor : DynamicDescriptors)
-			{
-				descriptor->ParseRootSignature(rootSignature);
-			}
 
 			List->SetGraphicsRootSignature(m_rootSignature);
 		}
@@ -89,25 +73,6 @@ namespace alexis
 	void CommandContext::SetPipelineState(ID3D12PipelineState* pipelineState)
 	{
 		List->SetPipelineState(pipelineState);
-	}
-
-	void CommandContext::SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap)
-	{
-		if (DescriptorHeap[heapType] != heap)
-		{
-			DescriptorHeap[heapType] = heap;
-			BindDescriptorHeaps();
-		}
-	}
-
-	void CommandContext::SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const TextureBuffer& resource)
-	{
-		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetSRV());
-	}
-
-	void CommandContext::SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const ConstantBuffer& resource)
-	{
-		DynamicDescriptors[D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV]->StageDescriptors(rootParameterIdx, descriptorOffset, 1, resource.GetCBV());
 	}
 
 	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
@@ -122,14 +87,14 @@ namespace alexis
 		List->SetGraphicsRootConstantBufferView(rootParameterIdx, cb.Gpu);
 	}
 
-	void CommandContext::ClearTexture(const TextureBuffer& texture, const float clearColor[4])
+	void CommandContext::ClearRTV(D3D12_CPU_DESCRIPTOR_HANDLE rtv, const float clearColor[4])
 	{
-		List->ClearRenderTargetView(texture.GetRTV(), clearColor, 0, nullptr);
+		List->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
 	}
 
-	void CommandContext::ClearDepthStencil(const TextureBuffer& texture, D3D12_CLEAR_FLAGS clearFlags, float depth /*= 1.0f*/, uint8_t stencil /*= 0*/)
+	void CommandContext::ClearDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv, D3D12_CLEAR_FLAGS clearFlags, float depth /*= 1.0f*/, uint8_t stencil /*= 0*/)
 	{
-		List->ClearDepthStencilView(texture.GetDSV(), clearFlags, depth, stencil, 0, nullptr);
+		List->ClearDepthStencilView(dsv, clearFlags, depth, stencil, 0, nullptr);
 	}
 
 	void CommandContext::SetRenderTarget(const RenderTarget& renderTarget)
@@ -139,6 +104,10 @@ namespace alexis
 
 		// Bind color slots
 		const auto& textures = renderTarget.GetTextures();
+		const auto& rtvs = renderTarget.GetRtvs();
+
+		auto* render = Render::GetInstance();
+		auto* device = render->GetDevice();
 
 		for (int i = 0; i < RenderTarget::Slot::DepthStencil; ++i)
 		{
@@ -146,7 +115,7 @@ namespace alexis
 
 			if (texture.IsValid())
 			{
-				renderTargetDescriptors.push_back(texture.GetRTV());
+				renderTargetDescriptors.push_back(rtvs[i]);
 			}
 		}
 
@@ -156,7 +125,7 @@ namespace alexis
 		CD3DX12_CPU_DESCRIPTOR_HANDLE dsDescriptor(D3D12_DEFAULT);
 		if (depthTexture.IsValid())
 		{
-			dsDescriptor = depthTexture.GetDSV();
+			dsDescriptor = renderTarget.GetDsv();
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE* dsv = dsDescriptor.ptr != 0 ? &dsDescriptor : nullptr;
@@ -304,33 +273,10 @@ namespace alexis
 		}
 	}
 
-	void CommandContext::BindDescriptorHeaps()
-	{
-		UINT numDescriptorHeaps = 0;
-		ID3D12DescriptorHeap* descriptorHeaps[D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES] = {};
-
-		for (uint32_t i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
-		{
-			ID3D12DescriptorHeap* descriptorHeap = DescriptorHeap[i];
-			if (descriptorHeap)
-			{
-				descriptorHeaps[numDescriptorHeaps++] = descriptorHeap;
-			}
-		}
-
-		List->SetDescriptorHeaps(numDescriptorHeaps, descriptorHeaps);
-	}
-
 	void CommandContext::Reset()
 	{
 		Allocator->Reset();
 		List->Reset(Allocator.Get(), nullptr);
-
-		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
-		{
-			DynamicDescriptors[i]->Reset();
-			DescriptorHeap[i] = nullptr;
-		}
 
 		m_rootSignature = nullptr;
 	}

@@ -8,7 +8,6 @@
 #include <Render/RootSignature.h>
 #include <Render/Buffers/GpuBuffer.h>
 #include <Render/RenderTarget.h>
-#include <Render/Descriptors/DynamicDescriptorHeap.h>
 
 namespace alexis
 {
@@ -35,14 +34,10 @@ namespace alexis
 		// TODO: Do I need wrapper over pipeline state like RootSignature?
 		void SetPipelineState(ID3D12PipelineState* pipelineState);
 
-		void SetDescriptorHeap(D3D12_DESCRIPTOR_HEAP_TYPE heapType, ID3D12DescriptorHeap* heap);
-
-		void SetSRV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const TextureBuffer& resource);
-		void SetCBV(uint32_t rootParameterIdx, uint32_t descriptorOffset, const ConstantBuffer& resource);
 		void SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData);
 
-		void ClearTexture(const TextureBuffer& texture, const float clearColor[4]);
-		void ClearDepthStencil(const TextureBuffer& texture, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);
+		void ClearRTV(D3D12_CPU_DESCRIPTOR_HANDLE rtv, const float clearColor[4]);
+		void ClearDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);
 
 		void SetRenderTarget(const RenderTarget& renderTarget);
 		void SetViewport(const Viewport& viewport);
@@ -56,14 +51,10 @@ namespace alexis
 
 		void LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename);
 
-		void BindDescriptorHeaps();
-
 		void Reset();
 
 		Microsoft::WRL::ComPtr<ID3D12CommandAllocator> Allocator;
 		Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList> List;
-		std::array<DynamicDescriptorHeap*, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> DynamicDescriptors;
-		std::array<ID3D12DescriptorHeap*, D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES> DescriptorHeap;
 
 	private:
 		ID3D12RootSignature* m_rootSignature{ nullptr };
