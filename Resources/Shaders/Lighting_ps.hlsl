@@ -72,7 +72,7 @@ float4 main(PSInput input) : SV_TARGET
 	float depth = depthTexture.Sample(PointSampler, input.uv0).r;
 	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
 
-	float3 lightPos = float3(5, 5.0, -5.0);
+	float3 lightPos = float3(21.0, 5.0, 17.0);
 	//float3 lightColor = float3(70.0f, 70.0f, 70.0f);
 	float3 lightColor = float3(5, 5, 5);
 

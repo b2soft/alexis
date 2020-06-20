@@ -31,8 +31,8 @@ namespace alexis
 		m_cubeMesh = rm->GetMesh(L"Resources/Models/Cube.DAE");
 
 		D3D12_RESOURCE_DESC desc{};
-		desc.Width = 512;
-		desc.Height = 512;
+		desc.Width = 1024;
+		desc.Height = 1024;
 		desc.MipLevels = 1;
 		desc.Alignment = 0;
 		desc.DepthOrArraySize = 6;
@@ -99,8 +99,8 @@ namespace alexis
 			//context->List->ClearRenderTargetView(m_cubemapRTVs[i], clearColor, 0, nullptr);
 			context->List->OMSetRenderTargets(1, &m_cubemapRTVs[i], FALSE, nullptr);
 
-			D3D12_VIEWPORT viewport{ 0, 0, 512, 512 };
-			CD3DX12_RECT rect{ 0, 0,512, 512 };
+			D3D12_VIEWPORT viewport{ 0, 0, 1024, 1024 };
+			CD3DX12_RECT rect{ 0, 0,1024, 1024 };
 
 			context->SetViewport(Viewport{ viewport, rect });
 
