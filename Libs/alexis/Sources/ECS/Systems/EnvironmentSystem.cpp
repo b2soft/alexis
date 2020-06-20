@@ -29,12 +29,8 @@ namespace alexis
 	{
 		auto* rm = Core::Get().GetResourceManager();
 		m_cubeMesh = rm->GetMesh(L"Resources/Models/Cube.DAE");
-		m_envMap = rm->GetTexture(L"Resources/Textures/rooitou_park_2k.hdr");
 
-		m_envRectToCubeMaterial = std::make_unique<EnvRectToCubeMaterial>();
-		m_skyboxMaterial = std::make_unique<SkyboxMaterial>();
-
-		D3D12_RESOURCE_DESC desc;
+		D3D12_RESOURCE_DESC desc{};
 		desc.Width = 512;
 		desc.Height = 512;
 		desc.MipLevels = 1;
@@ -47,7 +43,29 @@ namespace alexis
 		desc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
 		m_cubemap.Create(desc);
-		m_cubemap.GetResource()->SetName(L"CUBEMAP");
+
+		auto* rtManager = Render::GetInstance()->GetRTManager();
+		auto cubemapRT = std::make_unique<RenderTarget>();
+		cubemapRT->AttachTexture(m_cubemap, RenderTarget::Slot0);
+		rtManager->EmplaceTarget(L"CUBEMAP", std::move(cubemapRT));
+
+		for (int i = 0; i < 6; ++i)
+		{
+			D3D12_RENDER_TARGET_VIEW_DESC rtvDesc;
+			rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DARRAY;
+			rtvDesc.Format = desc.Format;
+			rtvDesc.Texture2DArray.MipSlice = 0;
+			rtvDesc.Texture2DArray.PlaneSlice = 0;
+
+			rtvDesc.Texture2DArray.FirstArraySlice = i;
+			rtvDesc.Texture2DArray.ArraySize = 1;
+
+			auto alloc = Render::GetInstance()->AllocateRTV(m_cubemap.GetResource(), rtvDesc);
+			m_cubemapRTVs[i] = alloc.CpuPtr;
+		}
+
+		m_envRectToCubeMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/EnvRectToCube.material");
+		m_skyboxMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/Skybox.material");
 	}
 
 	void ecs::EnvironmentSystem::Render(CommandContext* context)
@@ -63,37 +81,35 @@ namespace alexis
 		XMMATRIX projMatrix = XMMatrixPerspectiveFovLH(XMConvertToRadians(90.0f), 1.0f, 0.1f, 10.f);
 		std::array<XMMATRIX, 6> viewMatrices =
 		{
-			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }),
-			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }),
-			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }),
-			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }),
-			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }),
-			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }),
+			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }),		// +X
+			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { -1.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }),	// -X
+			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 1.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }),	// +Y
+			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, -1.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }),	// -Y
+			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }),		// +Z
+			XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }),	// -Z
 		};
 
 		context->TransitionResource(m_cubemap, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 		for (int i = 0; i < viewMatrices.size(); ++i)
 		{
-			//m_envRectToCubeMaterial->SetupToRender(context);
+			m_envRectToCubeMaterial->Set(context);
 
-			//D3D12_CPU_DESCRIPTOR_HANDLE rtv[] = { m_cubemap.GetRTV(i) };
 			//const float clearColor[4] = { 0, 0, 0, 0 };
-			//context->List->ClearRenderTargetView(m_cubemap.GetRTV(i), clearColor, 0, nullptr);
-			//context->List->OMSetRenderTargets(1, rtv, FALSE, nullptr);
+			//context->List->ClearRenderTargetView(m_cubemapRTVs[i], clearColor, 0, nullptr);
+			context->List->OMSetRenderTargets(1, &m_cubemapRTVs[i], FALSE, nullptr);
 
-			////context->SetRenderTarget(*hdrRt);
-			//D3D12_VIEWPORT viewport{ 0, 0, 512, 512 };
+			D3D12_VIEWPORT viewport{ 0, 0, 512, 512 };
+			CD3DX12_RECT rect{ 0, 0,512, 512 };
 
-			//context->SetViewport(Viewport{ viewport, Render::GetInstance()->GetDefaultScissorRect() });
+			context->SetViewport(Viewport{ viewport, rect });
 
-			//CameraParams cameraParams;
-			//cameraParams.ViewMatrix = viewMatrices[i];
-			//cameraParams.ProjMatrix = projMatrix;
-			//context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
-			//context->SetSRV(1, 0, *m_envMap);
+			CameraParams cameraParams;
+			cameraParams.ViewMatrix = viewMatrices[i];
+			cameraParams.ProjMatrix = projMatrix;
+			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
 
-			//m_cubeMesh->Draw(context);
+			m_cubeMesh->Draw(context);
 		}
 	}
 
@@ -106,23 +122,23 @@ namespace alexis
 		auto* render = alexis::Render::GetInstance();
 		auto* rtManager = render->GetRTManager();
 
-		m_skyboxMaterial->SetupToRender(context);
+		context->TransitionResource(m_cubemap, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+		m_skyboxMaterial->Set(context);
 
 		auto* rt = rtManager->GetRenderTarget(L"HDR");
 		context->SetRenderTarget(*rt);
 		context->SetViewport(rt->GetViewport());
 
-		context->TransitionResource(m_cubemap, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
 		context->TransitionResource(rt->GetTexture(RenderTarget::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+		context->TransitionResource(rt->GetTexture(RenderTarget::DepthStencil), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_READ);
 
 		CameraParams cameraParams;
 		cameraParams.ViewMatrix = cameraSystem->GetViewMatrix(activeCamera);
 		cameraParams.ProjMatrix = cameraSystem->GetProjMatrix(activeCamera);
 		context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
-		//context->SetSRV(1, 0, m_cubemap);
 
-		//m_cubeMesh->Draw(context);
+		m_cubeMesh->Draw(context);
 	}
 
 }

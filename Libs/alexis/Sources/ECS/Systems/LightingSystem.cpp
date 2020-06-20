@@ -13,8 +13,6 @@
 #include <Render/Render.h>
 #include <Render/CommandContext.h>
 
-#include <Render/Materials/LightingMaterial.h>
-
 namespace alexis
 {
 	namespace ecs

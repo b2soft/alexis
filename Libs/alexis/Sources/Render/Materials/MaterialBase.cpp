@@ -19,14 +19,22 @@ namespace alexis
 		ComPtr<ID3DBlob> pixelShaderBlob;
 
 #if defined(_DEBUG)
-		std::wstring absVSPath = L"Resources/Shaders/" + params.VSPath + L"_vs_d.cso";
-		std::wstring absPSPath = L"Resources/Shaders/" + params.PSPath + L"_ps_d.cso";
+		std::wstring absVSPath = L"Resources/Shaders/" + params.VSPath + L"_d.cso";
+		std::wstring absPSPath = L"Resources/Shaders/" + params.PSPath + L"_d.cso";
 #else
 		std::wstring absVSPath = L"Resources/Shaders/" + params.VSPath + L".cso";
 		std::wstring absPSPath = L"Resources/Shaders/" + params.PSPath + L".cso";
 #endif
-		ThrowIfFailed(D3DReadFileToBlob(absVSPath.c_str(), &vertexShaderBlob));
-		ThrowIfFailed(D3DReadFileToBlob(absPSPath.c_str(), &pixelShaderBlob));
+
+		if (!params.VSPath.empty())
+		{
+			ThrowIfFailed(D3DReadFileToBlob(absVSPath.c_str(), &vertexShaderBlob));
+		}
+
+		if (!params.PSPath.empty())
+		{
+			ThrowIfFailed(D3DReadFileToBlob(absPSPath.c_str(), &pixelShaderBlob));
+		}
 
 		// Root Signature
 		auto* render = Render::GetInstance();
@@ -58,31 +66,15 @@ namespace alexis
 				//TODO: move it to loader?
 				const alexis::TextureBuffer* texture = nullptr;
 				// RenderTarget
-				if (texturePath[0] == L'$')
+
+				auto [texName, slot, isRT] = utils::ParseRTName(texturePath);
+				if (isRT)
 				{
-					auto indexPos = texturePath.find(L'#');
-					auto rtName = texturePath.substr(1, indexPos - 1);
-
-					int index = 0;
-
-					if (indexPos != std::wstring::npos)
-					{
-						auto indexStr = texturePath.substr(indexPos + 1);
-						if (indexStr == L"Depth")
-						{
-							index = RenderTarget::Slot::DepthStencil;
-						}
-						else
-						{
-							index = _wtoi(indexStr.c_str());
-						}
-					}
-
-					texture = &rtManager->GetRenderTarget(rtName)->GetTexture(static_cast<RenderTarget::Slot>(index));
+					texture = &rtManager->GetRenderTarget(texName)->GetTexture(slot);
 				}
 				else
 				{
-					texture = resMgr->GetTexture(texturePath);
+					texture = resMgr->GetTexture(texName);
 				}
 
 				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
@@ -90,6 +82,15 @@ namespace alexis
 				srvDesc.Format = utils::GetFormatForSrv(texture->GetResourceDesc().Format);
 				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
 				srvDesc.Texture2D.MipLevels = 1;
+
+				// TODO: Found better way to distinct cubemaps?
+				if (texturePath.find(L"CUBEMAP") != std::wstring::npos)
+				{
+					srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
+					srvDesc.TextureCube.MostDetailedMip = 0;
+					srvDesc.TextureCube.MipLevels = 1;
+					srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
+				}
 
 				auto srvAlloc = render->AllocateSRV(texture->GetResource(), srvDesc);
 
@@ -115,16 +116,28 @@ namespace alexis
 		} pipelineStateStream;
 
 		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
+		rasterizerDesc.CullMode = params.CullMode;
+
 		CD3DX12_DEPTH_STENCIL_DESC depthStencilDesc(D3D12_DEFAULT);
 		depthStencilDesc.DepthEnable = params.DepthEnable;
+		depthStencilDesc.DepthFunc = params.DepthFunc;
+		depthStencilDesc.DepthWriteMask = params.DepthWriteMask;
 
 		pipelineStateStream.RootSignature = m_rootSignature.Get();
 		pipelineStateStream.InputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
 		pipelineStateStream.PrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-		pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
-		pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
 		pipelineStateStream.Rasterizer = rasterizerDesc;
 		pipelineStateStream.DepthStencil = depthStencilDesc;
+
+		if (vertexShaderBlob != nullptr)
+		{
+			pipelineStateStream.VS = CD3DX12_SHADER_BYTECODE(vertexShaderBlob.Get());
+		}
+
+		if (pixelShaderBlob != nullptr)
+		{
+			pipelineStateStream.PS = CD3DX12_SHADER_BYTECODE(pixelShaderBlob.Get());
+		}
 
 		//TODO: replace system key names
 		if (params.RTV == L"$backbuffer")

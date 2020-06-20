@@ -1,0 +1,10 @@
+{
+	"shaderVS": "Skybox_vs",
+	"shaderPS": "Skybox_ps",
+	"textures": ["$CUBEMAP"],
+	"rtv": "$HDR",
+	"DepthEnable":true,
+	"DepthFunc":"Less_Equal",
+	"DepthWriteMask":"Read",
+	"CullMode":"None"
+}

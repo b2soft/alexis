@@ -64,21 +64,6 @@
     <ClCompile Include="Sources\Core\ResourceManager.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Render\Render.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
@@ -117,6 +102,9 @@
     </ClCompile>
     <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
       <Filter>Sources\Render\Materials</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\Systems\EnvironmentSystem.cpp">
+      <Filter>Sources\ECS\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -165,29 +153,14 @@
     <ClInclude Include="Sources\ECS\ECS.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\PBRMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Render\RenderTargetManager.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h">
       <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\PBS_Simple.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Utils\unordered_map.h">
       <Filter>Sources\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Render.h">
       <Filter>Sources\Render</Filter>
@@ -242,6 +215,9 @@
     </ClInclude>
     <ClInclude Include="Sources\Utils\RenderUtils.h">
       <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h">
+      <Filter>Sources\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

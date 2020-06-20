@@ -43,6 +43,9 @@ namespace alexis
 		std::vector<std::wstring> Textures;
 		std::wstring RTV;
 		bool DepthEnable;
+		D3D12_CULL_MODE CullMode{ D3D12_CULL_MODE_BACK };
+		D3D12_COMPARISON_FUNC DepthFunc{ D3D12_COMPARISON_FUNC_LESS };
+		D3D12_DEPTH_WRITE_MASK DepthWriteMask{ D3D12_DEPTH_WRITE_MASK_ALL };
 	};
 
 	class Material

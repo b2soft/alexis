@@ -8,7 +8,7 @@
 namespace alexis
 {
 	class Mesh;
-	class MaterialBase;
+	class Material;
 	class CommandContext;
 
 	namespace ecs
@@ -22,7 +22,7 @@ namespace alexis
 			DirectX::XMMATRIX GetShadowMatrix() const;
 
 		private:
-			std::unique_ptr<MaterialBase> m_shadowMaterial;
+			Material* m_shadowMaterial{ nullptr };
 			ecs::Entity m_phantomCamera;
 		};
 	}

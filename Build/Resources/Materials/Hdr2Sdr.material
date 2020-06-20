@@ -1,5 +1,6 @@
 {
-	"shader": "Hdr2Sdr",
+	"shaderVS": "Hdr2Sdr_vs",
+	"shaderPS": "Hdr2Sdr_ps",
 	"textures": ["$HDR"],
 	"rtv": "$backbuffer",
 	"DepthEnable":false

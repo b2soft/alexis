@@ -1,3 +1,8 @@
+#define RootSig "RootFlags( ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
+"CBV(b0, space = 0, flags = DATA_STATIC)," \
+"DescriptorTable(SRV(t0, numDescriptors = 1),visibility=SHADER_VISIBILITY_PIXEL)," \
+"StaticSampler(s0, filter = FILTER_ANISOTROPIC)"
+
 struct CameraParams
 {
 	matrix ViewMatrix;
@@ -12,12 +17,11 @@ struct VSOutput
 
 ConstantBuffer<CameraParams> CamCB : register(b0);
 
+[RootSignature(RootSig)]
 VSOutput main(float4 pos : POSITION)
 {
 	VSOutput output;
 	float3 localPos = pos.xyz;
-
-	//matrix m = (float3x3)CamCB.ViewMatrix;
 
 	matrix rotView = CamCB.ViewMatrix;
 	rotView._41 = 0;

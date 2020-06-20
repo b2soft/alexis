@@ -8,8 +8,6 @@
 #include <Render/CommandContext.h>
 #include <Render/RenderTarget.h>
 
-#include <Render/Materials/Hdr2SdrMaterial.h>
-
 namespace alexis
 {
 	namespace ecs

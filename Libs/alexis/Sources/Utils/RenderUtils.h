@@ -2,6 +2,8 @@
 
 #include <d3d12.h>
 #include <d3dx12.h>
+#include <tuple>
+#include <Render/RenderTarget.h>
 
 namespace alexis
 {
@@ -18,6 +20,37 @@ namespace alexis
 			default:
 				return inFormat;
 			}
+		}
+
+		std::tuple<std::wstring, RenderTarget::Slot, bool> ParseRTName(const std::wstring& texturePath)
+		{
+			if (texturePath[0] == L'$')
+			{
+				auto indexPos = texturePath.find(L'#');
+				auto rtName = texturePath.substr(1, indexPos - 1);
+
+				int index = 0;
+
+				if (indexPos != std::wstring::npos)
+				{
+					auto indexStr = texturePath.substr(indexPos + 1);
+					if (indexStr == L"Depth")
+					{
+						index = RenderTarget::Slot::DepthStencil;
+					}
+					else
+					{
+						index = _wtoi(indexStr.c_str());
+					}
+				}
+
+				return { rtName, static_cast<RenderTarget::Slot>(index), true };
+			}
+			else
+			{
+				return { texturePath, RenderTarget::Slot::NumAttachmentPoints, false };
+			}
+
 		}
 	}
 }

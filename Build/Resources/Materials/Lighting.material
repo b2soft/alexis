@@ -1,5 +1,6 @@
 {
-	"shader": "Lighting",
+	"shaderVS": "Lighting_vs",
+	"shaderPS": "Lighting_ps",
 	"textures": ["$GB#0", "$GB#1", "$GB#2", "$GB#Depth", "$Shadow Map#Depth"],
 	"rtv": "$HDR",
 	"DepthEnable":false

@@ -45,13 +45,7 @@
     <ClInclude Include="Sources\Render\CommandContext.h" />
     <ClInclude Include="Sources\Render\CommandManager.h" />
     <ClInclude Include="Sources\Render\FrameRenderGraph.h" />
-    <ClInclude Include="Sources\Render\Materials\EnvRectToCubeMaterial.h" />
-    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h" />
-    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h" />
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h" />
-    <ClInclude Include="Sources\Render\Materials\PBRMaterial.h" />
-    <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h" />
-    <ClInclude Include="Sources\Render\Materials\SkyboxMaterial.h" />
     <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\Render.h" />
     <ClInclude Include="Sources\Render\RenderTarget.h" />
@@ -85,13 +79,7 @@
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
     <ClCompile Include="Sources\Render\CommandManager.cpp" />
     <ClCompile Include="Sources\Render\FrameRenderGraph.cpp" />
-    <ClCompile Include="Sources\Render\Materials\EnvRectToCubeMaterial.cpp" />
-    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp" />
-    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp" />
-    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
-    <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp" />
-    <ClCompile Include="Sources\Render\Materials\SkyboxMaterial.cpp" />
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\Render.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />

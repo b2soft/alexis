@@ -3,12 +3,11 @@
 #include <ECS/ECS.h>
 
 #include <Render/Buffers/GpuBuffer.h>
-#include <Render/Materials/EnvRectToCubeMaterial.h>
-#include <Render/Materials/SkyboxMaterial.h>
 
 namespace alexis
 {
 	class CommandContext;
+	class Material;
 	class Mesh;
 
 	namespace ecs
@@ -22,11 +21,11 @@ namespace alexis
 			void RenderSkybox(CommandContext* context);
 
 		private:
-			TextureBuffer* m_envMap{ nullptr };
 			Mesh* m_cubeMesh{ nullptr };
 			TextureBuffer m_cubemap;
-			std::unique_ptr<alexis::EnvRectToCubeMaterial> m_envRectToCubeMaterial;
-			std::unique_ptr<alexis::SkyboxMaterial> m_skyboxMaterial;
+			std::array<D3D12_CPU_DESCRIPTOR_HANDLE, 6> m_cubemapRTVs;
+			Material* m_envRectToCubeMaterial{ nullptr };
+			Material* m_skyboxMaterial{ nullptr };
 		};
 
 	}
