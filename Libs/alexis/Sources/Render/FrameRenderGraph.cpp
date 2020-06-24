@@ -94,7 +94,8 @@ namespace alexis
 		auto envTask = [envContext, &ecsWorld]
 		{
 			auto envSystem = ecsWorld.GetSystem<ecs::EnvironmentSystem>();
-			envSystem->Render(envContext);
+			envSystem->CaptureCubemap(envContext);
+			envSystem->ConvoluteCubemap(envContext);
 		};
 		envTask();
 

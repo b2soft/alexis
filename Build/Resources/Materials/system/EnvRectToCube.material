@@ -1,7 +1,7 @@
 {
 	"shaderVS": "EnvRectToCube_vs",
 	"shaderPS": "EnvRectToCube_ps",
-	"textures": ["Resources/Textures/rooitou_park_2k.hdr"],
+	"textures": ["Resources/Textures/Newport_Loft_Env.hdr"],
 	"rtv": "$CUBEMAP",
 	"DepthEnable":false,
 	"CullMode":"None"

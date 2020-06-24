@@ -38,6 +38,12 @@
     <ResourceCompile Include="..\Resources\Render.rc" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\ConvoluteIrradiance_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\ConvoluteIrradiance_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+    </FxCompile>
     <FxCompile Include="..\Resources\Shaders\EnvRectToCube_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
     </FxCompile>
