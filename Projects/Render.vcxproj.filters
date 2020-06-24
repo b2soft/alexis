@@ -96,6 +96,12 @@
     <FxCompile Include="..\Resources\Shaders\ConvoluteIrradiance_ps.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_test_object_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_test_object_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Shaders\PBS_Helpers.hlsli">

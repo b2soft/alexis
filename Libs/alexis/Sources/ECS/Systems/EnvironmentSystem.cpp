@@ -20,7 +20,6 @@ namespace alexis
 		static constexpr UINT k_cubemapSize = 1024;
 	}
 
-
 	__declspec(align(16)) struct CameraParams
 	{
 		XMMATRIX ViewMatrix;

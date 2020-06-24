@@ -2,9 +2,10 @@
 "CBV(b0, space = 0, flags = DATA_STATIC)," \
 "CBV(b1, space = 0, flags = DATA_STATIC)," \
 "CBV(b2, space = 0, flags = DATA_STATIC)," \
-"DescriptorTable(SRV(t0, numDescriptors = 5),visibility=SHADER_VISIBILITY_PIXEL)," \
+"DescriptorTable(SRV(t0, numDescriptors = 6),visibility=SHADER_VISIBILITY_PIXEL)," \
 "StaticSampler(s0, filter = FILTER_MIN_MAG_MIP_POINT)," \
-"StaticSampler(s1, filter = FILTER_MIN_MAG_MIP_LINEAR)"
+"StaticSampler(s1, filter = FILTER_MIN_MAG_MIP_LINEAR)," \
+"StaticSampler(s2, filter = FILTER_MIN_MAG_MIP_LINEAR)"
 
 struct VSInput
 {

@@ -36,8 +36,11 @@ Texture2D depthTexture : register(t3); // Depth 24-bit + Stencil 8-bit
 
 Texture2D shadowMap : register(t4); // Shadow Map
 
+TextureCube irradianceMap : register(t5); // Irradiance Map
+
 SamplerState PointSampler : register(s0);
 SamplerState ShadowSampler : register(s1);
+SamplerState IrradianceSampler : register(s2);
 
 float3 GetWorldPosFromDepth(float depth, float2 uv)
 {
@@ -72,7 +75,7 @@ float4 main(PSInput input) : SV_TARGET
 	float depth = depthTexture.Sample(PointSampler, input.uv0).r;
 	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
 
-	float3 lightPos = float3(21.0, 5.0, 17.0);
+	float3 lightPos = float3(-6.0, 9, -6);
 	//float3 lightColor = float3(70.0f, 70.0f, 70.0f);
 	float3 lightColor = float3(5, 5, 5);
 
@@ -118,7 +121,14 @@ float4 main(PSInput input) : SV_TARGET
 	Lo += (kD * baseColor.rgb * k_invPi + specular) * radiance * NdotL;
 
 	float ao = 1.0f;
-	float3 ambient = float3(0.03f, 0.03f, 0.03f) * baseColor.rgb * ao;
+	float3 ambient = 0.f;
+	{
+		float3 kS = F_SchlickRoughness(max(dot(H, V), 0.0f), F0, roughness);
+		float3 kD = float3(1.0, 1.0, 1.0) - kS;
+		float3 irradiance = irradianceMap.Sample(IrradianceSampler, N).rgb;
+		float3 diffuse = irradiance * baseColor.rgb;
+		ambient = (kD * diffuse) * ao;
+	}
 	float3 color = ambient + Lo;
 
 	return float4(color, 1.0f);
