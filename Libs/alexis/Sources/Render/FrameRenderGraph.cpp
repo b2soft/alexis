@@ -95,6 +95,8 @@ namespace alexis
 		{
 			auto envSystem = ecsWorld.GetSystem<ecs::EnvironmentSystem>();
 			envSystem->CaptureCubemap(envContext);
+			envSystem->CapturePreFilteredTexture(envContext);
+			envSystem->ConvoluteBRDF(envContext);
 			envSystem->ConvoluteCubemap(envContext);
 		};
 		envTask();

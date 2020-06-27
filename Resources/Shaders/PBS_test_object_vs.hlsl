@@ -41,7 +41,6 @@ VSOutput main(VSInput input)
 {
 	VSOutput output;
 
-
 	matrix mvpMatrix = mul(CameraCB.ProjMatrix, mul(CameraCB.ViewMatrix, ModelCB.ModelMatrix));
 	float4 worldPos = float4(input.position, 1.0f);
 

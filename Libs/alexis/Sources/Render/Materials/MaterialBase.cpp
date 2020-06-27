@@ -65,7 +65,6 @@ namespace alexis
 			{
 				//TODO: move it to loader?
 				const alexis::TextureBuffer* texture = nullptr;
-				// RenderTarget
 
 				auto [texName, slot, isRT] = utils::ParseRTName(texturePath);
 				if (isRT)
@@ -77,18 +76,20 @@ namespace alexis
 					texture = resMgr->GetTexture(texName);
 				}
 
+				const auto& resDesc = texture->GetResourceDesc();
+
 				D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
 				srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-				srvDesc.Format = utils::GetFormatForSrv(texture->GetResourceDesc().Format);
+				srvDesc.Format = utils::GetFormatForSrv(resDesc.Format);
 				srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-				srvDesc.Texture2D.MipLevels = 1;
+				srvDesc.Texture2D.MipLevels = resDesc.MipLevels;
 
 				// TODO: Found better way to distinct cubemaps?
 				if (texturePath.find(L"CUBEMAP") != std::wstring::npos)
 				{
 					srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURECUBE;
 					srvDesc.TextureCube.MostDetailedMip = 0;
-					srvDesc.TextureCube.MipLevels = 1;
+					srvDesc.TextureCube.MipLevels = resDesc.MipLevels;
 					srvDesc.TextureCube.ResourceMinLODClamp = 0.0f;
 				}
 

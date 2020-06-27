@@ -11,6 +11,9 @@
     <Filter Include="Resources\Shaders">
       <UniqueIdentifier>{077ea1b6-8743-4d8c-b9a8-9fad54968070}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Shaders\system">
+      <UniqueIdentifier>{91a38b5b-bb81-43d9-ab37-6595ae8e23be}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\Main.cpp">
@@ -101,6 +104,18 @@
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\PBS_test_object_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\IndirectSpecular_vs.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\IndirectSpecular_ps.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\ConvoluteBRDF_ps.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\ConvoluteBRDF_vs.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

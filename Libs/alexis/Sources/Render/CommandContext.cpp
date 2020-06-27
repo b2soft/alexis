@@ -77,6 +77,7 @@ namespace alexis
 
 	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
 	{
+		// TODO: calculate sizeof here instead of args
 		assert(bufferData && Math::IsAligned(bufferData, 16));
 
 		auto device = Render::GetInstance()->GetDevice();

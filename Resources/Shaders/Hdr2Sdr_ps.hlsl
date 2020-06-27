@@ -15,6 +15,7 @@ float4 main(PSInput input) : SV_TARGET
 	float3 x = hdrRT.Sample(PointSampler, input.uv0).rgb;
 	//x *= 1.0f; // Hardcoded exponent
 	x = x / (1.0f + x);
+	////x *= 0.4;
 	x = pow(x, (1.0f / 2.2f));
 
 	return float4(x, 1.0f);

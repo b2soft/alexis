@@ -69,6 +69,9 @@ PSOutput main(PSInput input)
 		metalness = 1.0;
 	}
 
+	//metalness = 1.0;
+	//roughness = 0.01;
+
 	metalRoughness.r = metalness;
 	metalRoughness.g = roughness;
 
@@ -77,7 +80,7 @@ PSOutput main(PSInput input)
 
 	PSOutput output;
 	//output.gb0 = texColor;
-	output.gb0 = float4(1.0, 0.0, 0.0, 1.0);
+	output.gb0 = float4(0.87, 0.53, 0.66, 1.0);
 	output.gb1 = normal;
 	output.gb2 = metalRoughness;
 
