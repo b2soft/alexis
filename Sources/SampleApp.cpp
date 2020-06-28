@@ -332,12 +332,9 @@ void SampleApp::ResetMousePos()
 
 bool SampleApp::LoadContent()
 {
-	auto scene = Core::Get().GetScene();
-	//scene->LoadFromJson(L"Resources/main.scene");
-	//scene->LoadFromJson(L"Resources/PBR_test.scene");
-	//scene->LoadFromJson(L"Resources/test.scene");
-	//scene->LoadFromJson(L"Resources/shaderball.scene");
-	scene->LoadFromJson(L"Resources/main.scene");
+	auto* scene = Core::Get().GetScene();
+	//scene->LoadFromJson(L"Resources/Scenes/PBR_test.scene");
+	scene->LoadFromJson(L"Resources/Scenes/main.scene");
 
 	auto& ecsWorld = Core::Get().GetECSWorld();
 	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
