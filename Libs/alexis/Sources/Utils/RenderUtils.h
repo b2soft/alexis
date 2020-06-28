@@ -9,7 +9,7 @@ namespace alexis
 {
 	namespace utils
 	{
-		DXGI_FORMAT GetFormatForSrv(DXGI_FORMAT inFormat)
+		inline DXGI_FORMAT GetFormatForSrv(DXGI_FORMAT inFormat)
 		{
 			switch (inFormat)
 			{
@@ -22,7 +22,20 @@ namespace alexis
 			}
 		}
 
-		std::tuple<std::wstring, RenderTarget::Slot, bool> ParseRTName(const std::wstring& texturePath)
+		inline DXGI_FORMAT GetFormatForDsv(DXGI_FORMAT inFormat)
+		{
+			switch (inFormat)
+			{
+			case DXGI_FORMAT_R24G8_TYPELESS:
+			{
+				return DXGI_FORMAT_D24_UNORM_S8_UINT;
+			}
+			default:
+				return inFormat;
+			}
+		}
+
+		inline std::tuple<std::wstring, RenderTarget::Slot, bool> ParseRTName(const std::wstring& texturePath)
 		{
 			if (texturePath[0] == L'$')
 			{

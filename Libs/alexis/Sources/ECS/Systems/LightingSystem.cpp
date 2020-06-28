@@ -48,9 +48,12 @@ namespace alexis
 		{
 			auto render = Render::GetInstance();
 			auto rtManager = render->GetRTManager();
-			auto gbuffer = rtManager->GetRenderTarget(L"GB");
-			auto shadowMapRT = rtManager->GetRenderTarget(L"Shadow Map");
-			auto hdr = rtManager->GetRenderTarget(L"HDR");
+			auto* gbuffer = rtManager->GetRenderTarget(L"GB");
+			auto* shadowMapRT = rtManager->GetRenderTarget(L"Shadow Map");
+			auto* hdr = rtManager->GetRenderTarget(L"HDR");
+			auto* irradiance = rtManager->GetRenderTarget(L"CUBEMAP_Irradiance");
+			auto* prefiltered = rtManager->GetRenderTarget(L"CUBEMAP_Prefiltered");
+			auto* convBRDF = rtManager->GetRenderTarget(L"ConvolutedBRDF");
 
 			auto& depth = gbuffer->GetTexture(RenderTarget::DepthStencil);
 			auto& shadowMap = shadowMapRT->GetTexture(RenderTarget::DepthStencil);
@@ -60,6 +63,9 @@ namespace alexis
 			context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			context->TransitionResource(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			context->TransitionResource(shadowMap, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(irradiance->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(prefiltered->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(convBRDF->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
 			context->SetRenderTarget(*hdr);
 			context->SetViewport(hdr->GetViewport());

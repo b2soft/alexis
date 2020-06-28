@@ -244,6 +244,9 @@ namespace alexis
 			return;
 		}
 
+		context->TransitionResource(m_cubemap, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+		context->TransitionResource(m_prefilteredMap, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+
 		m_prefilteredMaterial->Set(context);
 
 		for (std::size_t mip = 0; mip < k_munMipLevels; ++mip)
@@ -265,8 +268,6 @@ namespace alexis
 				XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, 1.0f }, { 0.0f, 1.0f, 0.0f }),		// +Z
 				XMMatrixLookAtLH({ 0.0f, 0.0f, 0.0f }, { 0.0f, 0.0f, -1.0f }, { 0.0f, 1.0f, 0.0f }),	// -Z
 			};
-
-			context->TransitionResource(m_prefilteredMap, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 			D3D12_VIEWPORT viewport{ 0, 0, mipWidth, mipHeight };
 			CD3DX12_RECT rect{ 0, 0, mipWidth, mipHeight };

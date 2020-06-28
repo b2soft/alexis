@@ -5,7 +5,7 @@
 #include <Core/Core.h>
 #include <Render/CommandManager.h>
 
-//#define ENABLE_DEBUG_LAYER
+#define ENABLE_DEBUG_LAYER
 
 namespace alexis
 {
@@ -70,7 +70,6 @@ namespace alexis
 
 			m_commandManager->WaitForGpu();
 
-			m_backbuffers[m_frameIndex].AttachTexture(TextureBuffer(), RenderTarget::Slot0);
 			for (int i = 0; i < k_frameCount; ++i)
 			{
 				m_backbuffers[i].Reset();

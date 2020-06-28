@@ -2,6 +2,7 @@
 
 #include "RenderTarget.h"
 #include <Render/Render.h>
+#include <Utils/RenderUtils.h>
 
 namespace alexis
 {
@@ -94,9 +95,34 @@ namespace alexis
 	void RenderTarget::Resize(DirectX::XMUINT2 size)
 	{
 		m_size = size;
-		for (auto& texture : m_textures)
+		auto* render = Render::GetInstance();
+
+		for (int i = Slot::Slot0; i < Slot::DepthStencil; ++i)
 		{
-			texture.Resize(m_size.x, m_size.y);
+			if (auto& texture = m_textures[i]; texture.IsValid())
+			{
+				texture.Resize(m_size.x, m_size.y);
+
+				D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+
+				rtvDesc.Format = texture.GetResourceDesc().Format;
+				auto rtvHandle = render->AllocateRTV(texture.GetResource(), rtvDesc);
+				m_rtvs[i] = rtvHandle.CpuPtr;
+			}
+		}
+		
+		if (auto& dsTexture = m_textures[Slot::DepthStencil]; dsTexture.IsValid())
+		{
+			dsTexture.Resize(m_size.x, m_size.y);
+
+			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+
+			dsvDesc.Format = utils::GetFormatForDsv(dsTexture.GetResourceDesc().Format);
+			auto dsvHandle = render->AllocateDSV(dsTexture.GetResource(), dsvDesc);
+
+			m_dsv = dsvHandle.CpuPtr;
 		}
 	}
 
