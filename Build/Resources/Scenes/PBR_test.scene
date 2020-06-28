@@ -33,7 +33,7 @@
             {
                "ModelComponent":{
                   "mesh":"Resources/Models/PBS_Spheres.DAE",
-				  "material":"Resources/Materials/PBS_Test.material"
+				  "material":"Resources/Materials/system/PBS_Test.material"
                }
             },
             {

@@ -15,7 +15,7 @@ namespace alexis
 		void Hdr2SdrSystem::Init()
 		{
 			auto* resMgr = Core::Get().GetResourceManager();
-			m_hdr2SdrMaterial = resMgr->GetMaterial(L"Resources/Materials/Hdr2Sdr.material");
+			m_hdr2SdrMaterial = resMgr->GetMaterial(L"Resources/Materials/system/Hdr2Sdr.material");
 
 			m_fsQuad = resMgr->GetMesh(L"$FS_QUAD");
 		}
