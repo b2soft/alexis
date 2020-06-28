@@ -11,8 +11,6 @@
 
 namespace alexis
 {
-	MaterialBase::~MaterialBase() = default;
-
 	Material::Material(const MaterialLoadParams& params)
 	{
 		ComPtr<ID3DBlob> vertexShaderBlob;
@@ -53,7 +51,6 @@ namespace alexis
 				break;
 			}
 		}
-
 
 		auto* rtManager = render->GetRTManager();
 

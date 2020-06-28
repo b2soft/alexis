@@ -141,11 +141,11 @@ namespace alexis
 			}
 		}
 
-		m_envRectToCubeMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/EnvRectToCube.material");
-		m_skyboxMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/Skybox.material");
-		m_irradianceMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/IrradianceMap.material");
-		m_prefilteredMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/PrefilteredMap.material");
-		m_convoluteBRDFMaterial = rm->GetBetterMaterial(L"Resources/Materials/system/ConvoluteBRDF.material");
+		m_envRectToCubeMaterial = rm->GetMaterial(L"Resources/Materials/system/EnvRectToCube.material");
+		m_skyboxMaterial = rm->GetMaterial(L"Resources/Materials/system/Skybox.material");
+		m_irradianceMaterial = rm->GetMaterial(L"Resources/Materials/system/IrradianceMap.material");
+		m_prefilteredMaterial = rm->GetMaterial(L"Resources/Materials/system/PrefilteredMap.material");
+		m_convoluteBRDFMaterial = rm->GetMaterial(L"Resources/Materials/system/ConvoluteBRDF.material");
 
 		m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 	}

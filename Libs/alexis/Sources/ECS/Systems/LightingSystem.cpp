@@ -39,7 +39,7 @@ namespace alexis
 		void LightingSystem::Init()
 		{
 			auto* resMgr = Core::Get().GetResourceManager();
-			m_lightingMaterial = resMgr->GetBetterMaterial(L"Resources/Materials/Lighting.material");
+			m_lightingMaterial = resMgr->GetMaterial(L"Resources/Materials/Lighting.material");
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 		}

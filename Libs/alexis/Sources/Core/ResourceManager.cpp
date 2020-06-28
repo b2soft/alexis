@@ -49,7 +49,7 @@ namespace alexis
 		return it->second.get();
 	}
 
-	MaterialBase* ResourceManager::GetMaterial(std::wstring_view path)
+	alexis::Material* ResourceManager::GetMaterial(std::wstring_view path)
 	{
 		auto it = m_materials.find(path);
 
@@ -59,19 +59,6 @@ namespace alexis
 		}
 
 		it = LoadMaterial(path);
-		return it->second.get();
-	}
-
-	alexis::Material* ResourceManager::GetBetterMaterial(std::wstring_view path)
-	{
-		auto it = m_betterMaterials.find(path);
-
-		if (it != m_betterMaterials.end())
-		{
-			return it->second.get();
-		}
-
-		it = LoadBetterMaterial(path);
 		return it->second.get();
 	}
 
@@ -237,45 +224,6 @@ namespace alexis
 
 	ResourceManager::MaterialMap::iterator ResourceManager::LoadMaterial(std::wstring_view path)
 	{
-		//fs::path filePath(path);
-
-		//if (!fs::exists(filePath))
-		//{
-		//	throw std::exception("File not found!");
-		//}
-
-		//using json = nlohmann::json;
-
-		//std::ifstream ifs(path);
-		//json j = nlohmann::json::parse(ifs);
-
-		//std::string type = j["type"];
-		//if (type == "PBS")
-		//{
-		//	PBRMaterialParams params;
-		//	params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
-		//	params.NormalMap = GetTexture(ToWStr(j["normalMap"]));
-		//	params.MetalRoughness = GetTexture(ToWStr(j["metalRoughness"]));
-
-		//	auto material = std::make_unique<PBRMaterial>(params);
-		//	return m_materials.emplace(path, std::move(material)).first;
-		//}
-		////else if (type == "PBS_Simple")
-		////{
-		////	PBSMaterialParams params;
-		////	params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
-		////	params.Metallic = j["metallic"];
-		////	params.Roughness = j["roughness"];
-		////
-		////	auto material = std::make_unique<PBSSimple>(params);
-		////	return m_materials.emplace(path, std::move(material)).first;
-		////}
-
-		return m_materials.end();
-	}
-
-	ResourceManager::BetterMaterialMap::iterator ResourceManager::LoadBetterMaterial(std::wstring_view path)
-	{
 		fs::path filePath(path);
 
 		if (!fs::exists(filePath))
@@ -342,7 +290,7 @@ namespace alexis
 		}
 
 		auto material = std::make_unique<Material>(params);
-		return m_betterMaterials.emplace(path, std::move(material)).first;
+		return m_materials.emplace(path, std::move(material)).first;
 	}
 
 }

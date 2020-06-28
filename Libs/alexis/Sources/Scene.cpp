@@ -74,7 +74,7 @@ namespace alexis
 					auto* mesh = resourceManager->GetMesh(ToWStr(meshPath));
 
 					std::string materialPath = componentKV.value()["material"];
-					auto* material = resourceManager->GetBetterMaterial(ToWStr(materialPath));
+					auto* material = resourceManager->GetMaterial(ToWStr(materialPath));
 
 					// TODO: Move semantics for adding components
 					ecsWorld.AddComponent(entity, ecs::ModelComponent{ mesh, material });

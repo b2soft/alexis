@@ -28,7 +28,7 @@ namespace alexis
 		void ShadowSystem::Init()
 		{
 			auto* resMgr = Core::Get().GetResourceManager();
-			m_shadowMaterial = resMgr->GetBetterMaterial(L"Resources/Materials/ShadowMap.material");
+			m_shadowMaterial = resMgr->GetMaterial(L"Resources/Materials/ShadowMap.material");
 
 			auto& ecsWorld = Core::Get().GetECSWorld();
 			auto entity = ecsWorld.CreateEntity();
