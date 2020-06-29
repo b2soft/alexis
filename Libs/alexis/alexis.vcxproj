@@ -83,6 +83,7 @@
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\Render.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
+    <ClCompile Include="Sources\Render\RenderTargetManager.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />
     <ClCompile Include="Sources\Scene.cpp" />
   </ItemGroup>

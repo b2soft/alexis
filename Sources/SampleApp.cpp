@@ -87,8 +87,6 @@ void SampleApp::OnResize(int width, int height)
 	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
 
 	cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
-
-	Render::GetInstance()->GetRTManager()->Resize(width, height);
 }
 
 void SampleApp::OnKeyPressed(alexis::KeyEventArgs& e)

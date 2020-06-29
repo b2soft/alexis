@@ -75,6 +75,10 @@ namespace alexis
 		DescriptorRecord AllocateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc);
 		DescriptorRecord AllocateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc);
 
+		void UpdateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle);
+		void UpdateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle);
+		void UpdateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle);
+
 		ID3D12DescriptorHeap* GetSrvUavHeap() const;
 		ID3D12DescriptorHeap* GetRtvHeap() const;
 		ID3D12DescriptorHeap* GetDsvHeap() const;

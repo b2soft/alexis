@@ -82,6 +82,8 @@ namespace alexis
 			m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
 			UpdateRenderTargetViews();
+
+			m_rtManager->Resize(width, height);
 		}
 	}
 
@@ -185,8 +187,7 @@ namespace alexis
 
 		m_device->CreateShaderResourceView(resource, &desc, handle);
 
-		//record.CpuPtr = handle.ptr;
-		//record.GpuPtr = handle.ptr;
+		record.CpuPtr = handle;
 		record.OffsetInHeap = m_allocatedSrvUavs;
 
 		m_allocatedSrvUavs++;
@@ -210,7 +211,7 @@ namespace alexis
 		return record;
 	}
 
-	alexis::Render::DescriptorRecord Render::AllocateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc)
+	Render::DescriptorRecord Render::AllocateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc)
 	{
 		DescriptorRecord record{};
 
@@ -224,6 +225,21 @@ namespace alexis
 		m_allocatedDsvs++;
 
 		return record;
+	}
+
+	void Render::UpdateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+	{
+		m_device->CreateRenderTargetView(resource, &desc, handle);
+	}
+
+	void Render::UpdateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+	{
+		m_device->CreateDepthStencilView(resource, &desc, handle);
+	}
+
+	void Render::UpdateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+	{
+		m_device->CreateShaderResourceView(resource, &desc, handle);
 	}
 
 	ID3D12DescriptorHeap* Render::GetSrvUavHeap() const
@@ -385,7 +401,7 @@ namespace alexis
 		ThrowIfFailed(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-		}
+	}
 
 	void Render::InitPipeline()
 	{
@@ -482,7 +498,7 @@ namespace alexis
 			hdrTexture.GetResource()->SetName(L"HDR Texture");
 
 			hdrTarget->AttachTexture(hdrTexture, RenderTarget::Slot::Slot0);
-			hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+			//hdrTarget->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
 
 			m_rtManager->EmplaceTarget(L"HDR", std::move(hdrTarget));
 		}
@@ -560,5 +576,5 @@ namespace alexis
 			m_backbuffers[i].AttachTexture(backBuffer.Get(), RenderTarget::Slot0);
 		}
 	}
-	}
+}
 

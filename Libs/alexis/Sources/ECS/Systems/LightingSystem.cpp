@@ -46,8 +46,8 @@ namespace alexis
 
 		void LightingSystem::Render(CommandContext* context)
 		{
-			auto render = Render::GetInstance();
-			auto rtManager = render->GetRTManager();
+			auto* render = Render::GetInstance();
+			auto* rtManager = render->GetRTManager();
 			auto* gbuffer = rtManager->GetRenderTarget(L"GB");
 			auto* shadowMapRT = rtManager->GetRenderTarget(L"Shadow Map");
 			auto* hdr = rtManager->GetRenderTarget(L"HDR");
@@ -67,7 +67,7 @@ namespace alexis
 			context->TransitionResource(prefiltered->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 			context->TransitionResource(convBRDF->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
 
-			context->SetRenderTarget(*hdr);
+			context->SetRenderTarget(*hdr, *gbuffer);
 			context->SetViewport(hdr->GetViewport());
 
 			m_lightingMaterial->Set(context);

@@ -52,6 +52,7 @@ namespace alexis
 			}
 		}
 
+		// SRVs
 		auto* rtManager = render->GetRTManager();
 
 		// Allocate SRVs in heap
@@ -95,6 +96,11 @@ namespace alexis
 				if (!m_srvOffset.has_value())
 				{
 					m_srvOffset = srvAlloc.OffsetInHeap;
+				}
+
+				if (isRT && rtManager->GetRenderTarget(texName)->IsFullscreen())
+				{
+					rtManager->AddManagedSRV(texturePath, srvAlloc.CpuPtr);
 				}
 			}
 		}

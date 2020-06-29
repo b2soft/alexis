@@ -33,15 +33,19 @@ namespace alexis
 			{
 				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-
-				if (texDesc.Format == DXGI_FORMAT_R24G8_TYPELESS)
-				{
-					dsvDesc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
-				}
+				dsvDesc.Format = utils::GetFormatForDsv(texture->GetDesc().Format);
 
 				auto dsvHandle = render->AllocateDSV(texture, dsvDesc);
-
 				m_dsv = dsvHandle.CpuPtr;
+			}
+			else
+			{
+				D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
+				dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
+				dsvDesc.Format = utils::GetFormatForDsv(texture->GetDesc().Format);
+
+				CD3DX12_CPU_DESCRIPTOR_HANDLE dsv{ m_dsv };
+				render->UpdateDSV(texture, dsvDesc, dsv);
 			}
 		}
 		else
@@ -50,11 +54,20 @@ namespace alexis
 			{
 				D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
 				rtvDesc.Format = texDesc.Format;
+
 				auto rtvHandle = render->AllocateRTV(texture, rtvDesc);
 
 				m_rtvs[slot] = rtvHandle.CpuPtr;
+			}
+			else
+			{
+				D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
+				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
+				rtvDesc.Format = texDesc.Format;
+
+				CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{ m_rtvs[slot] };
+				render->UpdateRTV(texture, rtvDesc, rtv);
 			}
 		}
 
@@ -105,24 +118,23 @@ namespace alexis
 
 				D3D12_RENDER_TARGET_VIEW_DESC rtvDesc{};
 				rtvDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2D;
-
 				rtvDesc.Format = texture.GetResourceDesc().Format;
-				auto rtvHandle = render->AllocateRTV(texture.GetResource(), rtvDesc);
-				m_rtvs[i] = rtvHandle.CpuPtr;
+
+				CD3DX12_CPU_DESCRIPTOR_HANDLE rtv{ m_rtvs[i] };
+				render->UpdateRTV(texture.GetResource(), rtvDesc, rtv);
 			}
 		}
-		
+
 		if (auto& dsTexture = m_textures[Slot::DepthStencil]; dsTexture.IsValid())
 		{
 			dsTexture.Resize(m_size.x, m_size.y);
 
 			D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc{};
 			dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2D;
-
 			dsvDesc.Format = utils::GetFormatForDsv(dsTexture.GetResourceDesc().Format);
-			auto dsvHandle = render->AllocateDSV(dsTexture.GetResource(), dsvDesc);
 
-			m_dsv = dsvHandle.CpuPtr;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE dsv{ m_dsv };
+			render->UpdateDSV(dsTexture.GetResource(), dsvDesc, dsv);
 		}
 	}
 

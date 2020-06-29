@@ -40,6 +40,7 @@ namespace alexis
 		void ClearDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);
 
 		void SetRenderTarget(const RenderTarget& renderTarget);
+		void SetRenderTarget(const RenderTarget& renderTarget, const RenderTarget& customDepth);
 		void SetViewport(const Viewport& viewport);
 		void SetViewports(const std::vector<Viewport>& viewports);
 

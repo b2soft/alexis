@@ -131,6 +131,13 @@ namespace alexis
 			resDesc.Height = std::max(height, 1u);
 			resDesc.DepthOrArraySize = depthOrArraySize;
 
+			// Change mips count if there are 1+ mips already
+			if (resDesc.MipLevels != 1)
+			{
+				UINT64 numMips = 1 + floor(log2(std::max(width, height)));
+				resDesc.MipLevels = numMips;
+			}
+
 			auto device = Render::GetInstance()->GetDevice();
 
 			auto heapProperties = CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);

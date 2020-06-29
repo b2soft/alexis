@@ -100,6 +100,11 @@ namespace alexis
 
 	void CommandContext::SetRenderTarget(const RenderTarget& renderTarget)
 	{
+		SetRenderTarget(renderTarget, renderTarget);
+	}
+
+	void CommandContext::SetRenderTarget(const RenderTarget& renderTarget, const RenderTarget& customDepth)
+	{
 		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetDescriptors;
 		renderTargetDescriptors.reserve(RenderTarget::Slot::NumAttachmentPoints);
 
@@ -121,12 +126,12 @@ namespace alexis
 		}
 
 		// Bind depth stencil
-		const auto& depthTexture = renderTarget.GetTexture(RenderTarget::DepthStencil);
+		const auto& depthTexture = customDepth.GetTexture(RenderTarget::DepthStencil);
 
 		CD3DX12_CPU_DESCRIPTOR_HANDLE dsDescriptor(D3D12_DEFAULT);
 		if (depthTexture.IsValid())
 		{
-			dsDescriptor = renderTarget.GetDsv();
+			dsDescriptor = customDepth.GetDsv();
 		}
 
 		D3D12_CPU_DESCRIPTOR_HANDLE* dsv = dsDescriptor.ptr != 0 ? &dsDescriptor : nullptr;

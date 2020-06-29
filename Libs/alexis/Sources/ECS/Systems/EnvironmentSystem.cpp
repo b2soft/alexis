@@ -320,13 +320,14 @@ namespace alexis
 		auto* rtManager = render->GetRTManager();
 
 		auto* rt = rtManager->GetRenderTarget(L"HDR");
+		auto* gb = rtManager->GetRenderTarget(L"GB");
 
 		context->TransitionResource(rt->GetTexture(RenderTarget::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
-		context->TransitionResource(rt->GetTexture(RenderTarget::DepthStencil), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_READ);
+		context->TransitionResource(gb->GetTexture(RenderTarget::DepthStencil), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_READ);
 
 		m_skyboxMaterial->Set(context);
 
-		context->SetRenderTarget(*rt);
+		context->SetRenderTarget(*rt, *gb);
 		context->SetViewport(rt->GetViewport());
 
 		CameraParams cameraParams;
