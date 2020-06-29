@@ -5,7 +5,7 @@
 #include <Core/Core.h>
 #include <Render/CommandManager.h>
 
-//#define ENABLE_DEBUG_LAYER
+#define ENABLE_DEBUG_LAYER
 
 namespace alexis
 {
@@ -21,19 +21,14 @@ namespace alexis
 
 		InitDevice();
 
-		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
-		{
-			m_descriptorAllocators[i] = std::make_unique<DescriptorAllocator>(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
-		}
-
 		m_uploadBufferManager = std::make_unique<UploadBufferManager>();
 		m_rtManager = std::make_unique<RenderTargetManager>();
 
 		m_frameRenderGraph = std::make_unique<FrameRenderGraph>();
 
-		UpdateRenderTargetViews();
-
 		InitPipeline();
+
+		UpdateRenderTargetViews();
 	}
 
 	void Render::Destroy()
@@ -75,10 +70,9 @@ namespace alexis
 
 			m_commandManager->WaitForGpu();
 
-			m_backbufferRT.AttachTexture(TextureBuffer(), RenderTarget::Slot0);
 			for (int i = 0; i < k_frameCount; ++i)
 			{
-				m_backbufferTextures[i].Reset();
+				m_backbuffers[i].Reset();
 			}
 
 			DXGI_SWAP_CHAIN_DESC swapChainDesc = {};
@@ -88,13 +82,14 @@ namespace alexis
 			m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
 
 			UpdateRenderTargetViews();
+
+			m_rtManager->Resize(width, height);
 		}
 	}
 
 	const RenderTarget& Render::GetBackbufferRT() const
 	{
-		m_backbufferRT.AttachTexture(m_backbufferTextures[m_frameIndex], RenderTarget::Slot::Slot0);
-		return m_backbufferRT;
+		return m_backbuffers[m_frameIndex];
 	}
 
 	const CD3DX12_VIEWPORT& Render::GetDefaultViewport() const
@@ -184,10 +179,84 @@ namespace alexis
 		SetFullscreen(!m_fullscreen);
 	}
 
-	DescriptorAllocation Render::AllocateDescriptors(D3D12_DESCRIPTOR_HEAP_TYPE type, uint32_t numDescriptors /*= 1*/)
+	Render::DescriptorRecord Render::AllocateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc)
 	{
-		return m_descriptorAllocators[type]->Allocate(numDescriptors);
+		DescriptorRecord record{};
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_srvUavHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedSrvUavs, m_incrementSrvUav);
+
+		m_device->CreateShaderResourceView(resource, &desc, handle);
+
+		record.CpuPtr = handle;
+		record.OffsetInHeap = m_allocatedSrvUavs;
+
+		m_allocatedSrvUavs++;
+
+		return record;
 	}
+
+	alexis::Render::DescriptorRecord Render::AllocateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc)
+	{
+		DescriptorRecord record{};
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_rtvHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedRtvs, m_incrementRtv);
+
+		m_device->CreateRenderTargetView(resource, &desc, handle);
+
+		record.CpuPtr = handle;
+		record.OffsetInHeap = m_allocatedRtvs;
+
+		m_allocatedRtvs++;
+
+		return record;
+	}
+
+	Render::DescriptorRecord Render::AllocateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc)
+	{
+		DescriptorRecord record{};
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_dsvHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedDsvs, m_incrementDsv);
+
+		m_device->CreateDepthStencilView(resource, &desc, handle);
+
+		record.CpuPtr = handle;
+		record.OffsetInHeap = m_allocatedDsvs;
+
+		m_allocatedDsvs++;
+
+		return record;
+	}
+
+	void Render::UpdateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+	{
+		m_device->CreateRenderTargetView(resource, &desc, handle);
+	}
+
+	void Render::UpdateDSV(ID3D12Resource* resource, D3D12_DEPTH_STENCIL_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+	{
+		m_device->CreateDepthStencilView(resource, &desc, handle);
+	}
+
+	void Render::UpdateSRV(ID3D12Resource* resource, D3D12_SHADER_RESOURCE_VIEW_DESC desc, CD3DX12_CPU_DESCRIPTOR_HANDLE handle)
+	{
+		m_device->CreateShaderResourceView(resource, &desc, handle);
+	}
+
+	ID3D12DescriptorHeap* Render::GetSrvUavHeap() const
+	{
+		return m_srvUavHeap.Get();
+	}
+
+	ID3D12DescriptorHeap* Render::GetRtvHeap() const
+	{
+		return m_rtvHeap.Get();
+	}
+
+	ID3D12DescriptorHeap* Render::GetDsvHeap() const
+	{
+		return m_dsvHeap.Get();
+	}
+
 
 	void Render::InitDevice()
 	{
@@ -332,10 +401,33 @@ namespace alexis
 		ThrowIfFailed(factory->MakeWindowAssociation(hwnd, DXGI_MWA_NO_ALT_ENTER));
 
 		m_frameIndex = m_swapChain->GetCurrentBackBufferIndex();
-		}
+	}
 
 	void Render::InitPipeline()
 	{
+		m_incrementSrvUav = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV);
+		m_incrementRtv = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_RTV);
+		m_incrementDsv = m_device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_DSV);
+
+		D3D12_DESCRIPTOR_HEAP_DESC srvUavDesc = {};
+		srvUavDesc.NumDescriptors = 4096;
+		srvUavDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV;
+		srvUavDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE;
+		m_device->CreateDescriptorHeap(&srvUavDesc, IID_PPV_ARGS(&m_srvUavHeap));
+
+		D3D12_DESCRIPTOR_HEAP_DESC rtvDesc = {};
+		rtvDesc.NumDescriptors = 4096;
+		rtvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_RTV;
+		rtvDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		m_device->CreateDescriptorHeap(&rtvDesc, IID_PPV_ARGS(&m_rtvHeap));
+
+		D3D12_DESCRIPTOR_HEAP_DESC dsvDesc = {};
+		dsvDesc.NumDescriptors = 4096;
+		dsvDesc.Type = D3D12_DESCRIPTOR_HEAP_TYPE_DSV;
+		dsvDesc.Flags = D3D12_DESCRIPTOR_HEAP_FLAG_NONE;
+		m_device->CreateDescriptorHeap(&dsvDesc, IID_PPV_ARGS(&m_dsvHeap));
+
+
 		// Depth
 		//DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
 		DXGI_FORMAT depthFormat = DXGI_FORMAT_R24G8_TYPELESS;
@@ -362,8 +454,8 @@ namespace alexis
 			colorClearValue.Format = colorDesc.Format;
 			colorClearValue.Color[0] = 0.0f;
 			colorClearValue.Color[1] = 0.0f;
-			colorClearValue.Color[2] = 0.5f;
-			colorClearValue.Color[3] = 1.0f;
+			colorClearValue.Color[2] = 0.0f;
+			colorClearValue.Color[3] = 0.0f;
 
 			TextureBuffer gb0;
 			gb0.Create(colorDesc, &colorClearValue); // Base color
@@ -434,14 +526,6 @@ namespace alexis
 
 	}
 
-	void Render::ReleaseStaleDescriptors(uint64_t fenceValue)
-	{
-		for (auto& allocator : m_descriptorAllocators)
-		{
-			allocator->ReleaseStaleDescriptors(fenceValue);
-		}
-	}
-
 	Microsoft::WRL::ComPtr<IDXGIAdapter4> Render::GetHardwareAdapter(IDXGIFactory4* factory)
 	{
 		ComPtr<IDXGIFactory4> dxgiFactory;
@@ -489,8 +573,8 @@ namespace alexis
 			ComPtr<ID3D12Resource> backBuffer;
 			ThrowIfFailed(m_swapChain->GetBuffer(i, IID_PPV_ARGS(&backBuffer)));
 
-			m_backbufferTextures[i].SetFromResource(backBuffer.Get());
+			m_backbuffers[i].AttachTexture(backBuffer.Get(), RenderTarget::Slot0);
 		}
 	}
-	}
+}
 

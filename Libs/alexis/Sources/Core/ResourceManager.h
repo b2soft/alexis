@@ -18,7 +18,7 @@ namespace alexis
 
 		TextureBuffer* GetTexture(std::wstring_view path);
 		Mesh* GetMesh(std::wstring_view path);
-		MaterialBase* GetMaterial(std::wstring_view path);
+		Material* GetMaterial(std::wstring_view path);
 
 	private:
 		CommandContext* m_copyContext{ nullptr };
@@ -31,7 +31,7 @@ namespace alexis
 		MeshMap::iterator LoadMesh(std::wstring_view path);
 		MeshMap m_meshes;
 
-		using MaterialMap = alexis::unordered_map<std::wstring, std::unique_ptr<MaterialBase>>;
+		using MaterialMap = alexis::unordered_map<std::wstring, std::unique_ptr<Material>>;
 		MaterialMap::iterator LoadMaterial(std::wstring_view path);
 		MaterialMap m_materials;
 	};

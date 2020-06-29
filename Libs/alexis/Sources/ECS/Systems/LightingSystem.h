@@ -4,7 +4,7 @@
 
 namespace alexis
 {
-	class MaterialBase;
+	class Material;
 	class CommandContext;
 	class Mesh;
 
@@ -18,7 +18,7 @@ namespace alexis
 			DirectX::XMVECTOR GetSunDirection() const;
 
 		private:
-			std::unique_ptr<MaterialBase> m_lightingMaterial;
+			Material* m_lightingMaterial{ nullptr };
 			Mesh* m_fsQuad{ nullptr };
 		};
 	}

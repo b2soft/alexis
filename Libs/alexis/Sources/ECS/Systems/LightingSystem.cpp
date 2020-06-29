@@ -10,9 +10,8 @@
 
 #include <Core/Core.h>
 #include <Core/ResourceManager.h>
+#include <Render/Render.h>
 #include <Render/CommandContext.h>
-
-#include <Render/Materials/LightingMaterial.h>
 
 namespace alexis
 {
@@ -39,14 +38,39 @@ namespace alexis
 
 		void LightingSystem::Init()
 		{
-			m_lightingMaterial = std::make_unique<LightingMaterial>();
+			auto* resMgr = Core::Get().GetResourceManager();
+			m_lightingMaterial = resMgr->GetMaterial(L"Resources/Materials/system/Lighting.material");
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 		}
 
 		void LightingSystem::Render(CommandContext* context)
 		{
-			m_lightingMaterial->SetupToRender(context);
+			auto* render = Render::GetInstance();
+			auto* rtManager = render->GetRTManager();
+			auto* gbuffer = rtManager->GetRenderTarget(L"GB");
+			auto* shadowMapRT = rtManager->GetRenderTarget(L"Shadow Map");
+			auto* hdr = rtManager->GetRenderTarget(L"HDR");
+			auto* irradiance = rtManager->GetRenderTarget(L"CUBEMAP_Irradiance");
+			auto* prefiltered = rtManager->GetRenderTarget(L"CUBEMAP_Prefiltered");
+			auto* convBRDF = rtManager->GetRenderTarget(L"ConvolutedBRDF");
+
+			auto& depth = gbuffer->GetTexture(RenderTarget::DepthStencil);
+			auto& shadowMap = shadowMapRT->GetTexture(RenderTarget::DepthStencil);
+
+			context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(shadowMap, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(irradiance->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(prefiltered->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+			context->TransitionResource(convBRDF->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
+
+			context->SetRenderTarget(*hdr, *gbuffer);
+			context->SetViewport(hdr->GetViewport());
+
+			m_lightingMaterial->Set(context);
 
 			auto& ecsWorld = Core::Get().GetECSWorld();
 			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();

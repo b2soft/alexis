@@ -67,12 +67,6 @@ namespace alexis
 			nullptr,
 			IID_PPV_ARGS(&context->List)));
 
-		for (int i = 0; i < D3D12_DESCRIPTOR_HEAP_TYPE_NUM_TYPES; ++i)
-		{
-			context->DynamicDescriptors[i] = new DynamicDescriptorHeap(static_cast<D3D12_DESCRIPTOR_HEAP_TYPE>(i));
-			context->DescriptorHeap[i] = nullptr;
-		}
-
 		m_commandContextPool.push_back(std::move(context));
 	}
 

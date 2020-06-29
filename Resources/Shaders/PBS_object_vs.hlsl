@@ -1,7 +1,13 @@
+#define RootSig "RootFlags( ALLOW_INPUT_ASSEMBLER_INPUT_LAYOUT)," \
+"CBV(b0, space = 0, flags = DATA_STATIC)," \
+"CBV(b1, space = 0, flags = DATA_STATIC)," \
+"DescriptorTable(SRV(t0, numDescriptors = 3), visibility=SHADER_VISIBILITY_PIXEL)," \
+"StaticSampler(s0, filter = FILTER_ANISOTROPIC)"
+
 struct CameraParams
 {
 	matrix ViewMatrix;
-	matrix ViewProjMatrix;
+	matrix ProjMatrix;
 };
 
 struct ModelParams
@@ -29,11 +35,13 @@ struct VSOutput
 	float4 position : SV_Position;
 };
 
+[RootSignature(RootSig)]
 VSOutput main(VSInput input)
 {
 	VSOutput output;
 
-	matrix mvpMatrix = mul(CameraCB.ViewProjMatrix, ModelCB.ModelMatrix);
+
+	matrix mvpMatrix = mul(CameraCB.ProjMatrix, mul(CameraCB.ViewMatrix, ModelCB.ModelMatrix));
 	float4 worldPos = float4(input.position, 1.0f);
 
 	//output.oPos = mul(ModelCB.ModelMatrix, worldPos);
@@ -42,7 +50,7 @@ VSOutput main(VSInput input)
 
 	//output.normal = float4(mul(ModelCB.ModelMatrix, input.normal).xyz, 0.0);
 	//output.normal = float4(input.normal.xyz, 0.0);
-	
+
 	//output.TBN = float3x3(input.tangent.rgb, input.bitangent.rgb, input.normal.rgb);
 	//output.TBN = mul((float3x3)ModelCB.ModelMatrix,output.TBN);
 

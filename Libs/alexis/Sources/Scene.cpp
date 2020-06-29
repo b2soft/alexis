@@ -70,11 +70,11 @@ namespace alexis
 				{
 					std::string meshPath = componentKV.value()["mesh"];
 
-					auto resourceManager = Core::Get().GetResourceManager();
-					auto mesh = resourceManager->GetMesh(ToWStr(meshPath));
+					auto* resourceManager = Core::Get().GetResourceManager();
+					auto* mesh = resourceManager->GetMesh(ToWStr(meshPath));
 
 					std::string materialPath = componentKV.value()["material"];
-					auto material = resourceManager->GetMaterial(ToWStr(materialPath));
+					auto* material = resourceManager->GetMaterial(ToWStr(materialPath));
 
 					// TODO: Move semantics for adding components
 					ecsWorld.AddComponent(entity, ecs::ModelComponent{ mesh, material });

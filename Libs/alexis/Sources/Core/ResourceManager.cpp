@@ -14,8 +14,6 @@
 // Material
 #include <json.hpp>
 #include <fstream>
-#include <Render/Materials/PBRMaterial.h>
-#include <Render/Materials/PBS_Simple.h>
 
 namespace alexis
 {
@@ -51,7 +49,7 @@ namespace alexis
 		return it->second.get();
 	}
 
-	MaterialBase* ResourceManager::GetMaterial(std::wstring_view path)
+	alexis::Material* ResourceManager::GetMaterial(std::wstring_view path)
 	{
 		auto it = m_materials.find(path);
 
@@ -238,29 +236,61 @@ namespace alexis
 		std::ifstream ifs(path);
 		json j = nlohmann::json::parse(ifs);
 
-		std::string type = j["type"];
-		if (type == "PBS")
-		{
-			PBRMaterialParams params;
-			params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
-			params.NormalMap = GetTexture(ToWStr(j["normalMap"]));
-			params.MetalRoughness = GetTexture(ToWStr(j["metalRoughness"]));
+		MaterialLoadParams params;
+		params.VSPath = ToWStr(j["shaderVS"]);
+		params.PSPath = ToWStr(j["shaderPS"]);
 
-			auto material = std::make_unique<PBRMaterial>(params);
-			return m_materials.emplace(path, std::move(material)).first;
-		}
-		else if (type == "PBS_Simple")
+		std::size_t i = 0;
+		for (auto& tex : j["textures"])
 		{
-			PBSMaterialParams params;
-			params.BaseColor = GetTexture(ToWStr(j["baseColor"]));
-			params.Metallic = j["metallic"];
-			params.Roughness = j["roughness"];
-
-			auto material = std::make_unique<PBSSimple>(params);
-			return m_materials.emplace(path, std::move(material)).first;
+			params.Textures.emplace_back(ToWStr(tex));
 		}
 
-		return m_materials.end();
+		params.RTV = ToWStr(j["rtv"]);
+		params.DepthEnable = j["DepthEnable"];
+
+		if (j.find("CullMode") != j.end())
+		{
+			auto str = ToWStr(j["CullMode"]);
+			if (str == L"None")
+			{
+				params.CullMode = D3D12_CULL_MODE_NONE;
+			}
+			else if (str == L"Back" || str == L"Default")
+			{
+				params.CullMode = D3D12_CULL_MODE_BACK;
+			}
+			else if (str == L"Front")
+			{
+				params.CullMode = D3D12_CULL_MODE_FRONT;
+			}
+		}
+
+		if (j.find("DepthFunc") != j.end())
+		{
+			// TODO other modes
+			auto str = ToWStr(j["DepthFunc"]);
+			if (str == L"Less_Equal")
+			{
+				params.DepthFunc = D3D12_COMPARISON_FUNC_LESS_EQUAL;
+			}
+			else if (str == L"Greater_Equal")
+			{
+				params.DepthFunc = D3D12_COMPARISON_FUNC_GREATER_EQUAL;
+			}
+		}
+
+		if (j.find("DepthWriteMask") != j.end())
+		{
+			auto str = ToWStr(j["DepthWriteMask"]);
+			if (str == L"Read")
+			{
+				params.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
+			}
+		}
+
+		auto material = std::make_unique<Material>(params);
+		return m_materials.emplace(path, std::move(material)).first;
 	}
 
 }

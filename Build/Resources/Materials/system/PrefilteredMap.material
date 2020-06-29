@@ -1,0 +1,8 @@
+{
+	"shaderVS": "IndirectSpecular_vs",
+	"shaderPS": "IndirectSpecular_ps",
+	"textures": ["$CUBEMAP"],
+	"rtv": "$CUBEMAP_Prefiltered",
+	"DepthEnable":false,
+	"CullMode":"None"
+}

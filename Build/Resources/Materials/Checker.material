@@ -1,6 +1,0 @@
-{
-   "type" : "PBS",
-   "baseColor":"Resources/Textures/Checker2.dds",
-   "normalMap":"Resources/Textures/Checker2.dds",
-   "metalRoughness":"Resources/Textures/Checker2.dds"
-}

@@ -17,9 +17,6 @@
     <Filter Include="Sources\Render">
       <UniqueIdentifier>{4e92aeb6-9b96-4796-b46a-2664775cf086}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Sources\Render\Descriptors">
-      <UniqueIdentifier>{3ecf5158-7518-4930-8a16-e67d73ceef9b}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Sources\Render\Buffers">
       <UniqueIdentifier>{86550b38-517d-4247-88a9-e05607dfcd70}</UniqueIdentifier>
     </Filter>
@@ -46,18 +43,6 @@
     <ClCompile Include="Sources\Core\HighResolutionClock.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Render\RootSignature.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
@@ -78,21 +63,6 @@
     </ClCompile>
     <ClCompile Include="Sources\Core\ResourceManager.cpp">
       <Filter>Sources\Core</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClCompile>
-    <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp">
-      <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\Render.cpp">
       <Filter>Sources\Render</Filter>
@@ -133,6 +103,12 @@
     <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp">
       <Filter>Sources\Render\Materials</Filter>
     </ClCompile>
+    <ClCompile Include="Sources\ECS\Systems\EnvironmentSystem.cpp">
+      <Filter>Sources\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\Render\RenderTargetManager.cpp">
+      <Filter>Sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Sources\d3dx12.h">
@@ -152,18 +128,6 @@
     </ClInclude>
     <ClInclude Include="Sources\Core\HighResolutionClock.h">
       <Filter>Sources\Core</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h">
-      <Filter>Sources\Render\Descriptors</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h">
-      <Filter>Sources\Render\Descriptors</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\RootSignature.h">
       <Filter>Sources\Render</Filter>
@@ -192,29 +156,14 @@
     <ClInclude Include="Sources\ECS\ECS.h">
       <Filter>Sources\ECS</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\PBRMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Render\RenderTargetManager.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h">
       <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\PBS_Simple.h">
-      <Filter>Sources\Render\Materials</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Utils\unordered_map.h">
       <Filter>Sources\Utils</Filter>
-    </ClInclude>
-    <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h">
-      <Filter>Sources\Render\Materials</Filter>
     </ClInclude>
     <ClInclude Include="Sources\Render\Render.h">
       <Filter>Sources\Render</Filter>
@@ -266,6 +215,12 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\Components\TransformComponent.h">
       <Filter>Sources\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Utils\RenderUtils.h">
+      <Filter>Sources\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h">
+      <Filter>Sources\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

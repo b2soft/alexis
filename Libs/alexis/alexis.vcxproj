@@ -33,6 +33,7 @@
     <ClInclude Include="Sources\ECS\Components\TransformComponent.h" />
     <ClInclude Include="Sources\ECS\ECS.h" />
     <ClInclude Include="Sources\ECS\Systems\CameraSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\Hdr2SdrSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\ImguiSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\LightingSystem.h" />
@@ -43,17 +44,8 @@
     <ClInclude Include="Sources\Render\Buffers\UploadBufferManager.h" />
     <ClInclude Include="Sources\Render\CommandContext.h" />
     <ClInclude Include="Sources\Render\CommandManager.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocation.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocator.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DescriptorAllocatorPage.h" />
-    <ClInclude Include="Sources\Render\Descriptors\DynamicDescriptorHeap.h" />
     <ClInclude Include="Sources\Render\FrameRenderGraph.h" />
-    <ClInclude Include="Sources\Render\Materials\Hdr2SdrMaterial.h" />
-    <ClInclude Include="Sources\Render\Materials\LightingMaterial.h" />
     <ClInclude Include="Sources\Render\Materials\MaterialBase.h" />
-    <ClInclude Include="Sources\Render\Materials\PBRMaterial.h" />
-    <ClInclude Include="Sources\Render\Materials\PBS_Simple.h" />
-    <ClInclude Include="Sources\Render\Materials\ShadowMaterial.h" />
     <ClInclude Include="Sources\Render\Mesh.h" />
     <ClInclude Include="Sources\Render\Render.h" />
     <ClInclude Include="Sources\Render\RenderTarget.h" />
@@ -61,6 +53,7 @@
     <ClInclude Include="Sources\Render\RootSignature.h" />
     <ClInclude Include="Sources\Render\Viewport.h" />
     <ClInclude Include="Sources\Scene.h" />
+    <ClInclude Include="Sources\Utils\RenderUtils.h" />
     <ClInclude Include="Sources\Utils\Singleton.h" />
     <ClInclude Include="Sources\Utils\unordered_map.h" />
   </ItemGroup>
@@ -71,6 +64,7 @@
     <ClCompile Include="Sources\Core\ResourceManager.cpp" />
     <ClCompile Include="Sources\Core\SystemsHolder.cpp" />
     <ClCompile Include="Sources\ECS\Systems\CameraSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\EnvironmentSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\Hdr2SdrSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\ImguiSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\LightingSystem.cpp" />
@@ -84,20 +78,12 @@
     <ClCompile Include="Sources\Render\Buffers\UploadBufferManager.cpp" />
     <ClCompile Include="Sources\Render\CommandContext.cpp" />
     <ClCompile Include="Sources\Render\CommandManager.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocation.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocator.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DescriptorAllocatorPage.cpp" />
-    <ClCompile Include="Sources\Render\Descriptors\DynamicDescriptorHeap.cpp" />
     <ClCompile Include="Sources\Render\FrameRenderGraph.cpp" />
-    <ClCompile Include="Sources\Render\Materials\Hdr2SdrMaterial.cpp" />
-    <ClCompile Include="Sources\Render\Materials\LightingMaterial.cpp" />
     <ClCompile Include="Sources\Render\Materials\MaterialBase.cpp" />
-    <ClCompile Include="Sources\Render\Materials\PBRMaterial.cpp" />
-    <ClCompile Include="Sources\Render\Materials\PBS_Simple.cpp" />
-    <ClCompile Include="Sources\Render\Materials\ShadowMaterial.cpp" />
     <ClCompile Include="Sources\Render\Mesh.cpp" />
     <ClCompile Include="Sources\Render\Render.cpp" />
     <ClCompile Include="Sources\Render\RenderTarget.cpp" />
+    <ClCompile Include="Sources\Render\RenderTargetManager.cpp" />
     <ClCompile Include="Sources\Render\RootSignature.cpp" />
     <ClCompile Include="Sources\Scene.cpp" />
   </ItemGroup>

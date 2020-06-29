@@ -3,10 +3,10 @@
 #include "ShadowSystem.h"
 
 #include <Core/Core.h>
+#include <Core/ResourceManager.h>
 #include <Render/Render.h>
 #include <Render/Mesh.h>
 #include <Render/CommandContext.h>
-#include <Render/Materials/ShadowMaterial.h>
 
 #include <ECS/Systems/CameraSystem.h>
 #include <ECS/Systems/LightingSystem.h>
@@ -27,7 +27,8 @@ namespace alexis
 
 		void ShadowSystem::Init()
 		{
-			m_shadowMaterial = std::make_unique<ShadowMaterial>();
+			auto* resMgr = Core::Get().GetResourceManager();
+			m_shadowMaterial = resMgr->GetMaterial(L"Resources/Materials/system/ShadowMap.material");
 
 			auto& ecsWorld = Core::Get().GetECSWorld();
 			auto entity = ecsWorld.CreateEntity();
@@ -65,7 +66,7 @@ namespace alexis
 			context->SetRenderTarget(*shadowRT);
 			context->SetViewport(shadowRT->GetViewport());
 
-			m_shadowMaterial->SetupToRender(context);
+			m_shadowMaterial->Set(context);
 
 			for (const auto& entity : Entities)
 			{

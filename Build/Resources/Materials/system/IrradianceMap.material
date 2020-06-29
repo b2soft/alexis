@@ -1,0 +1,8 @@
+{
+	"shaderVS": "ConvoluteIrradiance_vs",
+	"shaderPS": "ConvoluteIrradiance_ps",
+	"textures": ["$CUBEMAP"],
+	"rtv": "$CUBEMAP_Irradiance",
+	"DepthEnable":false,
+	"CullMode":"None"
+}

@@ -87,8 +87,6 @@ void SampleApp::OnResize(int width, int height)
 	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
 
 	cameraSystem->SetProjectionParams(m_sceneCamera, 45.0f, m_aspectRatio, 0.1f, 100.0f);
-
-	Render::GetInstance()->GetRTManager()->Resize(width, height);
 }
 
 void SampleApp::OnKeyPressed(alexis::KeyEventArgs& e)
@@ -332,10 +330,9 @@ void SampleApp::ResetMousePos()
 
 bool SampleApp::LoadContent()
 {
-	auto scene = Core::Get().GetScene();
-	//scene->LoadFromJson(L"Resources/main.scene");
-	scene->LoadFromJson(L"Resources/shaderball.scene");
-	//scene->LoadFromJson(L"Resources/main_sphere.scene");
+	auto* scene = Core::Get().GetScene();
+	//scene->LoadFromJson(L"Resources/Scenes/PBR_test.scene");
+	scene->LoadFromJson(L"Resources/Scenes/main.scene");
 
 	auto& ecsWorld = Core::Get().GetECSWorld();
 	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();

@@ -29,9 +29,11 @@ PSOutput main(PSInput input)
 	//float4 normal = float4(mul(input.TBN, normalMap.rgb), 0.0);
 
 	float4 normal = float4(normalize(input.normal.xyz), 1.0);
+	normal.xyz = normal.xyz * 0.5f + 0.5f;
 
 	PSOutput output;
-	output.gb0 = texColor;
+	//output.gb0 = texColor;
+	output.gb0 = pow(texColor, 2.2);
 	output.gb1 = normal;
 	output.gb2 = metalRoughness;
 

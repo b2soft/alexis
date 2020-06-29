@@ -16,6 +16,7 @@
 #include <ECS/Systems/LightingSystem.h>
 #include <ECS/Systems/Hdr2SdrSystem.h>
 #include <ECS/Systems/ImguiSystem.h>
+#include <ECS/Systems/EnvironmentSystem.h>
 
 namespace alexis
 {
@@ -58,6 +59,8 @@ namespace alexis
 		cameraSystemMask.set(ecsWorld.GetComponentType<ecs::TransformComponent>());
 		ecsWorld.SetSystemComponentMask<ecs::CameraSystem>(cameraSystemMask);
 
+		m_environmentSystem = ecsWorld.RegisterSystem<ecs::EnvironmentSystem>();
+
 		// Lighting System
 		m_lightingSystem = ecsWorld.RegisterSystem<ecs::LightingSystem>();
 
@@ -73,6 +76,9 @@ namespace alexis
 
 	void SystemsHolder::InitInternal()
 	{
+		//TODO: Temp solution: moved env system before Lighting. RT creating needs refactoring (create without order or cache names instead direct init)
+		m_environmentSystem->Init();
+
 		m_lightingSystem->Init();
 		m_shadowSystem->Init();
 		m_hdr2SdrSystem->Init();

@@ -1,0 +1,8 @@
+{
+	"shaderVS": "ConvoluteBRDF_vs",
+	"shaderPS": "ConvoluteBRDF_ps",
+	"textures": [],
+	"rtv": "$ConvolutedBRDF",
+	"DepthEnable":false,
+	"CullMode":"None"
+}

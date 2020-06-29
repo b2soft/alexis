@@ -55,7 +55,7 @@ namespace alexis
 
 		void ImguiSystem::Render(CommandContext* context)
 		{
-			auto render = Render::GetInstance();
+			auto* render = Render::GetInstance();
 			const auto& backbuffer = render->GetBackbufferRT();
 			const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
 
