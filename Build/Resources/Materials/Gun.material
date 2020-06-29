@@ -1,0 +1,7 @@
+{
+	"shaderVS": "PBS_object_vs",
+	"shaderPS": "PBS_object_ps",
+	"textures": ["Resources/Textures/Gun/Base.dds", "Resources/Textures/Gun/Normal.dds", "Resources/Textures/Gun/MeRo.dds"],
+	"rtv": "$GB",
+	"DepthEnable":true
+}

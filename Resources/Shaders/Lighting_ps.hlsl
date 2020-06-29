@@ -73,11 +73,10 @@ float4 main(PSInput input) : SV_TARGET
 {
 	float3 baseColor = gb0.Sample(PointSampler, input.uv0).rgb;
 	float3 normal = gb1.Sample(AnisoSampler, input.uv0).xyz;
-	float2 metalRoughness = gb2.Sample(PointSampler, input.uv0).rg;
+	float3 metalRoughness = gb2.Sample(PointSampler, input.uv0).rgb;
 	float metallic = metalRoughness.r;
 	float roughness = metalRoughness.g;
-	//TODO: read AO from Map
-	float ao = 1.0f;
+	float ao = metalRoughness.b;
 
 	float depth = depthTexture.Sample(PointSampler, input.uv0).r;
 	[flatten] if (depth >= 1.0f)
@@ -87,11 +86,11 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
 
-	float3 lightPos[4] = { float3(-20, 20, 20), float3(20, 20, 20), float3(-20, -20, 20), float3(20, -20, 20) };
+	float3 lightPos[4] = { float3(-10, 2, -4), float3(20, 20, 20), float3(-20, -20, 20), float3(20, -20, 20) };
 	float3 lightColor[4] = { float3(300, 300, 300), float3(300, 300, 300), float3(300, 300, 300), float3(300, 300, 300) };
 
 	//TODO: normal mapping
-	float3 N = normal * 2.0 - 1.0;
+	float3 N = normalize(normal * 2.0 - 1.0);
 	float3 V = normalize(CamCB.CameraPos.xyz - worldPos);
 	float3 R = reflect(-V, N);
 
@@ -100,8 +99,8 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 Lo = 0.0f;
 
-	// For each light
-	for (int i = 0; i < 4; ++i)
+	[unroll]
+	for (int i = 0; i < 1; ++i)
 	{
 		float3 L = normalize(lightPos[i] - worldPos);
 		float3 H = normalize(V + L);
@@ -146,8 +145,8 @@ float4 main(PSInput input) : SV_TARGET
 
 		const float k_maxReflectionLod = 5.0f;
 		float3 prefilteredColor = prefilteredMap.SampleLevel(LinearSampler, R, roughness * k_maxReflectionLod).rgb;
-		float2 envBRDF = brdfLUT.Sample(LinearSamplerPointMip, float2(max(dot(N,V), 0.0), roughness)).rg;
-		float3 specular =prefilteredColor * (F * envBRDF.x + envBRDF.y);
+		float2 envBRDF = brdfLUT.Sample(LinearSampler, float2(max(dot(N,V), 0.0), roughness)).rg;
+		float3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
 
 		ambient = (kD * diffuse + specular) * ao;
 	}
