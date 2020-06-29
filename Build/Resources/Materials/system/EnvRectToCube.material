@@ -1,0 +1,8 @@
+{
+	"shaderVS": "EnvRectToCube_vs",
+	"shaderPS": "EnvRectToCube_ps",
+	"textures": ["Resources/Textures/Newport_Loft_Ref.hdr"],
+	"rtv": "$CUBEMAP",
+	"DepthEnable":false,
+	"CullMode":"None"
+}

@@ -19,124 +19,118 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Sources\Application.cpp" />
-    <ClCompile Include="..\Sources\b2Game.cpp" />
-    <ClCompile Include="..\Sources\CommandQueue.cpp" />
-    <ClCompile Include="..\Sources\Game.cpp" />
-    <ClCompile Include="..\Sources\HighResolutionClock.cpp" />
-    <ClCompile Include="..\Sources\ImguiWrapper.cpp" />
-    <ClCompile Include="..\Sources\Libs\imgui\imgui.cpp" />
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_demo.cpp" />
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_draw.cpp" />
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_impl_win32.cpp" />
-    <ClCompile Include="..\Sources\Libs\imgui\imgui_widgets.cpp" />
     <ClCompile Include="..\Sources\Main.cpp" />
     <ClCompile Include="..\Sources\Precompiled.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="..\Sources\Render\Buffers\Buffer.cpp" />
-    <ClCompile Include="..\Sources\Render\Buffers\IndexBuffer.cpp" />
-    <ClCompile Include="..\Sources\Render\Buffers\RawBuffer.cpp" />
-    <ClCompile Include="..\Sources\Render\Buffers\StructuredBuffer.cpp" />
-    <ClCompile Include="..\Sources\Render\Buffers\VertexBuffer.cpp" />
-    <ClCompile Include="..\Sources\Render\CommandList.cpp" />
-    <ClCompile Include="..\Sources\Render\DescriptorAllocation.cpp" />
-    <ClCompile Include="..\Sources\Render\DescriptorAllocator.cpp" />
-    <ClCompile Include="..\Sources\Render\DescriptorAllocatorPage.cpp" />
-    <ClCompile Include="..\Sources\Render\DynamicDescriptorHeap.cpp" />
-    <ClCompile Include="..\Sources\Render\GenerateMipsPSO.cpp" />
-    <ClCompile Include="..\Sources\Render\Mesh.cpp" />
-    <ClCompile Include="..\Sources\Render\RenderTarget.cpp" />
-    <ClCompile Include="..\Sources\Render\Resource.cpp" />
-    <ClCompile Include="..\Sources\Render\ResourceStateTracker.cpp" />
-    <ClCompile Include="..\Sources\Render\RootSignature.cpp" />
-    <ClCompile Include="..\Sources\Render\Texture.cpp" />
-    <ClCompile Include="..\Sources\Render\UploadBuffer.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Use</PrecompiledHeader>
-    </ClCompile>
-    <ClCompile Include="..\Sources\Window.cpp" />
+    <ClCompile Include="..\Sources\SampleApp.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\Sources\Application.h" />
-    <ClInclude Include="..\Sources\b2Game.h" />
-    <ClInclude Include="..\Sources\CommandQueue.h" />
-    <ClInclude Include="..\Sources\d3dx12.h" />
-    <ClInclude Include="..\Sources\Events.h" />
-    <ClInclude Include="..\Sources\Game.h" />
-    <ClInclude Include="..\Sources\Helpers.h" />
-    <ClInclude Include="..\Sources\HighResolutionClock.h" />
-    <ClInclude Include="..\Sources\ImguiWrapper.h" />
-    <ClInclude Include="..\Sources\KeyCodes.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imconfig.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imgui.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imgui_impl_win32.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imgui_internal.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imstb_rectpack.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imstb_textedit.h" />
-    <ClInclude Include="..\Sources\Libs\imgui\imstb_truetype.h" />
+    <ClInclude Include="..\Resources\resource.h" />
     <ClInclude Include="..\Sources\Precompiled.h" />
-    <ClInclude Include="..\Sources\Render\Buffers\Buffer.h" />
-    <ClInclude Include="..\Sources\Render\Buffers\IndexBuffer.h" />
-    <ClInclude Include="..\Sources\Render\Buffers\RawBuffer.h" />
-    <ClInclude Include="..\Sources\Render\Buffers\StructuredBuffer.h" />
-    <ClInclude Include="..\Sources\Render\Buffers\VertexBuffer.h" />
-    <ClInclude Include="..\Sources\Render\CommandList.h" />
-    <ClInclude Include="..\Sources\Render\DescriptorAllocation.h" />
-    <ClInclude Include="..\Sources\Render\DescriptorAllocator.h" />
-    <ClInclude Include="..\Sources\Render\DescriptorAllocatorPage.h" />
-    <ClInclude Include="..\Sources\Render\DynamicDescriptorHeap.h" />
-    <ClInclude Include="..\Sources\Render\GenerateMipsPSO.h" />
-    <ClInclude Include="..\Sources\Render\Mesh.h" />
-    <ClInclude Include="..\Sources\Render\RenderTarget.h" />
-    <ClInclude Include="..\Sources\Render\Resource.h" />
-    <ClInclude Include="..\Sources\Render\ResourceStateTracker.h" />
-    <ClInclude Include="..\Sources\Render\RootSignature.h" />
-    <ClInclude Include="..\Sources\Render\Texture.h" />
-    <ClInclude Include="..\Sources\Render\UploadBuffer.h" />
-    <ClInclude Include="..\Sources\ThreadSafeQueue.h" />
-    <ClInclude Include="..\Sources\Utils\Defines.h" />
-    <ClInclude Include="..\Sources\Window.h" />
+    <ClInclude Include="..\Sources\SampleApp.h" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="..\Sources\GenerateMips_CS.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Compute</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">4.0</ShaderModel>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Compute</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Release|x64'">4.0</ShaderModel>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\Sources\%(Filename).h</HeaderFileOutput>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">g_generateMips_CS</VariableName>
-    </FxCompile>
-    <FxCompile Include="..\Sources\ImGui_ps.hlsl">
+    <Image Include="..\Resources\b2nder.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="..\Resources\Render.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="..\Resources\Shaders\ConvoluteIrradiance_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\Sources\%(Filename).h</HeaderFileOutput>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">g_ImGui_ps</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\Sources\%(Filename).h</HeaderFileOutput>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">g_ImGui_ps</VariableName>
     </FxCompile>
-    <FxCompile Include="..\Sources\ImGui_vs.hlsl">
+    <FxCompile Include="..\Resources\Shaders\ConvoluteIrradiance_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">g_ImGui_vs</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)..\Sources\%(Filename).h</HeaderFileOutput>
-      <VariableName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">g_ImGui_vs</VariableName>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)..\Sources\%(Filename).h</HeaderFileOutput>
     </FxCompile>
-    <FxCompile Include="..\Sources\PixelShader.hlsl">
+    <FxCompile Include="..\Resources\Shaders\EnvRectToCube_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\EnvRectToCube_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_ps.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
     </FxCompile>
-    <FxCompile Include="..\Sources\VertexShader.hlsl">
+    <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Lighting_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Lighting_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_object_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_object_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_test_object_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\PBS_test_object_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Shadows_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Skybox_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Skybox_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\ConvoluteBRDF_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\ConvoluteBRDF_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\IndirectSpecular_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\IndirectSpecular_vs.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Test_ps.hlsl">
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Pixel</ShaderType>
+      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\Test_vs.hlsl">
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Vertex</ShaderType>
       <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Vertex</ShaderType>
@@ -144,9 +138,12 @@
     </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Sources\Libs\DirectXTex\DirectXTex_Desktop_2019_Win10.vcxproj">
-      <Project>{371b9fa9-4c90-4ac6-a123-aced756d6c77}</Project>
+    <ProjectReference Include="..\Libs\alexis\alexis.vcxproj">
+      <Project>{45df3c3a-1ffa-477b-b6c2-cb60449acc8a}</Project>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Resources\Shaders\PBS_Helpers.hlsli" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -174,6 +171,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v142</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -206,8 +204,12 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <IntDir>..\Temp\$(Configuration)\</IntDir>
-    <OutDir>..\Build\$(Configuration)\</OutDir>
+    <OutDir>..\Build\</OutDir>
     <IncludePath>$(IncludePath)</IncludePath>
+    <TargetName>$(ProjectName)_d</TargetName>
+    <ClangTidyChecks>-*, cppcoreguidelines-*</ClangTidyChecks>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
@@ -215,8 +217,10 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <IntDir>..\Temp\$(Configuration)\</IntDir>
-    <OutDir>..\Build\$(Configuration)\</OutDir>
+    <OutDir>..\Build\</OutDir>
     <IncludePath>$(VC_IncludePath);$(WindowsSDK_IncludePath)</IncludePath>
+    <EnableMicrosoftCodeAnalysis>false</EnableMicrosoftCodeAnalysis>
+    <EnableClangTidyCodeAnalysis>true</EnableClangTidyCodeAnalysis>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -233,7 +237,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <WarningLevel>Level3</WarningLevel>
+      <WarningLevel>Level4</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -241,16 +245,19 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>E:\Polygon\dx12\Sources\Libs\DirectXTex;$(SolutionDir)..\Sources\;$(SolutionDir)..\Sources\Libs\imgui\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Libs\imgui;$(SolutionDir)..\Libs\alexis\Sources</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;d3dcompiler.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>alexis.lib;d3d12.lib;dxgi.lib;dxguid.lib;d3dcompiler.lib;shlwapi.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Libs\alexis\Build\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.1</ShaderModel>
+      <ObjectFileOutput>$(OutDir)Resources\Shaders\%(Filename)_d.cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -282,18 +289,20 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(SolutionDir)..\Sources\;$(SolutionDir)..\Sources\Libs\imgui\</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpplatest</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)..\Libs\imgui;$(SolutionDir)..\Libs\alexis\Sources</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;shlwapi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>alexis.lib;d3d12.lib;dxgi.lib;dxguid.lib;shlwapi.lib;d3dcompiler.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\Libs\alexis\Build\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <FxCompile>
       <ShaderModel>5.1</ShaderModel>
+      <ObjectFileOutput>$(OutDir)Resources\Shaders\%(Filename).cso</ObjectFileOutput>
     </FxCompile>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

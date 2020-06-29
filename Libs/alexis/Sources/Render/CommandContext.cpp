@@ -1,0 +1,294 @@
+#include <Precompiled.h>
+
+#include "CommandContext.h"
+
+#include <Render/Render.h>
+#include <Render/CommandManager.h>
+#include <Render/Buffers/UploadBufferManager.h>
+
+namespace alexis
+{
+
+	CommandContext::CommandContext(D3D12_COMMAND_LIST_TYPE type) :
+		m_type(type)
+	{
+
+	}
+
+	uint64_t CommandContext::Flush(bool waitForCompletion /*= false*/)
+	{
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		uint64_t fenceValue = commandManager->GetQueue(m_type).ExecuteCommandList(List.Get());
+
+		if (waitForCompletion)
+		{
+			commandManager->WaitForFence(fenceValue);
+		}
+
+		List->Reset(Allocator.Get(), nullptr);
+
+		return fenceValue;
+	}
+
+	uint64_t CommandContext::Finish(bool waitForCompletion /*= false*/)
+	{
+		// Never finish copy lists
+		assert(m_type == D3D12_COMMAND_LIST_TYPE_DIRECT || m_type == D3D12_COMMAND_LIST_TYPE_COMPUTE);
+
+		auto commandManager = Render::GetInstance()->GetCommandManager();
+		uint64_t fenceValue = commandManager->GetQueue(m_type).ExecuteCommandList(List.Get());
+
+		if (waitForCompletion)
+		{
+			commandManager->WaitForFence(fenceValue);
+		}
+
+		commandManager->CacheContext(this, fenceValue);
+
+		return fenceValue;
+	}
+
+	void CommandContext::DrawInstanced(UINT vertexCountPerInstance, UINT instanceCount, UINT startVertexLocation, UINT startInstanceLocation)
+	{
+		List->DrawInstanced(vertexCountPerInstance, instanceCount, startVertexLocation, startInstanceLocation);
+	}
+
+	void CommandContext::DrawIndexedInstanced(UINT indexCountPerInstance, UINT instanceCount, UINT startIndexLocation, INT baseVertexLocation, UINT startInstanceLocation)
+	{
+		List->DrawIndexedInstanced(indexCountPerInstance, instanceCount, startIndexLocation, baseVertexLocation, startInstanceLocation);
+	}
+
+	void CommandContext::SetRootSignature(const RootSignature& rootSignature)
+	{
+		auto* resource = rootSignature.GetRootSignature().Get();
+
+		if (m_rootSignature != resource)
+		{
+			m_rootSignature = resource;
+
+			List->SetGraphicsRootSignature(m_rootSignature);
+		}
+	}
+
+	void CommandContext::SetPipelineState(ID3D12PipelineState* pipelineState)
+	{
+		List->SetPipelineState(pipelineState);
+	}
+
+	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
+	{
+		// TODO: calculate sizeof here instead of args
+		assert(bufferData && Math::IsAligned(bufferData, 16));
+
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		auto cb = bufferManager->Allocate(bufferSize);
+		memcpy(cb.Cpu, bufferData, bufferSize);
+
+		List->SetGraphicsRootConstantBufferView(rootParameterIdx, cb.Gpu);
+	}
+
+	void CommandContext::ClearRTV(D3D12_CPU_DESCRIPTOR_HANDLE rtv, const float clearColor[4])
+	{
+		List->ClearRenderTargetView(rtv, clearColor, 0, nullptr);
+	}
+
+	void CommandContext::ClearDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv, D3D12_CLEAR_FLAGS clearFlags, float depth /*= 1.0f*/, uint8_t stencil /*= 0*/)
+	{
+		List->ClearDepthStencilView(dsv, clearFlags, depth, stencil, 0, nullptr);
+	}
+
+	void CommandContext::SetRenderTarget(const RenderTarget& renderTarget)
+	{
+		SetRenderTarget(renderTarget, renderTarget);
+	}
+
+	void CommandContext::SetRenderTarget(const RenderTarget& renderTarget, const RenderTarget& customDepth)
+	{
+		std::vector<D3D12_CPU_DESCRIPTOR_HANDLE> renderTargetDescriptors;
+		renderTargetDescriptors.reserve(RenderTarget::Slot::NumAttachmentPoints);
+
+		// Bind color slots
+		const auto& textures = renderTarget.GetTextures();
+		const auto& rtvs = renderTarget.GetRtvs();
+
+		auto* render = Render::GetInstance();
+		auto* device = render->GetDevice();
+
+		for (int i = 0; i < RenderTarget::Slot::DepthStencil; ++i)
+		{
+			auto& texture = textures[i];
+
+			if (texture.IsValid())
+			{
+				renderTargetDescriptors.push_back(rtvs[i]);
+			}
+		}
+
+		// Bind depth stencil
+		const auto& depthTexture = customDepth.GetTexture(RenderTarget::DepthStencil);
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE dsDescriptor(D3D12_DEFAULT);
+		if (depthTexture.IsValid())
+		{
+			dsDescriptor = customDepth.GetDsv();
+		}
+
+		D3D12_CPU_DESCRIPTOR_HANDLE* dsv = dsDescriptor.ptr != 0 ? &dsDescriptor : nullptr;
+
+		List->OMSetRenderTargets(static_cast<UINT>(renderTargetDescriptors.size()), renderTargetDescriptors.data(), FALSE, dsv);
+	}
+
+	void CommandContext::SetViewport(const Viewport& viewport)
+	{
+		List->RSSetViewports(1, &viewport.Viewport);
+		List->RSSetScissorRects(1, &viewport.ScissorRect);
+	}
+
+	void CommandContext::SetViewports(const std::vector<Viewport>& viewports)
+	{
+		assert(viewports.size() < D3D12_VIEWPORT_AND_SCISSORRECT_OBJECT_COUNT_PER_PIPELINE);
+
+		std::vector<D3D12_VIEWPORT> dv;
+		dv.resize(viewports.size());
+
+		std::vector<CD3DX12_RECT> ds;
+		ds.resize(viewports.size());
+
+		for (auto& v : viewports)
+		{
+			dv.push_back(v.Viewport);
+			ds.push_back(v.ScissorRect);
+		}
+
+		List->RSSetViewports(static_cast<UINT>(viewports.size()), dv.data());
+		List->RSSetScissorRects(static_cast<UINT>(viewports.size()), ds.data());
+	}
+
+	void CommandContext::TransitionResource(const GpuBuffer& resource, D3D12_RESOURCE_STATES oldState, D3D12_RESOURCE_STATES newState)
+	{
+		auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(resource.GetResource(), oldState, newState);
+		List->ResourceBarrier(1, &barrier);
+	}
+
+	void CommandContext::CopyBuffer(GpuBuffer& destination, const void* data, std::size_t numElements, std::size_t elementSize)
+	{
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		const std::size_t sizeInBytes = numElements * elementSize;
+
+		auto allocation = bufferManager->Allocate(sizeInBytes, elementSize);
+		memcpy(allocation.Cpu, data, sizeInBytes);
+
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+		List->CopyBufferRegion(destination.GetResource(), 0, allocation.Resource, allocation.Offset, sizeInBytes);
+		//TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
+	void CommandContext::InitializeTexture(TextureBuffer& destination, UINT numSubresources, D3D12_SUBRESOURCE_DATA subData[])
+	{
+		UINT64 uploadBufferSize = GetRequiredIntermediateSize(destination.GetResource(), 0, numSubresources);
+
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		auto allocation = bufferManager->Allocate(uploadBufferSize, 512);
+
+		TransitionResource(destination, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_DEST);
+		UpdateSubresources(List.Get(), destination.GetResource(), allocation.Resource, allocation.Offset, 0, numSubresources, subData);
+		//TransitionResource(destination, D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ);
+	}
+
+	void CommandContext::LoadTextureFromFile(TextureBuffer& destination, const std::wstring& filename)
+	{
+		fs::path filePath(filename);
+
+		if (!fs::exists(filePath))
+		{
+			throw std::exception("File not found!");
+		}
+
+		std::lock_guard<std::mutex> lock(s_textureCacheMutex);
+		auto it = s_textureCache.find(filename);
+		if (it != s_textureCache.end())
+		{
+			destination.SetFromResource(it->second);
+		}
+		else
+		{
+			TexMetadata metadata;
+			ScratchImage scratchImage;
+
+			if (filePath.extension() == ".dds")
+			{
+				ThrowIfFailed(
+					LoadFromDDSFile(filename.c_str(), DDS_FLAGS_FORCE_RGB, &metadata, scratchImage)
+				);
+			}
+			else if (filePath.extension() == ".hdr")
+			{
+				ThrowIfFailed(
+					LoadFromHDRFile(filename.c_str(), &metadata, scratchImage)
+				);
+			}
+			else if (filePath.extension() == ".tga")
+			{
+				ThrowIfFailed(
+					LoadFromTGAFile(filename.c_str(), &metadata, scratchImage)
+				);
+			}
+			else
+			{
+				LoadFromWICFile(filename.c_str(), WIC_FLAGS_FORCE_RGB, &metadata, scratchImage);
+			}
+
+			D3D12_RESOURCE_DESC textureDesc = {};
+			switch (metadata.dimension)
+			{
+			case TEX_DIMENSION_TEXTURE1D:
+				textureDesc = CD3DX12_RESOURCE_DESC::Tex1D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT16>(metadata.arraySize));
+				break;
+			case TEX_DIMENSION_TEXTURE2D:
+				textureDesc = CD3DX12_RESOURCE_DESC::Tex2D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.height), static_cast<UINT16>(metadata.arraySize));
+				break;
+			case TEX_DIMENSION_TEXTURE3D:
+				textureDesc = CD3DX12_RESOURCE_DESC::Tex3D(metadata.format, static_cast<UINT64>(metadata.width), static_cast<UINT>(metadata.height), static_cast<UINT16>(metadata.depth));
+				break;
+			default:
+				throw std::exception("Invalid texture dimension!");
+				break;
+			}
+
+			auto device = Render::GetInstance()->GetDevice();
+
+			std::vector<D3D12_SUBRESOURCE_DATA> subresources(scratchImage.GetImageCount());
+			const Image* images = scratchImage.GetImages();
+			for (int i = 0; i < scratchImage.GetImageCount(); ++i)
+			{
+				auto& subresource = subresources[i];
+				subresource.RowPitch = images[i].rowPitch;
+				subresource.SlicePitch = images[i].slicePitch;
+				subresource.pData = images[i].pixels;
+			}
+
+			destination.Create(metadata.width, metadata.height, metadata.format, metadata.mipLevels);
+
+			InitializeTexture(destination, subresources.size(), subresources.data());
+
+			// Add texture to the cache
+			s_textureCache[filename] = destination.GetResource();
+		}
+	}
+
+	void CommandContext::Reset()
+	{
+		Allocator->Reset();
+		List->Reset(Allocator.Get(), nullptr);
+
+		m_rootSignature = nullptr;
+	}
+
+	std::mutex CommandContext::s_textureCacheMutex;
+
+	std::map<std::wstring, ID3D12Resource*> CommandContext::s_textureCache;
+
+}

@@ -1,0 +1,7 @@
+{
+	"shaderVS": "Lighting_vs",
+	"shaderPS": "Lighting_ps",
+	"textures": ["$GB#0", "$GB#1", "$GB#2", "$GB#Depth", "$Shadow Map#Depth", "$CUBEMAP_Irradiance", "$CUBEMAP_Prefiltered", "$ConvolutedBRDF"],
+	"rtv": "$HDR",
+	"DepthEnable":false
+}
