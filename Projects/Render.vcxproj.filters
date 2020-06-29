@@ -66,12 +66,6 @@
     <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\VertexShader.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\PixelShader.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
     <FxCompile Include="..\Resources\Shaders\Shadows_vs.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>

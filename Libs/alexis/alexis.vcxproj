@@ -88,22 +88,6 @@
     <ClCompile Include="Sources\Scene.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Resources\ImGui_ps.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Pixel</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Pixel</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resources/Generated/%(Filename).h</HeaderFileOutput>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resources/Generated/%(Filename).h</HeaderFileOutput>
-    </FxCompile>
-    <FxCompile Include="Resources\ImGui_vs.hlsl">
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Vertex</ShaderType>
-      <ShaderType Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Vertex</ShaderType>
-      <ShaderModel Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">5.1</ShaderModel>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Resources/Generated/%(Filename).h</HeaderFileOutput>
-      <HeaderFileOutput Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Resources/Generated/%(Filename).h</HeaderFileOutput>
-    </FxCompile>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Sources\Core\ResourceManager.h" />
   </ItemGroup>
   <ItemGroup>
