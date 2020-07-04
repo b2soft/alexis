@@ -237,8 +237,18 @@ namespace alexis
 		json j = nlohmann::json::parse(ifs);
 
 		MaterialLoadParams params;
-		params.VSPath = ToWStr(j["shaderVS"]);
-		params.PSPath = ToWStr(j["shaderPS"]);
+		if (j.find("shaderVS") != j.end())
+		{
+			params.VSPath = ToWStr(j["shaderVS"]);
+		}
+		if (j.find("shaderPS") != j.end())
+		{
+			params.PSPath = ToWStr(j["shaderPS"]);
+		}
+		if (j.find("shaderCS") != j.end())
+		{
+			params.CSPath = ToWStr(j["shaderCS"]);
+		}
 
 		std::size_t i = 0;
 		for (auto& tex : j["textures"])

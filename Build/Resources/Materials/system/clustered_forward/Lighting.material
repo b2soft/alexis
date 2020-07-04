@@ -1,0 +1,9 @@
+{
+	"shaderVS": "Lighting_vs",
+	"shaderPS": "Lighting_ps",
+	"textures": ["Resources/Textures/Concrete/Basecolor.dds", "Resources/Textures/Concrete/Normal.dds", "Resources/Textures/Concrete/Mero.dds"],
+	"rtv": "$MainRT",
+	"DepthEnable":true,
+	"DepthFunc":"Less_Equal",
+	"DepthWriteMask":"Read"
+}

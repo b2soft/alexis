@@ -186,7 +186,7 @@ namespace alexis
 			CameraParams cameraParams;
 			cameraParams.ViewMatrix = viewMatrices[i];
 			cameraParams.ProjMatrix = projMatrix;
-			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+			context->SetCBV(0, sizeof(cameraParams), &cameraParams);
 
 			m_cubeMesh->Draw(context);
 		}
@@ -229,7 +229,7 @@ namespace alexis
 			CameraParams cameraParams;
 			cameraParams.ViewMatrix = viewMatrices[i];
 			cameraParams.ProjMatrix = projMatrix;
-			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+			context->SetCBV(0, sizeof(cameraParams), &cameraParams);
 
 			m_cubeMesh->Draw(context);
 		}
@@ -253,7 +253,7 @@ namespace alexis
 		{
 			RoughnessParams rcb{ static_cast<float>(mip) / static_cast<float>(k_munMipLevels - 1) };
 
-			context->SetDynamicCBV(1, sizeof(rcb), &rcb);
+			context->SetCBV(1, sizeof(rcb), &rcb);
 
 			LONG mipWidth = 128 * std::pow(0.5f, mip);
 			LONG mipHeight = 128 * std::pow(0.5f, mip);
@@ -282,7 +282,7 @@ namespace alexis
 				context->List->OMSetRenderTargets(1, &m_prefilteredRTVs[i*k_munMipLevels+mip], FALSE, nullptr);
 
 				cameraParams.ViewMatrix = viewMatrices[i];
-				context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+				context->SetCBV(0, sizeof(cameraParams), &cameraParams);
 
 				m_cubeMesh->Draw(context);
 			}
@@ -333,7 +333,7 @@ namespace alexis
 		CameraParams cameraParams;
 		cameraParams.ViewMatrix = cameraSystem->GetViewMatrix(activeCamera);
 		cameraParams.ProjMatrix = cameraSystem->GetProjMatrix(activeCamera);
-		context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+		context->SetCBV(0, sizeof(cameraParams), &cameraParams);
 
 		m_cubeMesh->Draw(context);
 	}

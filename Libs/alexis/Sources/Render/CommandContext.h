@@ -34,7 +34,8 @@ namespace alexis
 		// TODO: Do I need wrapper over pipeline state like RootSignature?
 		void SetPipelineState(ID3D12PipelineState* pipelineState);
 
-		void SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData);
+		void SetCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData);
+		void SetComputeCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData);
 
 		void ClearRTV(D3D12_CPU_DESCRIPTOR_HANDLE rtv, const float clearColor[4]);
 		void ClearDSV(D3D12_CPU_DESCRIPTOR_HANDLE dsv, D3D12_CLEAR_FLAGS clearFlags, float depth = 1.0f, uint8_t stencil = 0);

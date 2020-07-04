@@ -3,6 +3,8 @@
 #include "ModelSystem.h"
 
 #include <Core/Core.h>
+#include <Core/ResourceManager.h>
+
 #include <Render/Render.h>
 #include <Render/Mesh.h>
 #include <Render/CommandContext.h>
@@ -24,6 +26,13 @@ namespace alexis
 			XMMATRIX projMatrix;
 		};
 
+		void ModelSystem::Init()
+		{
+			auto* resMgr = Core::Get().GetResourceManager();
+			m_zPrepassMaterial = resMgr->GetMaterial(L"Resources\\Materials\\system\\clustered_forward\\z_prepass.material");
+			m_forwardPassMaterial = resMgr->GetMaterial(L"Resources\\Materials\\system\\clustered_forward\\Lighting.material");
+		}
+
 		void ModelSystem::Update(float dt)
 		{
 			auto& ecsWorld = Core::Get().GetECSWorld();
@@ -40,7 +49,7 @@ namespace alexis
 
 					modelComponent.ModelMatrix = XMMatrixMultiply(translationMatrix, rotationMatrix);
 					modelComponent.ModelMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, scalingMatrix);
-					
+
 					modelComponent.IsTransformDirty = false;
 				}
 			}
@@ -74,10 +83,82 @@ namespace alexis
 
 				modelComponent.Material->Set(context);
 
-				context->SetDynamicCBV(0, sizeof(cameraCB), &cameraCB);
-				context->SetDynamicCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
+				context->SetCBV(0, sizeof(cameraCB), &cameraCB);
+				context->SetCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
 				modelComponent.Mesh->Draw(context);
 			}
 		}
+
+		__declspec(align(16)) struct CameraParams
+		{
+			XMMATRIX View;
+			XMMATRIX Proj;
+		};
+
+		void ModelSystem::ZPrepass(CommandContext* context)
+		{
+			PIXScopedEvent(context->List.Get(), PIX_COLOR(0.0, 255.0, 0.0), L"Forward Z-Prepass");
+			m_zPrepassMaterial->Set(context);
+
+			auto* render = alexis::Render::GetInstance();
+			auto* rtManager = render->GetRTManager();
+			auto* mainRT = rtManager->GetRenderTarget(L"MainRT");
+
+			context->TransitionResource(mainRT->GetTexture(RenderTarget::DepthStencil), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+			context->ClearDSV(mainRT->GetDsv(), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0);
+
+			context->SetRenderTarget(*mainRT);
+			context->SetViewport(mainRT->GetViewport());
+
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
+			auto activeCamera = cameraSystem->GetActiveCamera();
+
+			CameraParams cameraCB{ cameraSystem->GetViewMatrix(activeCamera), cameraSystem->GetProjMatrix(activeCamera) };
+			context->SetCBV(0, sizeof(cameraCB), &cameraCB);
+
+			for (const auto& entity : Entities)
+			{
+				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
+
+				context->SetCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
+				modelComponent.Mesh->Draw(context);
+			}
+		}
+
+		void ModelSystem::ForwardPass(CommandContext* context)
+		{
+			PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), L"Forward Pass");
+			m_forwardPassMaterial->Set(context);
+
+			auto* render = alexis::Render::GetInstance();
+			auto* rtManager = render->GetRTManager();
+			auto* mainRT = rtManager->GetRenderTarget(L"MainRT");
+
+			context->TransitionResource(mainRT->GetTexture(RenderTarget::Slot0), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			static constexpr float k_clearColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+			context->ClearRTV(mainRT->GetRtv(RenderTarget::Slot0), k_clearColor);
+
+			context->TransitionResource(mainRT->GetTexture(RenderTarget::DepthStencil), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ);
+
+			context->SetRenderTarget(*mainRT);
+			context->SetViewport(mainRT->GetViewport());
+
+			auto& ecsWorld = Core::Get().GetECSWorld();
+			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
+			auto activeCamera = cameraSystem->GetActiveCamera();
+
+			CameraParams cameraCB{ cameraSystem->GetViewMatrix(activeCamera), cameraSystem->GetProjMatrix(activeCamera) };
+			context->SetCBV(0, sizeof(cameraCB), &cameraCB);
+
+			for (const auto& entity : Entities)
+			{
+				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
+
+				context->SetCBV(1, sizeof(modelComponent.ModelMatrix), &modelComponent.ModelMatrix);
+				modelComponent.Mesh->Draw(context);
+			}
+		}
+
 	}
 }

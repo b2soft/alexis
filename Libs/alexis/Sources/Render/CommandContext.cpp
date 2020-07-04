@@ -75,7 +75,7 @@ namespace alexis
 		List->SetPipelineState(pipelineState);
 	}
 
-	void CommandContext::SetDynamicCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
+	void CommandContext::SetCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
 	{
 		// TODO: calculate sizeof here instead of args
 		assert(bufferData && Math::IsAligned(bufferData, 16));
@@ -86,6 +86,19 @@ namespace alexis
 		memcpy(cb.Cpu, bufferData, bufferSize);
 
 		List->SetGraphicsRootConstantBufferView(rootParameterIdx, cb.Gpu);
+	}
+
+	void CommandContext::SetComputeCBV(uint32_t rootParameterIdx, std::size_t bufferSize, const void* bufferData)
+	{
+		// TODO: calculate sizeof here instead of args
+		assert(bufferData && Math::IsAligned(bufferData, 16));
+
+		auto device = Render::GetInstance()->GetDevice();
+		auto bufferManager = Render::GetInstance()->GetUploadBufferManager();
+		auto cb = bufferManager->Allocate(bufferSize);
+		memcpy(cb.Cpu, bufferData, bufferSize);
+
+		List->SetComputeRootConstantBufferView(rootParameterIdx, cb.Gpu);
 	}
 
 	void CommandContext::ClearRTV(D3D12_CPU_DESCRIPTOR_HANDLE rtv, const float clearColor[4])

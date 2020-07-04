@@ -14,6 +14,9 @@
     <Filter Include="Resources\Shaders\system">
       <UniqueIdentifier>{91a38b5b-bb81-43d9-ab37-6595ae8e23be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Shaders\clustered_forward">
+      <UniqueIdentifier>{fd405ae2-93bf-4895-b252-2557f0a90582}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\Main.cpp">
@@ -110,6 +113,21 @@
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\system\ConvoluteBRDF_vs.hlsl">
       <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\clustered_forward\Z_Prepass_vs.hlsl">
+      <Filter>Resources\Shaders\clustered_forward</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\clustered_forward\Z_Prepass_ps.hlsl">
+      <Filter>Resources\Shaders\clustered_forward</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\clustered_forward\Lighting_vs.hlsl">
+      <Filter>Resources\Shaders\clustered_forward</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\clustered_forward\Lighting_ps.hlsl">
+      <Filter>Resources\Shaders\clustered_forward</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\clustered_forward\CalculateClusters_cs.hlsl">
+      <Filter>Resources\Shaders\clustered_forward</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

@@ -1,0 +1,5 @@
+{
+	"shaderVS": "Z_Prepass_vs",
+	"rtv": "$MainRT",
+	"DepthEnable":true
+}

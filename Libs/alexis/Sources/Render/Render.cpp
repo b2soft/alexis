@@ -195,6 +195,22 @@ namespace alexis
 		return record;
 	}
 
+	Render::DescriptorRecord Render::AllocateUAV(ID3D12Resource* resource, D3D12_UNORDERED_ACCESS_VIEW_DESC desc)
+	{
+		DescriptorRecord record{};
+
+		CD3DX12_CPU_DESCRIPTOR_HANDLE handle(m_srvUavHeap->GetCPUDescriptorHandleForHeapStart(), m_allocatedSrvUavs, m_incrementSrvUav);
+
+		m_device->CreateUnorderedAccessView(resource, resource, &desc, handle);
+
+		record.CpuPtr = handle;
+		record.OffsetInHeap = m_allocatedSrvUavs;
+
+		m_allocatedSrvUavs++;
+
+		return record;
+	}
+
 	alexis::Render::DescriptorRecord Render::AllocateRTV(ID3D12Resource* resource, D3D12_RENDER_TARGET_VIEW_DESC desc)
 	{
 		DescriptorRecord record{};
@@ -519,6 +535,32 @@ namespace alexis
 			auto shadowRT = std::make_unique<RenderTarget>();
 			shadowRT->AttachTexture(shadowDepthTexture, RenderTarget::DepthStencil);
 			m_rtManager->EmplaceTarget(L"Shadow Map", std::move(shadowRT));
+		}
+
+
+		// Create Main HDR Forward Accumulator
+		{
+			auto mainRT = std::make_unique<RenderTarget>(true);
+			DXGI_FORMAT rtFormat = DXGI_FORMAT_R16G16B16A16_FLOAT;
+
+			auto colorDesc = CD3DX12_RESOURCE_DESC::Tex2D(rtFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
+			colorDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
+
+			D3D12_CLEAR_VALUE colorClearValue{};
+			colorClearValue.Format = colorDesc.Format;
+			colorClearValue.Color[0] = 0.0f;
+			colorClearValue.Color[1] = 0.0f;
+			colorClearValue.Color[2] = 0.0f;
+			colorClearValue.Color[3] = 1.0f;
+
+			TextureBuffer mainTexture;
+			mainTexture.Create(colorDesc, &colorClearValue);
+			mainTexture.GetResource()->SetName(L"Main Buffer");
+
+			mainRT->AttachTexture(mainTexture, RenderTarget::Slot::Slot0);
+			mainRT->AttachTexture(depthTexture, RenderTarget::Slot::DepthStencil);
+
+			m_rtManager->EmplaceTarget(L"MainRT", std::move(mainRT));
 		}
 
 		// Wait

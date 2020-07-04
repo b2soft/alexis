@@ -1,0 +1,6 @@
+{
+	"shaderCS": "CalculateClusters_cs",
+	"textures": [""],
+	"rtv": "",
+	"DepthEnable":false
+}

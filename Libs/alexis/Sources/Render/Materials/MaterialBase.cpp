@@ -15,13 +15,16 @@ namespace alexis
 	{
 		ComPtr<ID3DBlob> vertexShaderBlob;
 		ComPtr<ID3DBlob> pixelShaderBlob;
+		ComPtr<ID3DBlob> computeShaderBlob;
 
 #if defined(_DEBUG)
 		std::wstring absVSPath = L"Resources/Shaders/" + params.VSPath + L"_d.cso";
 		std::wstring absPSPath = L"Resources/Shaders/" + params.PSPath + L"_d.cso";
+		std::wstring absCSPath = L"Resources/Shaders/" + params.CSPath + L"_d.cso";
 #else
 		std::wstring absVSPath = L"Resources/Shaders/" + params.VSPath + L".cso";
 		std::wstring absPSPath = L"Resources/Shaders/" + params.PSPath + L".cso";
+		std::wstring absCSPath = L"Resources/Shaders/" + params.CSPath + L".cso";
 #endif
 
 		if (!params.VSPath.empty())
@@ -34,10 +37,39 @@ namespace alexis
 			ThrowIfFailed(D3DReadFileToBlob(absPSPath.c_str(), &pixelShaderBlob));
 		}
 
+		if (!params.CSPath.empty())
+		{
+			ThrowIfFailed(D3DReadFileToBlob(absCSPath.c_str(), &computeShaderBlob));
+		}
+
 		// Root Signature
 		auto* render = Render::GetInstance();
 		auto* device = render->GetDevice();
+		if (computeShaderBlob)
+		{
+			auto result = device->CreateRootSignature(0, computeShaderBlob->GetBufferPointer(), computeShaderBlob->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature));
+			// PSS for compute shader
+			struct ComputePSS
+			{
+				CD3DX12_PIPELINE_STATE_STREAM_ROOT_SIGNATURE RootSignature;
+				CD3DX12_PIPELINE_STATE_STREAM_CS CS;
+			} computePss;
+
+			computePss.RootSignature = m_rootSignature.Get();
+			computePss.CS = CD3DX12_SHADER_BYTECODE(computeShaderBlob.Get());
+
+			if (computeShaderBlob)
+			{
+				D3D12_PIPELINE_STATE_STREAM_DESC pssDesc{ sizeof(ComputePSS), &computePss };
+
+				ThrowIfFailed(render->GetDevice()->CreatePipelineState(&pssDesc, IID_PPV_ARGS(&m_pso)));
+				isCompute = true;
+				return;
+			}
+		}
+
 		auto result = device->CreateRootSignature(0, vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), IID_PPV_ARGS(&m_rootSignature));
+
 
 		Microsoft::WRL::ComPtr<ID3D12VersionedRootSignatureDeserializer> deserializer;
 		HRESULT hs = D3D12CreateVersionedRootSignatureDeserializer(vertexShaderBlob->GetBufferPointer(), vertexShaderBlob->GetBufferSize(), IID_PPV_ARGS(&deserializer));
@@ -166,7 +198,14 @@ namespace alexis
 		auto* device = render->GetDevice();
 
 		context->List->SetPipelineState(m_pso.Get());
-		context->List->SetGraphicsRootSignature(m_rootSignature.Get());
+		if (isCompute)
+		{
+			context->List->SetComputeRootSignature(m_rootSignature.Get());
+		}
+		else
+		{
+			context->List->SetGraphicsRootSignature(m_rootSignature.Get());
+		}
 
 		if (m_srvOffset.has_value())
 		{

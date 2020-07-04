@@ -13,6 +13,8 @@
 #include <Render/Render.h>
 #include <Render/CommandContext.h>
 
+#include <sstream>
+
 namespace alexis
 {
 	namespace ecs
@@ -28,7 +30,7 @@ namespace alexis
 		__declspec(align(16)) struct DirectionalLight
 		{
 			XMVECTOR Direction;
-			XMVECTOR Color; 
+			XMVECTOR Color;
 		};
 
 		__declspec(align(16)) struct ShadowMapParams
@@ -40,6 +42,7 @@ namespace alexis
 		{
 			auto* resMgr = Core::Get().GetResourceManager();
 			m_lightingMaterial = resMgr->GetMaterial(L"Resources/Materials/system/Lighting.material");
+			m_buildClustersMaterial = resMgr->GetMaterial(L"Resources/Materials/system/clustered_forward/build_clusters.material");
 
 			m_fsQuad = Core::Get().GetResourceManager()->GetMesh(L"$FS_QUAD");
 		}
@@ -82,7 +85,7 @@ namespace alexis
 			cameraParams.CameraPos = transformComponent.Position;
 			cameraParams.InvViewMatrix = cameraSystem->GetInvViewMatrix(activeCamera);
 			cameraParams.InvProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
-			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+			context->SetCBV(0, sizeof(cameraParams), &cameraParams);
 
 			DirectionalLight directionalLights[1];
 
@@ -96,33 +99,143 @@ namespace alexis
 				}
 			}
 
-			context->SetDynamicCBV(1, sizeof(directionalLights), &directionalLights);
+			context->SetCBV(1, sizeof(directionalLights), &directionalLights);
 
 			ShadowMapParams depthParams;
-			
+
 			auto shadowSystem = ecsWorld.GetSystem<ShadowSystem>();
 			depthParams.LightSpaceMatrix = shadowSystem->GetShadowMatrix();
 
-			context->SetDynamicCBV(2, sizeof(depthParams), &depthParams);
+			context->SetCBV(2, sizeof(depthParams), &depthParams);
 
 			m_fsQuad->Draw(context);
 		}
 
-		DirectX::XMVECTOR LightingSystem::GetSunDirection() const
+		__declspec(align(16)) struct ClusterData
 		{
-			for (const auto& entity : Entities)
-			{
-				auto& ecsWorld = Core::Get().GetECSWorld();
+			XMFLOAT4 MinPoint;
+			XMFLOAT4 MaxPoint;
+		};
 
-				auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
-				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
-				{
-					return lightComponent.Direction;
-				}
-			}
+		__declspec(align(16)) struct ScreenToViewParams
+		{
+			XMMATRIX InvProj;
+			XMUINT4 ClusterSize;
+			XMUINT2 ScreenSize;
+		};
 
-			return { 0., 0., 0.f };
+		__declspec(align(16))  struct ClusterCameraParams
+		{
+			float Near;
+			float Far;
+		};
+
+		static inline UINT AlignForUavCounter(UINT bufferSize)
+		{
+			const UINT alignment = D3D12_UAV_COUNTER_PLACEMENT_ALIGNMENT;
+			return (bufferSize + (alignment - 1)) & ~(alignment - 1);
 		}
 
+		void LightingSystem::BuildClusters(CommandContext* context)
+		{
+			auto* render = Render::GetInstance();
+			auto* device = render->GetDevice();
+
+			if (!m_uavOffset.has_value())
+			{
+				const UINT uavBufferSize = 16 * 9 * 24 * sizeof(ClusterData);
+				const UINT counterOffset = AlignForUavCounter(uavBufferSize);
+
+				D3D12_RESOURCE_DESC uavResDesc = CD3DX12_RESOURCE_DESC::Buffer(counterOffset + sizeof(UINT), D3D12_RESOURCE_FLAG_ALLOW_UNORDERED_ACCESS);
+				auto* properties = &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT);
+				device->CreateCommittedResource(properties, D3D12_HEAP_FLAG_NONE, &uavResDesc, D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_uavResource));
+
+				D3D12_UNORDERED_ACCESS_VIEW_DESC uavDesc{};
+				uavDesc.Format = DXGI_FORMAT_UNKNOWN;
+				uavDesc.ViewDimension = D3D12_UAV_DIMENSION_BUFFER;
+				uavDesc.Buffer.FirstElement = 0;
+				uavDesc.Buffer.NumElements = 16 * 9 * 24;
+				uavDesc.Buffer.StructureByteStride = sizeof(ClusterData);
+				uavDesc.Buffer.CounterOffsetInBytes = counterOffset;
+				uavDesc.Buffer.Flags = D3D12_BUFFER_UAV_FLAG_NONE;
+
+				auto alloc = render->AllocateUAV(m_uavResource.Get(), uavDesc);
+				m_uavHandle = alloc.CpuPtr;
+				m_uavOffset = alloc.OffsetInHeap;
+
+				const UINT byteSize = counterOffset + sizeof(UINT);
+
+				device->CreateCommittedResource(&CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_READBACK), D3D12_HEAP_FLAG_NONE, &CD3DX12_RESOURCE_DESC::Buffer(byteSize), D3D12_RESOURCE_STATE_COPY_DEST, nullptr, IID_PPV_ARGS(&m_uavReadback));
+			}
+
+			if (m_uavOffset.has_value())
+			{
+				PIXScopedEvent(context->List.Get(), PIX_COLOR(255, 0, 0), L"Build Clusters");
+				m_buildClustersMaterial->Set(context);
+
+				auto barrier = CD3DX12_RESOURCE_BARRIER::Transition(m_uavResource.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE);
+				context->List->ResourceBarrier(1, &barrier);
+
+				auto* uavHeap = render->GetSrvUavHeap();
+				ID3D12DescriptorHeap* ppHeaps[] = { uavHeap };
+				context->List->SetDescriptorHeaps(1, ppHeaps);
+
+				CD3DX12_GPU_DESCRIPTOR_HANDLE gpuHandle{ uavHeap->GetGPUDescriptorHandleForHeapStart() };
+				gpuHandle.Offset(m_uavOffset.value(), device->GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV));
+
+				auto& ecsWorld = Core::Get().GetECSWorld();
+				auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
+				auto activeCamera = cameraSystem->GetActiveCamera();
+
+				auto invProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
+
+				ScreenToViewParams stvParams;
+				stvParams.InvProj = invProjMatrix;
+				stvParams.ScreenSize = { 1280, 720 };
+				UINT sizeX = (unsigned int)std::ceilf(1280 / (float)16);
+				stvParams.ClusterSize = { 16, 9, 24, sizeX };
+
+				context->SetComputeCBV(0, sizeof(stvParams), &stvParams);
+
+				auto& cameraComponent = ecsWorld.GetComponent<CameraComponent>(activeCamera);
+
+				ClusterCameraParams cameraParams;
+				cameraParams.Near = cameraComponent.NearZ;
+				cameraParams.Far = cameraComponent.FarZ;
+
+				context->SetComputeCBV(1, sizeof(cameraParams), &cameraParams);
+
+				//context->List->SetComputeRootUnorderedAccessView(2, m_uavResource->GetGPUVirtualAddress());
+				context->List->SetComputeRootDescriptorTable(2, gpuHandle);
+
+				context->List->Dispatch(16, 9, 24);
+
+				context->List->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_uavResource.Get(), D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_COPY_SOURCE));
+				context->List->CopyResource(m_uavReadback.Get(), m_uavResource.Get());
+				context->List->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_uavResource.Get(), D3D12_RESOURCE_STATE_COPY_SOURCE, D3D12_RESOURCE_STATE_COMMON));
+			}
+		}
+
+		void LightingSystem::ReadClusters()
+		{
+			printf("TEST");
+
+			auto* render = Render::GetInstance();
+			auto* device = render->GetDevice();
+
+			std::array<ClusterData, 16 * 9 * 24> data;
+			m_uavReadback->Map(0, nullptr, reinterpret_cast<void**>(data.data()));
+			for (auto& item : data)
+			{
+				std::wstringstream oss;
+
+				oss << item.MinPoint.x << ", " << item.MinPoint.y << ", " << item.MinPoint.z << "; "
+					<< item.MaxPoint.x << ", " << item.MaxPoint.y << ", " << item.MaxPoint.z << std::endl << std::endl;
+
+				std::wstring ws = oss.str();
+				OutputDebugString(ws.c_str());
+			}
+			m_uavReadback->Unmap(0, nullptr);
+		}
 	}
 }

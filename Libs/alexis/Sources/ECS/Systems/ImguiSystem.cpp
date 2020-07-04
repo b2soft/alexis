@@ -60,6 +60,8 @@ namespace alexis
 			const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
 
 			context->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
+			//float clearColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+			//context->ClearRTV(backbuffer.GetRtv(RenderTarget::Slot0), clearColor);
 
 			context->SetRenderTarget(backbuffer);
 			context->SetViewport(backbuffer.GetViewport());

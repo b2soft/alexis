@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ECS/ECS.h>
+#include <optional>
 
 namespace alexis
 {
@@ -15,11 +16,18 @@ namespace alexis
 		public:
 			void Init();
 			void Render(CommandContext* context);
-			DirectX::XMVECTOR GetSunDirection() const;
+			void BuildClusters(CommandContext* context);
+			void ReadClusters();
 
 		private:
 			Material* m_lightingMaterial{ nullptr };
 			Mesh* m_fsQuad{ nullptr };
+
+			Microsoft::WRL::ComPtr<ID3D12Resource> m_uavResource;
+			Microsoft::WRL::ComPtr<ID3D12Resource> m_uavReadback;
+			std::optional<std::size_t> m_uavOffset;
+			CD3DX12_CPU_DESCRIPTOR_HANDLE m_uavHandle;
+			Material* m_buildClustersMaterial{ nullptr };
 		};
 	}
 }

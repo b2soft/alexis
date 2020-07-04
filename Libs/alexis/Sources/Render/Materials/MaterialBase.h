@@ -15,6 +15,7 @@ namespace alexis
 	{
 		std::wstring VSPath;
 		std::wstring PSPath;
+		std::wstring CSPath;
 
 		std::vector<std::wstring> Textures;
 		std::wstring RTV;
@@ -50,5 +51,7 @@ namespace alexis
 
 		ComPtr<ID3DBlob> m_vertexShader;
 		ComPtr<ID3DBlob> m_pixelShader;
+
+		bool isCompute{ false };
 	};
 }

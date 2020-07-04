@@ -37,7 +37,7 @@ namespace alexis
 
 			auto lightingSystem = ecsWorld.GetSystem<LightingSystem>();
 			XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(90.f), 0.f, 0);
-			ecsWorld.AddComponent(entity, ecs::TransformComponent{ -lightingSystem->GetSunDirection(), rotation, {1.f} });
+			//ecsWorld.AddComponent(entity, ecs::TransformComponent{ -lightingSystem->GetSunDirection(), rotation, {1.f} });
 			
 			//auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			//cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
@@ -50,7 +50,7 @@ namespace alexis
 
 			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			auto lightingSystem = ecsWorld.GetSystem<LightingSystem>();
-			cameraSystem->SetPosition(m_phantomCamera, -lightingSystem->GetSunDirection());
+			//cameraSystem->SetPosition(m_phantomCamera, -lightingSystem->GetSunDirection());
 			cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });
 
 			DepthCB depthParams;
@@ -74,7 +74,7 @@ namespace alexis
 
 				depthParams.modelMatrix = modelComponent.ModelMatrix;
 
-				context->SetDynamicCBV(0, sizeof(depthParams), &depthParams);
+				context->SetCBV(0, sizeof(depthParams), &depthParams);
 				modelComponent.Mesh->Draw(context);
 			}
 		}

@@ -27,7 +27,7 @@ namespace alexis
 			const auto& backTexture = backbuffer.GetTexture(RenderTarget::Slot::Slot0);
 
 			auto rtManager = render->GetRTManager();
-			auto hdrRT = rtManager->GetRenderTarget(L"HDR");
+			auto hdrRT = rtManager->GetRenderTarget(L"MainRT");
 
 			context->TransitionResource(backTexture, D3D12_RESOURCE_STATE_PRESENT, D3D12_RESOURCE_STATE_RENDER_TARGET);
 			context->TransitionResource(hdrRT->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
