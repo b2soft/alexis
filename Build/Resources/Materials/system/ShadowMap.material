@@ -1,7 +1,0 @@
-{
-	"shaderVS": "Shadows_vs",
-	"shaderPS": "",
-	"textures": [],
-	"rtv": "$Shadow Map",
-	"DepthEnable":true
-}

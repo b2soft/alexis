@@ -1,7 +1,0 @@
-{
-	"shaderVS": "PBS_test_object_vs",
-	"shaderPS": "PBS_test_object_ps",
-	"textures": ["Resources/Textures/Rusty/rustediron2_basecolor.dds", "Resources/Textures/Rusty/rustediron2_normal.dds", "Resources/Textures/Rusty/rustediron2_mero.dds"],
-	"rtv": "$GB",
-	"DepthEnable":true
-}
