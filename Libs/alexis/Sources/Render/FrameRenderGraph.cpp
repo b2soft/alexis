@@ -72,13 +72,13 @@ namespace alexis
 		pbrTask();
 
 		// Shadows Cast
-		auto* shadowContext = commandManager->CreateCommandContext();
-		auto shadowTask = [shadowContext, &ecsWorld]
-		{
-			auto shadowSystem = ecsWorld.GetSystem<ecs::ShadowSystem>();
-			shadowSystem->Render(shadowContext);
-		};
-		shadowTask();
+		//auto* shadowContext = commandManager->CreateCommandContext();
+		//auto shadowTask = [shadowContext, &ecsWorld]
+		//{
+		//	auto shadowSystem = ecsWorld.GetSystem<ecs::ShadowSystem>();
+		//	shadowSystem->Render(shadowContext);
+		//};
+		//shadowTask();
 
 		// Lighting Resolve
 		auto lightingContext = commandManager->CreateCommandContext();
@@ -132,7 +132,7 @@ namespace alexis
 		{
 			clearTargetContext->Finish();
 			pbsContext->Finish();
-			shadowContext->Finish();
+			//shadowContext->Finish();
 			envContext->Finish();
 			lightingContext->Finish();
 			skyboxContext->Finish();

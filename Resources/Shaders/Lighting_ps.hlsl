@@ -19,8 +19,6 @@ struct PointLightParams
 {
 	float4 Position;
 	float4 Color;
-	float Linear;
-	float Exp;
 };
 
 struct ShadowMapParams
@@ -91,7 +89,6 @@ float4 main(PSInput input) : SV_TARGET
 	float roughness = metalRoughness.g;
 	float ao = metalRoughness.b;
 
-
 	float depth = depthTexture.Sample(PointSampler, uv).r;
 	[flatten] if (depth >= 1.0f)
 	{
@@ -117,8 +114,8 @@ float4 main(PSInput input) : SV_TARGET
 		float3 H = normalize(V + L);
 
 		float distance = length(PointLightsCB.Position.xyz - worldPos);
-		float attenuation = PointLightsCB.Linear * distance + PointLightsCB.Exp * distance * distance;
-		float3 radiance = PointLightsCB.Color.rgb * 100 / attenuation;
+		float attenuation = 1 / (distance * distance);
+		float3 radiance = PointLightsCB.Color.rgb * attenuation;
 
 		// Cook-Torrance BRDF
 		float NDF = D_TrowbridgeReitz(N, H, roughness);
@@ -144,23 +141,23 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 ambient = 0.f;
 	// Env BRDF
-	{
-		float3 F = F_SchlickRoughness(max(dot(N, V), 0.0f), F0, roughness);
-
-		float3 kS = F;
-		float3 kD = 1.0 - kS;
-		kD *= (1.0 - metallic);
-
-		float3 irradiance = irradianceMap.Sample(LinearSampler, N).rgb;
-		float3 diffuse = irradiance * baseColor;
-
-		const float k_maxReflectionLod = 5.0f;
-		float3 prefilteredColor = prefilteredMap.SampleLevel(LinearSampler, R, roughness * k_maxReflectionLod).rgb;
-		float2 envBRDF = brdfLUT.Sample(LinearSampler, float2(max(dot(N,V), 0.0), roughness)).rg;
-		float3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
-
-		ambient = (kD * diffuse + specular) * ao;
-	}
+	//{
+	//	float3 F = F_SchlickRoughness(max(dot(N, V), 0.0f), F0, roughness);
+	//
+	//	float3 kS = F;
+	//	float3 kD = 1.0 - kS;
+	//	kD *= (1.0 - metallic);
+	//
+	//	float3 irradiance = irradianceMap.Sample(LinearSampler, N).rgb;
+	//	float3 diffuse = irradiance * baseColor;
+	//
+	//	const float k_maxReflectionLod = 5.0f;
+	//	float3 prefilteredColor = prefilteredMap.SampleLevel(LinearSampler, R, roughness * k_maxReflectionLod).rgb;
+	//	float2 envBRDF = brdfLUT.Sample(LinearSampler, float2(max(dot(N,V), 0.0), roughness)).rg;
+	//	float3 specular = prefilteredColor * (F * envBRDF.x + envBRDF.y);
+	//
+	//	ambient = (kD * diffuse + specular) * ao;
+	//}
 
 	float3 color = ambient + Lo;
 	//float3 color = NDF;// ambient + Lo;

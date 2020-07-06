@@ -83,15 +83,15 @@ namespace alexis
 				{
 					std::string lightTypeStr = componentKV.value()["type"];
 
-					if (lightTypeStr == "Directional")
+					if (lightTypeStr == "Point")
 					{
 						auto colorJson = componentKV.value()["color"];
 						XMVECTOR color = XMVectorSet(colorJson["r"], colorJson["g"], colorJson["b"], 1.f);
 
-						auto dirJson = componentKV.value()["direction"];
-						XMVECTOR direction = XMVectorSet(dirJson["x"], dirJson["y"], dirJson["z"], 1.f);
+						auto dirJson = componentKV.value()["position"];
+						XMVECTOR position = XMVectorSet(dirJson["x"], dirJson["y"], dirJson["z"], 1.f);
 
-						ecsWorld.AddComponent(entity, ecs::LightComponent{ ecs::LightComponent::LightType::Directional, direction, color });
+						ecsWorld.AddComponent(entity, ecs::LightComponent{ ecs::LightComponent::LightType::Point, position, color });
 					}
 				}
 			}

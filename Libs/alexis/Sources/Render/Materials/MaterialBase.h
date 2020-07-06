@@ -24,6 +24,7 @@ namespace alexis
 		D3D12_DEPTH_WRITE_MASK DepthWriteMask{ D3D12_DEPTH_WRITE_MASK_ALL };
 		bool CustomDS = false;
 		CD3DX12_DEPTH_STENCIL_DESC DepthStencil{ D3D12_DEFAULT };
+		CD3DX12_BLEND_DESC BlendDesc{ D3D12_DEFAULT };
 	};
 
 	class Material

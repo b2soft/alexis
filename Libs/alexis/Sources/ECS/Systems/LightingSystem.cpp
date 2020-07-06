@@ -52,16 +52,13 @@ namespace alexis
 			} Attenuation;
 		};
 
-		float CalculatePointLightScale(const PointLight& light)
+		float CalculatePointLightScale(const XMVECTOR& color, const XMVECTOR& position)
 		{
-			XMFLOAT4 color;
-			XMStoreFloat4(&color, light.Color);
-			float maxChannel = std::fmax(std::fmax(color.x, color.y), color.z);
+			XMFLOAT4 colorOut;
+			XMStoreFloat4(&colorOut, color);
+			float maxChannel = std::fmax(std::fmax(colorOut.x, colorOut.y), colorOut.z);
 
-			float ret = (light.Attenuation.Linear + sqrtf(light.Attenuation.Linear * light.Attenuation.Linear - 4 * light.Attenuation.Exp * (light.Attenuation.Exp - 256 * maxChannel))) /
-				(2 * light.Attenuation.Exp);
-
-			return ret;
+			return sqrtf(maxChannel * 256);
 		}
 
 		void LightingSystem::Init()
@@ -105,6 +102,15 @@ namespace alexis
 				params.RTV = L"$HDR";
 
 				params.CullMode = D3D12_CULL_MODE_FRONT;
+
+
+				CD3DX12_BLEND_DESC blendDesc{ D3D12_DEFAULT };
+				blendDesc.RenderTarget[0].BlendEnable = true;
+				blendDesc.RenderTarget[0].BlendOp = D3D12_BLEND_OP_ADD;
+				blendDesc.RenderTarget[0].DestBlend = D3D12_BLEND_ONE;
+				blendDesc.RenderTarget[0].SrcBlend = D3D12_BLEND_ONE;
+
+				params.BlendDesc = blendDesc;
 
 				CD3DX12_DEPTH_STENCIL_DESC depthDesc{ D3D12_DEFAULT };
 				depthDesc.DepthEnable = false;
@@ -164,12 +170,12 @@ namespace alexis
 
 			for (const auto& entity : Entities)
 			{
-				auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
-				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
-				{
-					directionalLights[0].Color = lightComponent.Color;
-					directionalLights[0].Direction = lightComponent.Direction;
-				}
+			//	auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
+			//	if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
+			//	{
+			//		directionalLights[0].Color = lightComponent.Color;
+			//		directionalLights[0].Direction = lightComponent.Direction;
+			//	}
 			}
 
 			context->SetDynamicCBV(1, sizeof(directionalLights), &directionalLights);
@@ -227,28 +233,27 @@ namespace alexis
 			cameraParams.InvProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
 			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
 
-			PointLight pl;
-			pl.Color = { 1.0, 0.0, 0.0, 1.0 };
-			pl.Position = { 7.0, 4.0, 0.0, 0.0 };
-			pl.Attenuation.Exp = 1.0;
-			pl.Attenuation.Linear = 1.0;
-
-			PointLight pl2;
-			pl2.Color = { 0.0, 1.0, 0.0, 1.0 };
-			pl2.Position = { 4.0, 7.0, 0.0, 0.0 };
-			pl2.Attenuation.Exp = 1.0;
-			pl2.Attenuation.Linear = 1.0;
-
-			float scale = CalculatePointLightScale(pl);
-			XMMATRIX wvpMatrix = XMMatrixIdentity()* XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(pl.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
-
-			LightParams lightCB{ wvpMatrix };
-			context->SetDynamicCBV(3, sizeof(lightCB), &lightCB);
-			context->SetDynamicCBV(4, sizeof(pl), &pl);
-
+			// Point Lights
 			{
 				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "Point Light Stencil");
-				m_sphere->Draw(context);
+
+				m_lightStencil->Set(context);
+
+				for (auto entity : Entities)
+				{
+					auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
+					if (lightComponent.Type == ecs::LightComponent::LightType::Point)
+					{
+						float scale = CalculatePointLightScale(lightComponent.Color, lightComponent.Position);
+						XMMATRIX wvpMatrix = XMMatrixIdentity() * XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(lightComponent.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
+
+						LightParams lightCB{ wvpMatrix };
+						context->SetDynamicCBV(3, sizeof(lightCB), &lightCB);
+
+						
+						m_sphere->Draw(context);
+					}
+				}
 
 				auto barrierStencil = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COMMON);
 				context->List->ResourceBarrier(1, &barrierStencil);
@@ -260,27 +265,43 @@ namespace alexis
 				auto barrierStencil2 = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ, 1);
 				D3D12_RESOURCE_BARRIER barriers[] = { barrierStencil , barrierStencil2 };
 				context->List->ResourceBarrier(2, barriers);
+				context->List->OMSetStencilRef(0);
 
 				m_lightShading->Set(context);
 
-				context->List->OMSetStencilRef(0);
+				for (auto entity : Entities)
+				{
+					auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
+					if (lightComponent.Type == ecs::LightComponent::LightType::Point)
+					{
+						float scale = CalculatePointLightScale(lightComponent.Color, lightComponent.Position);
+						XMMATRIX wvpMatrix = XMMatrixIdentity() * XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(lightComponent.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
 
-				m_sphere->Draw(context);
+						PointLight pl{ lightComponent.Position, lightComponent.Color };
+
+						LightParams lightCB{ wvpMatrix };
+						context->SetDynamicCBV(3, sizeof(lightCB), &lightCB);
+						context->SetDynamicCBV(4, sizeof(pl), &pl);
+
+						
+						m_sphere->Draw(context);
+					}
+				}
 			}
 		}
 
 		DirectX::XMVECTOR LightingSystem::GetSunDirection() const
 		{
-			for (const auto& entity : Entities)
-			{
-				auto& ecsWorld = Core::Get().GetECSWorld();
+			//for (const auto& entity : Entities)
+			//{
+			//	auto& ecsWorld = Core::Get().GetECSWorld();
 
-				auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
-				if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
-				{
-					return lightComponent.Direction;
-				}
-			}
+			//	auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
+			//	if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
+			//	{
+			//		return lightComponent.Direction;
+			//	}
+			//}
 
 			return { 0., 0., 0.f };
 		}
