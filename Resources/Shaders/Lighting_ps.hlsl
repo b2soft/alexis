@@ -31,6 +31,7 @@ struct ShadowMapParams
 struct PSInput
 {
 	float2 uv0 : TEXCOORD;
+	float4 screenPos : SV_Position;
 };
 
 ConstantBuffer<CameraParams> CamCB : register(b0);
@@ -80,26 +81,24 @@ float LinearizeDepth(float depth)
 
 float4 main(PSInput input) : SV_TARGET
 {
-	return float4(1.0, 0.0, 0.0, 1.0);
-	float3 baseColor = gb0.Sample(PointSampler, input.uv0).rgb;
-	float3 normal = gb1.Sample(AnisoSampler, input.uv0).xyz;
-	float3 metalRoughness = gb2.Sample(PointSampler, input.uv0).rgb;
+	//float2 uv = input.uv0;
+	float2 uv = input.screenPos.xy / float2(1280, 720);// *float2(2,-2) - float2(1, -1);// / float2(1280, 720);
+	//return float4(1.0, 0.0, 0.0, 1.0);
+	float3 baseColor = gb0.Sample(PointSampler, uv).rgb;
+	float3 normal = gb1.Sample(AnisoSampler, uv).xyz;
+	float3 metalRoughness = gb2.Sample(PointSampler, uv).rgb;
 	float metallic = metalRoughness.r;
 	float roughness = metalRoughness.g;
 	float ao = metalRoughness.b;
 
-	float depth = depthTexture.Sample(PointSampler, input.uv0).r;
+
+	float depth = depthTexture.Sample(PointSampler, uv).r;
 	[flatten] if (depth >= 1.0f)
 	{
 		discard;
 	}
 
-	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
-
-	return float4(worldPos, 1.0);
-
-	float3 lightPos[4] = { float3(-10, 2, -4), float3(20, 20, 20), float3(-20, -20, 20), float3(20, -20, 20) };
-	float3 lightColor[4] = { float3(300, 300, 300), float3(300, 300, 300), float3(300, 300, 300), float3(300, 300, 300) };
+	float3 worldPos = GetWorldPosFromDepth(depth, uv);
 
 	//TODO: normal mapping
 	float3 N = normalize(normal * 2.0 - 1.0);
@@ -111,15 +110,15 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 Lo = 0.0f;
 
-	[unroll]
+	//[unroll]
 	//for (int i = 0; i < 1; ++i)
 	{
-		float3 L = normalize(PointLightsCB.Position - worldPos);
+		float3 L = normalize(PointLightsCB.Position.xyz - worldPos);
 		float3 H = normalize(V + L);
 
-		float distance = length(PointLightsCB.Position - worldPos);
+		float distance = length(PointLightsCB.Position.xyz - worldPos);
 		float attenuation = PointLightsCB.Linear * distance + PointLightsCB.Exp * distance * distance;
-		float3 radiance = PointLightsCB.Color *100 * attenuation;
+		float3 radiance = PointLightsCB.Color.rgb * 100 / attenuation;
 
 		// Cook-Torrance BRDF
 		float NDF = D_TrowbridgeReitz(N, H, roughness);

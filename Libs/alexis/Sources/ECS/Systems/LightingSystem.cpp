@@ -108,6 +108,7 @@ namespace alexis
 
 				CD3DX12_DEPTH_STENCIL_DESC depthDesc{ D3D12_DEFAULT };
 				depthDesc.DepthEnable = false;
+				depthDesc.DepthWriteMask = D3D12_DEPTH_WRITE_MASK_ZERO;
 				depthDesc.StencilEnable = TRUE;
 				depthDesc.StencilWriteMask = 0x00;
 				depthDesc.BackFace.StencilFunc = D3D12_COMPARISON_FUNC_NOT_EQUAL;
@@ -220,11 +221,23 @@ namespace alexis
 
 			auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(activeCamera);
 
+			CameraParams cameraParams;
+			cameraParams.CameraPos = transformComponent.Position;
+			cameraParams.InvViewMatrix = cameraSystem->GetInvViewMatrix(activeCamera);
+			cameraParams.InvProjMatrix = cameraSystem->GetInvProjMatrix(activeCamera);
+			context->SetDynamicCBV(0, sizeof(cameraParams), &cameraParams);
+
 			PointLight pl;
 			pl.Color = { 1.0, 0.0, 0.0, 1.0 };
-			pl.Position = { 0.0, 0.0, 0.0, 0.0 };
+			pl.Position = { 7.0, 4.0, 0.0, 0.0 };
 			pl.Attenuation.Exp = 1.0;
 			pl.Attenuation.Linear = 1.0;
+
+			PointLight pl2;
+			pl2.Color = { 0.0, 1.0, 0.0, 1.0 };
+			pl2.Position = { 4.0, 7.0, 0.0, 0.0 };
+			pl2.Attenuation.Exp = 1.0;
+			pl2.Attenuation.Linear = 1.0;
 
 			float scale = CalculatePointLightScale(pl);
 			XMMATRIX wvpMatrix = XMMatrixIdentity()* XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(pl.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
@@ -236,12 +249,15 @@ namespace alexis
 			{
 				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "Point Light Stencil");
 				m_sphere->Draw(context);
+
+				auto barrierStencil = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_COMMON);
+				context->List->ResourceBarrier(1, &barrierStencil);
 			}
 
 			{
 				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "Point Light Shading");
-				auto barrierStencil2 = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 0);
-				auto barrierStencil = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ, 1);
+				auto barrierStencil = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 0);
+				auto barrierStencil2 = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ, 1);
 				D3D12_RESOURCE_BARRIER barriers[] = { barrierStencil , barrierStencil2 };
 				context->List->ResourceBarrier(2, barriers);
 
