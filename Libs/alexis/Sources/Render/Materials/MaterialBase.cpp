@@ -131,7 +131,14 @@ namespace alexis
 		pipelineStateStream.InputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
 		pipelineStateStream.PrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pipelineStateStream.Rasterizer = rasterizerDesc;
-		pipelineStateStream.DepthStencil = depthStencilDesc;
+		if (params.CustomDS)
+		{
+			pipelineStateStream.DepthStencil = params.DepthStencil;
+		}
+		else
+		{
+			pipelineStateStream.DepthStencil = depthStencilDesc;
+		}
 
 		if (vertexShaderBlob != nullptr)
 		{

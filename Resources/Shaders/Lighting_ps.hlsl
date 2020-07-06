@@ -15,6 +15,14 @@ struct DirectionalLightParams
 	float4 Color;
 };
 
+struct PointLightParams
+{
+	float4 Position;
+	float4 Color;
+	float Linear;
+	float Exp;
+};
+
 struct ShadowMapParams
 {
 	matrix LightSpaceMatrix;
@@ -28,6 +36,7 @@ struct PSInput
 ConstantBuffer<CameraParams> CamCB : register(b0);
 ConstantBuffer<DirectionalLightParams> DirectionalLightsCB[1] : register(b1);
 ConstantBuffer<ShadowMapParams> ShadowMapCB : register(b2);
+ConstantBuffer<PointLightParams> PointLightsCB : register(b4);
 
 Texture2D gb0 : register(t0); // (x,y,z) - baseColor RGB
 Texture2D gb1 : register(t1); // (x,y,z) - normal XYZ
@@ -71,6 +80,7 @@ float LinearizeDepth(float depth)
 
 float4 main(PSInput input) : SV_TARGET
 {
+	return float4(1.0, 0.0, 0.0, 1.0);
 	float3 baseColor = gb0.Sample(PointSampler, input.uv0).rgb;
 	float3 normal = gb1.Sample(AnisoSampler, input.uv0).xyz;
 	float3 metalRoughness = gb2.Sample(PointSampler, input.uv0).rgb;
@@ -86,6 +96,8 @@ float4 main(PSInput input) : SV_TARGET
 
 	float3 worldPos = GetWorldPosFromDepth(depth, input.uv0);
 
+	return float4(worldPos, 1.0);
+
 	float3 lightPos[4] = { float3(-10, 2, -4), float3(20, 20, 20), float3(-20, -20, 20), float3(20, -20, 20) };
 	float3 lightColor[4] = { float3(300, 300, 300), float3(300, 300, 300), float3(300, 300, 300), float3(300, 300, 300) };
 
@@ -100,14 +112,14 @@ float4 main(PSInput input) : SV_TARGET
 	float3 Lo = 0.0f;
 
 	[unroll]
-	for (int i = 0; i < 1; ++i)
+	//for (int i = 0; i < 1; ++i)
 	{
-		float3 L = normalize(lightPos[i] - worldPos);
+		float3 L = normalize(PointLightsCB.Position - worldPos);
 		float3 H = normalize(V + L);
 
-		float distance = length(lightPos[i] - worldPos);
-		float attenuation = 1.0 / (distance * distance);
-		float3 radiance = lightColor[i] * attenuation;
+		float distance = length(PointLightsCB.Position - worldPos);
+		float attenuation = PointLightsCB.Linear * distance + PointLightsCB.Exp * distance * distance;
+		float3 radiance = PointLightsCB.Color *100 * attenuation;
 
 		// Cook-Torrance BRDF
 		float NDF = D_TrowbridgeReitz(N, H, roughness);
