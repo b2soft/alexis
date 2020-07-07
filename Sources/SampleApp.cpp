@@ -18,7 +18,7 @@ using namespace DirectX;
 
 //#define MULTITHREAD_CONTEXTS
 
-static const float k_cameraSpeed = 20.0f;
+static const float k_cameraSpeed = 10.0f;
 static const float k_cameraTurnSpeed = 0.1f;
 
 SampleApp::SampleApp() :

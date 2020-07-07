@@ -1,4 +1,4 @@
-#include "../PBS_helpers.hlsli"
+#include "../utils/PBSHelpers.hlsli"
 
 float VanDerCorpusSequence(uint bits)
 {

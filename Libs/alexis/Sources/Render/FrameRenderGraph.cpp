@@ -85,7 +85,7 @@ namespace alexis
 		auto lightingTask = [lightingContext, &ecsWorld]
 		{
 			auto lightingSystem = ecsWorld.GetSystem<ecs::LightingSystem>();
-			lightingSystem->Render2(lightingContext);
+			lightingSystem->Render(lightingContext);
 		};
 		lightingTask();
 

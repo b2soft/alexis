@@ -235,6 +235,8 @@ namespace alexis
 		}
 
 		m_irradianceCalculated = true;
+
+		context->TransitionResource(m_irradianceMap, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	void ecs::EnvironmentSystem::CapturePreFilteredTexture(CommandContext* context)
@@ -287,6 +289,8 @@ namespace alexis
 				m_cubeMesh->Draw(context);
 			}
 		}
+
+		context->TransitionResource(m_prefilteredMap, D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	void ecs::EnvironmentSystem::ConvoluteBRDF(CommandContext* context)
@@ -308,6 +312,8 @@ namespace alexis
 		context->SetViewport(rt->GetViewport());
 
 		m_fsQuad->Draw(context);
+
+		context->TransitionResource(rt->GetTexture(RenderTarget::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_COMMON);
 	}
 
 	void ecs::EnvironmentSystem::RenderSkybox(CommandContext* context)
