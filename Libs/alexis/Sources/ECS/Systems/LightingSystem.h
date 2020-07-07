@@ -21,9 +21,7 @@ namespace alexis
 
 		private:
 			Mesh* m_fsQuad{ nullptr };
-
 			Mesh* m_sphere{ nullptr };
-
 
 			std::unique_ptr<Material> m_pointLightStencil;
 			std::unique_ptr<Material> m_pointLight;

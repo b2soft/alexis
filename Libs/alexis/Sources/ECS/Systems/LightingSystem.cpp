@@ -249,15 +249,6 @@ namespace alexis
 			auto& depth = gbuffer->GetTexture(RenderTarget::DepthStencil);
 			//auto& shadowMap = shadowMapRT->GetTexture(RenderTarget::DepthStencil);
 
-			//context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot1), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(gbuffer->GetTexture(RenderTarget::Slot::Slot2), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(depth, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(shadowMap, D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(irradiance->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(prefiltered->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-			//context->TransitionResource(convBRDF->GetTexture(RenderTarget::Slot::Slot0), D3D12_RESOURCE_STATE_RENDER_TARGET, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE);
-
 			context->SetRenderTarget(*hdr, *gbuffer);
 			context->SetViewport(hdr->GetViewport());
 
@@ -287,17 +278,6 @@ namespace alexis
 
 		DirectX::XMVECTOR LightingSystem::GetSunDirection() const
 		{
-			//for (const auto& entity : Entities)
-			//{
-			//	auto& ecsWorld = Core::Get().GetECSWorld();
-
-			//	auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
-			//	if (lightComponent.Type == ecs::LightComponent::LightType::Directional)
-			//	{
-			//		return lightComponent.Direction;
-			//	}
-			//}
-
 			return { 0., 0., 0.f };
 		}
 
