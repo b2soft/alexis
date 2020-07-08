@@ -38,8 +38,7 @@ namespace alexis
 					XMMATRIX rotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(transformComponent.Rotation));
 					XMMATRIX scalingMatrix = XMMatrixScaling(transformComponent.UniformScale, transformComponent.UniformScale, transformComponent.UniformScale);
 
-					modelComponent.ModelMatrix = XMMatrixMultiply(translationMatrix, rotationMatrix);
-					modelComponent.ModelMatrix = XMMatrixMultiply(modelComponent.ModelMatrix, scalingMatrix);
+					modelComponent.ModelMatrix = XMMatrixMultiply(XMMatrixMultiply(scalingMatrix, rotationMatrix), translationMatrix);
 					
 					modelComponent.IsTransformDirty = false;
 				}
@@ -49,6 +48,8 @@ namespace alexis
 		// TODO: remove XMMATRIX viewProj arg
 		void XM_CALLCONV ModelSystem::Render(CommandContext* context)
 		{
+			PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "ModelSystem Render");
+
 			auto& ecsWorld = Core::Get().GetECSWorld();
 			auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			auto activeCamera = cameraSystem->GetActiveCamera();

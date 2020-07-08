@@ -1,170 +1,204 @@
 {
-    "entities":[
-	{
-          "components":[
-             {
-                "CameraComponent":{
-                   "fov":45.0,
-                   "aspectRatio":1.7777778,
-                   "nearZ":0.01,
-                   "farZ":100.0,
-				   "isOrtho":0
-                }
-             },
-             {
-                "TransformComponent":{
-                   "position":{
-                      "x":9,
-                      "y":4,
-                      "z":8
-                   },
-                   "rotation":{
-                      "x":0.0,
-                      "y":0.0,
-                      "z":180.0
-                   },
-				   "scale":1.0
-                }
-             }
-          ]
-       },
-      {
-         "components":[
-            {
-               "ModelComponent":{
-                  "mesh":"Resources/Models/sgc.DAE",
-				  "material":"Resources/Materials/Concrete.material"
-               }
-            },
-            {
-               "TransformComponent":{
-                  "position":{
-                     "x":0.0,
-                     "y":1,
-                     "z":0.0
-                  },
-                  "rotation":{
-                     "x":0.0,
-                     "y":0.0,
-                     "z":0.0
-                  },
-				  "scale":1.0
-               }
-            }
-         ]
-      },
-	  {
-         "components":[
-            {
-               "ModelComponent":{
-                  "mesh":"Resources/Models/sphere.DAE",
-				  "material":"Resources/Materials/Rusty.material"
-               }
-            },
-            {
-               "TransformComponent":{
-                  "position":{
-                     "x":10,
-                     "y":3,
-                     "z":-1
-                  },
-                  "rotation":{
-                     "x":0.0,
-                     "y":0.0,
-                     "z":0.0
-                  },
-				  "scale":1.0
-               }
-            }
-         ]
-      },
-	  {
-         "components":[
-            {
-               "ModelComponent":{
-                  "mesh":"Resources/Models/cube.DAE",
-				  "material":"Resources/Materials/Rusty.material"
-               }
-            },
-            {
-               "TransformComponent":{
-                  "position":{
-                     "x":6,
-                     "y":3.5,
-                     "z":-1
-                  },
-                  "rotation":{
-                     "x":3,
-                     "y":19,
-                     "z":15
-                  },
-				  "scale":1.0
-               }
-            }
-         ]
-      },
-	  {
-         "components":[
-            {
-               "ModelComponent":{
-                  "mesh":"Resources/Models/cube.DAE",
-				  "material":"Resources/Materials/Rusty.material"
-               }
-            },
-            {
-               "TransformComponent":{
-                  "position":{
-                     "x":10,
-                     "y":4,
-                     "z":5
-                  },
-                  "rotation":{
-                     "x":46,
-                     "y":13,
-                     "z":28
-                  },
-				  "scale":1.0
-               }
-            }
-         ]
-      },
-	  {
-		"components":[
-			{
-				"LightComponent":{
-					"type":"Point",
-					"color":{
-						"r":1,
-						"g":0,
-						"b":0
-					},
-					"position":{
-						"x":12.0,
-						"y":4.5,
-						"z":-3.3
+	"entities": [{
+			"components": [{
+					"CameraComponent": {
+						"fov": 45.0,
+						"aspectRatio": 1.7777778,
+						"nearZ": 0.01,
+						"farZ": 100.0,
+						"isOrtho": 0
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 9,
+							"y": 4,
+							"z": 8
+						},
+						"rotation": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 180.0
+						},
+						"scale": 1.0
 					}
 				}
-			}
-		]
-	  },
-	  {
-		"components":[
-			{
-				"LightComponent":{
-					"type":"Point",
-					"color":{
-						"r":0,
-						"g":1,
-						"b":0
-					},
-					"position":{
-						"x":5.2,
-						"y":5.7,
-						"z":-2.9
+			]
+		},
+		{
+			"components": [{
+					"ModelComponent": {
+						"mesh": "Resources/Models/sgc.DAE",
+						"material": "Resources/Materials/Concrete.material"
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 0.0,
+							"y": 1,
+							"z": 0.0
+						},
+						"rotation": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0
+						},
+						"scale": 1.0
 					}
 				}
-			}
-		]
-	  }
-    ]
- }
+			]
+		},
+		{
+			"components": [{
+					"ModelComponent": {
+						"mesh": "Resources/Models/sphere.DAE",
+						"material": "Resources/Materials/Rusty.material"
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 10,
+							"y": 3,
+							"z": -1
+						},
+						"rotation": {
+							"x": 0.0,
+							"y": 0.0,
+							"z": 0.0
+						},
+						"scale": 1.0
+					}
+				}
+			]
+		},
+		{
+			"components": [{
+					"ModelComponent": {
+						"mesh": "Resources/Models/cube.DAE",
+						"material": "Resources/Materials/Rusty.material"
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 6,
+							"y": 3.5,
+							"z": -1
+						},
+						"rotation": {
+							"x": 3,
+							"y": 19,
+							"z": 15
+						},
+						"scale": 1.0
+					}
+				}
+			]
+		},
+		{
+			"components": [{
+					"ModelComponent": {
+						"mesh": "Resources/Models/cube.DAE",
+						"material": "Resources/Materials/Rusty.material"
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 10,
+							"y": 4,
+							"z": 5
+						},
+						"rotation": {
+							"x": 46,
+							"y": 13,
+							"z": 28
+						},
+						"scale": 1.0
+					}
+				}
+			]
+		},
+		{
+			"components": [{
+					"LightComponent": {
+						"type": "Point",
+						"color": {
+							"r": 1,
+							"g": 0,
+							"b": 0
+						},
+						"position": {
+							"x": 12.0,
+							"y": 4.5,
+							"z": -3.3
+						}
+					}
+				},
+				{
+					"ModelComponent": {
+						"mesh": "Resources/Models/Sphere.DAE",
+						"material": "Resources/Materials/FlatColor.material"
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 12.0,
+							"y": 4.5,
+							"z": -3.3
+						},
+						"rotation": {
+							"x": 0,
+							"y": 0,
+							"z": 0
+						},
+						"scale": 0.1
+					}
+				}
+			]
+		},
+		{
+			"components": [{
+					"LightComponent": {
+						"type": "Point",
+						"color": {
+							"r": 0,
+							"g": 1,
+							"b": 0
+						},
+						"position": {
+							"x": 5.2,
+							"y": 5.7,
+							"z": -2.9
+						}
+					}
+				},
+				{
+					"ModelComponent": {
+						"mesh": "Resources/Models/Sphere.DAE",
+						"material": "Resources/Materials/FlatColor.material"
+					}
+				},
+				{
+					"TransformComponent": {
+						"position": {
+							"x": 5.2,
+							"y": 5.7,
+							"z": -2.9
+						},
+						"rotation": {
+							"x": 0,
+							"y": 0,
+							"z": 0
+						},
+						"scale": 0.1
+					}
+				}
+			]
+		}
+	]
+}

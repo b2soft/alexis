@@ -120,6 +120,12 @@
     <FxCompile Include="..\Resources\Shaders\system\AmbientLight_vs.hlsl">
       <Filter>Resources\Shaders\system</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\FlatColor_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\FlatColor_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Resources\Shaders\utils\Common.hlsli">
