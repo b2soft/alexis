@@ -332,8 +332,8 @@ bool SampleApp::LoadContent()
 {
 	auto* scene = Core::Get().GetScene();
 	//scene->LoadFromJson(L"Resources/Scenes/PBR_test.scene");
-	//scene->LoadFromJson(L"Resources/Scenes/main.scene");
-	scene->LoadFromJson(L"Resources/Scenes/sgc.scene");
+	scene->LoadFromJson(L"Resources/Scenes/main.scene");
+	//scene->LoadFromJson(L"Resources/Scenes/sgc.scene");
 
 	auto& ecsWorld = Core::Get().GetECSWorld();
 	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();

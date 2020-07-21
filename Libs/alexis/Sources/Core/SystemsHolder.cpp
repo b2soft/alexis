@@ -17,6 +17,7 @@
 #include <ECS/Systems/Hdr2SdrSystem.h>
 #include <ECS/Systems/ImguiSystem.h>
 #include <ECS/Systems/EnvironmentSystem.h>
+#include <ECS/Systems/EditorSystem.h>
 
 namespace alexis
 {
@@ -72,6 +73,13 @@ namespace alexis
 		m_hdr2SdrSystem = ecsWorld.RegisterSystem<ecs::Hdr2SdrSystem>();
 
 		m_imguiSystem = ecsWorld.RegisterSystem<ecs::ImguiSystem>();
+
+
+		m_editorSystem = ecsWorld.RegisterSystem<ecs::EditorSystem>();
+
+		ecs::ComponentMask editorSystemMask;
+		editorSystemMask.set(ecsWorld.GetComponentType<ecs::TransformComponent>());
+		ecsWorld.SetSystemComponentMask<ecs::EditorSystem>(editorSystemMask);
 	}
 
 	void SystemsHolder::InitInternal()

@@ -32,15 +32,16 @@ namespace alexis
 				auto& modelComponent = ecsWorld.GetComponent<ModelComponent>(entity);
 				auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 
-				if (modelComponent.IsTransformDirty)
+				if (modelComponent.IsTransformDirty || transformComponent.IsTransformDirty)
 				{
 					XMMATRIX translationMatrix = XMMatrixTranslationFromVector(transformComponent.Position);
-					XMMATRIX rotationMatrix = XMMatrixTranspose(XMMatrixRotationQuaternion(transformComponent.Rotation));
+					XMMATRIX rotationMatrix = XMMatrixRotationQuaternion(transformComponent.Rotation);
 					XMMATRIX scalingMatrix = XMMatrixScaling(transformComponent.UniformScale, transformComponent.UniformScale, transformComponent.UniformScale);
 
 					modelComponent.ModelMatrix = XMMatrixMultiply(XMMatrixMultiply(scalingMatrix, rotationMatrix), translationMatrix);
 					
 					modelComponent.IsTransformDirty = false;
+					transformComponent.IsTransformDirty = false;
 				}
 			}
 		}

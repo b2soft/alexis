@@ -33,6 +33,7 @@
     <ClInclude Include="Sources\ECS\Components\TransformComponent.h" />
     <ClInclude Include="Sources\ECS\ECS.h" />
     <ClInclude Include="Sources\ECS\Systems\CameraSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\EditorSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\Hdr2SdrSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\ImguiSystem.h" />
@@ -64,6 +65,7 @@
     <ClCompile Include="Sources\Core\ResourceManager.cpp" />
     <ClCompile Include="Sources\Core\SystemsHolder.cpp" />
     <ClCompile Include="Sources\ECS\Systems\CameraSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\EditorSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\EnvironmentSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\Hdr2SdrSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\ImguiSystem.cpp" />

@@ -133,6 +133,11 @@ namespace alexis
 				return m_componentArray[m_entityToIndexMap[entity]];
 			}
 
+			bool HasData(Entity entity)
+			{
+				return m_entityToIndexMap.contains(entity);
+			}
+
 			void EntityDestroyed(Entity entity) override
 			{
 				// Remove component when entity is destroyed
@@ -200,6 +205,12 @@ namespace alexis
 			T& GetComponent(Entity entity)
 			{
 				return GetComponentArray<T>()->GetData(entity);
+			}
+
+			template<class T>
+			bool HasComponent(Entity entity)
+			{
+				return GetComponentArray<T>()->HasData(entity);
 			}
 
 			void EntityDestroyed(Entity entity)
@@ -374,6 +385,12 @@ namespace alexis
 			T& GetComponent(Entity entity)
 			{
 				return m_componentManager->GetComponent<T>(entity);
+			}
+
+			template<class T>
+			bool HasComponent(Entity entity)
+			{
+				return m_componentManager->HasComponent<T>(entity);
 			}
 
 			template<class T>
