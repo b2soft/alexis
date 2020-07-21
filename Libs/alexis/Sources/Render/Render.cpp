@@ -431,7 +431,7 @@ namespace alexis
 		// Depth
 		//DXGI_FORMAT depthFormat = DXGI_FORMAT_D32_FLOAT;
 		DXGI_FORMAT depthFormat = DXGI_FORMAT_R24G8_TYPELESS;
-		auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthFormat, alexis::g_clientWidth, alexis::g_clientHeight);
+		auto depthDesc = CD3DX12_RESOURCE_DESC::Tex2D(depthFormat, alexis::g_clientWidth, alexis::g_clientHeight, 1, 1);
 		depthDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
 
 		D3D12_CLEAR_VALUE depthClearValue;

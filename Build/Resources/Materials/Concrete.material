@@ -1,0 +1,7 @@
+{
+	"shaderVS": "PBS_object_vs",
+	"shaderPS": "PBS_object_ps",
+	"textures": ["Resources/Textures/Concrete/Basecolor.dds", "Resources/Textures/Concrete/Normal.dds", "Resources/Textures/Concrete/Mero.dds"],
+	"rtv": "$GB",
+	"DepthEnable":true
+}

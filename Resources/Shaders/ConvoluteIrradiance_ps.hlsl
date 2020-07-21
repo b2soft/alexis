@@ -1,4 +1,4 @@
-#include "PBS_helpers.hlsli"
+#include "utils/PBSHelpers.hlsli"
 
 TextureCube envMap : register(t0);
 

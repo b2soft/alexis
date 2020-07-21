@@ -10,14 +10,12 @@ namespace alexis
 		{
 			enum class LightType
 			{
-				Directional = 0, // Analytical direction only
-				Point, // Analytical coord only
-				Omni, // Sphere
-				Spot // Cone
+				Point = 0,
+				Spot
 			};
 
-			LightType Type{ LightType::Directional };
-			DirectX::XMVECTOR Direction;
+			LightType Type{ LightType::Point };
+			DirectX::XMVECTOR Position;
 			DirectX::XMVECTOR Color;
 		};
 	}

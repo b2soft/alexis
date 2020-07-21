@@ -117,6 +117,7 @@ namespace alexis
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL DepthStencil;
 			CD3DX12_PIPELINE_STATE_STREAM_RENDER_TARGET_FORMATS RtvFormats;
 			CD3DX12_PIPELINE_STATE_STREAM_DEPTH_STENCIL_FORMAT DsvFormats;
+			CD3DX12_PIPELINE_STATE_STREAM_BLEND_DESC BlendDesc;
 		} pipelineStateStream;
 
 		CD3DX12_RASTERIZER_DESC rasterizerDesc(D3D12_DEFAULT);
@@ -127,11 +128,20 @@ namespace alexis
 		depthStencilDesc.DepthFunc = params.DepthFunc;
 		depthStencilDesc.DepthWriteMask = params.DepthWriteMask;
 
+		pipelineStateStream.BlendDesc = params.BlendDesc;
+
 		pipelineStateStream.RootSignature = m_rootSignature.Get();
 		pipelineStateStream.InputLayout = { VertexDef::InputElements, VertexDef::InputElementCount };
 		pipelineStateStream.PrimitiveTopology = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
 		pipelineStateStream.Rasterizer = rasterizerDesc;
-		pipelineStateStream.DepthStencil = depthStencilDesc;
+		if (params.CustomDS)
+		{
+			pipelineStateStream.DepthStencil = params.DepthStencil;
+		}
+		else
+		{
+			pipelineStateStream.DepthStencil = depthStencilDesc;
+		}
 
 		if (vertexShaderBlob != nullptr)
 		{

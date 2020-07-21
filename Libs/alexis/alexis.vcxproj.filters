@@ -104,7 +104,10 @@
       <Filter>Sources\ECS\Systems</Filter>
     </ClCompile>
     <ClCompile Include="Sources\Render\RenderTargetManager.cpp">
-      <Filter>Sources</Filter>
+      <Filter>Sources\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\Systems\EditorSystem.cpp">
+      <Filter>Sources\ECS\Systems</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -217,6 +220,9 @@
       <Filter>Sources\Utils</Filter>
     </ClInclude>
     <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h">
+      <Filter>Sources\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Systems\EditorSystem.h">
       <Filter>Sources\ECS\Systems</Filter>
     </ClInclude>
   </ItemGroup>

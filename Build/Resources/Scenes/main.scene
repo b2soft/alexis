@@ -15,8 +15,8 @@
                 "TransformComponent":{
                    "position":{
                       "x":0,
-                      "y":15,
-                      "z":-10
+                      "y":1,
+                      "z":-2
                    },
                    "rotation":{
                       "x":0.0,
@@ -45,7 +45,7 @@
                   },
                   "rotation":{
                      "x":0.0,
-                     "y":90.0,
+                     "y":45.0,
                      "z":0.0
                   },
 				  "scale":1.0

@@ -32,6 +32,9 @@
 // D3D12 extension library.
 #include "d3dx12.h"
 
+// WinPixEventRuntime
+#include "pix3.h"
+
 // STL Headers
 #include <algorithm>
 #include <cassert>
@@ -44,7 +47,6 @@
 #include <unordered_map>
 #include <unordered_set>
 #include <filesystem>
-
 
 #include <json.hpp>
 namespace fs = std::filesystem;

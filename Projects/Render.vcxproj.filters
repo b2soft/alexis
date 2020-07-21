@@ -14,6 +14,9 @@
     <Filter Include="Resources\Shaders\system">
       <UniqueIdentifier>{91a38b5b-bb81-43d9-ab37-6595ae8e23be}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Resources\Shaders\utils">
+      <UniqueIdentifier>{f646259a-1bc4-4360-bdee-b33ee35fe6df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Sources\Main.cpp">
@@ -52,12 +55,6 @@
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\PBS_object_ps.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\Lighting_vs.hlsl">
-      <Filter>Resources\Shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="..\Resources\Shaders\Lighting_ps.hlsl">
       <Filter>Resources\Shaders</Filter>
     </FxCompile>
     <FxCompile Include="..\Resources\Shaders\Hdr2Sdr_ps.hlsl">
@@ -111,10 +108,31 @@
     <FxCompile Include="..\Resources\Shaders\system\ConvoluteBRDF_vs.hlsl">
       <Filter>Resources\Shaders\system</Filter>
     </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\PointLight_ps.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\PointLight_vs.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\AmbientLight_ps.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\system\AmbientLight_vs.hlsl">
+      <Filter>Resources\Shaders\system</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\FlatColor_vs.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="..\Resources\Shaders\FlatColor_ps.hlsl">
+      <Filter>Resources\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Resources\Shaders\PBS_Helpers.hlsli">
-      <Filter>Resources\Shaders</Filter>
+    <None Include="..\Resources\Shaders\utils\Common.hlsli">
+      <Filter>Resources\Shaders\utils</Filter>
+    </None>
+    <None Include="..\Resources\Shaders\utils\PBSHelpers.hlsli">
+      <Filter>Resources\Shaders\utils</Filter>
     </None>
   </ItemGroup>
 </Project>

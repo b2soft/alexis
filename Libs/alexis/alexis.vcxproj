@@ -33,6 +33,7 @@
     <ClInclude Include="Sources\ECS\Components\TransformComponent.h" />
     <ClInclude Include="Sources\ECS\ECS.h" />
     <ClInclude Include="Sources\ECS\Systems\CameraSystem.h" />
+    <ClInclude Include="Sources\ECS\Systems\EditorSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\EnvironmentSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\Hdr2SdrSystem.h" />
     <ClInclude Include="Sources\ECS\Systems\ImguiSystem.h" />
@@ -64,6 +65,7 @@
     <ClCompile Include="Sources\Core\ResourceManager.cpp" />
     <ClCompile Include="Sources\Core\SystemsHolder.cpp" />
     <ClCompile Include="Sources\ECS\Systems\CameraSystem.cpp" />
+    <ClCompile Include="Sources\ECS\Systems\EditorSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\EnvironmentSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\Hdr2SdrSystem.cpp" />
     <ClCompile Include="Sources\ECS\Systems\ImguiSystem.cpp" />
@@ -183,7 +185,7 @@
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;..\WinPix\Include\WinPixEventRuntime;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -197,8 +199,8 @@
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename)_d.cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
-      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib;WinPixEventRuntime.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;..\WinPix\bin\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <TargetMachine>MachineX64</TargetMachine>
     </Lib>
     <ProjectReference />
@@ -250,7 +252,7 @@
       <PrecompiledHeaderFile>Precompiled.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpplatest</LanguageStandard>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Resources\Generated;..\imgui;..\DirectXTex;.\Sources;..\assimp\include;..\json;..\WinPix\Include\WinPixEventRuntime;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -265,8 +267,8 @@
       <ObjectFileOutput>$(OutDir)Shaders/%(Filename).cso</ObjectFileOutput>
     </FxCompile>
     <Lib>
-      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;..\WinPix\bin\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib;WinPixEventRuntime.lib</AdditionalDependencies>
     </Lib>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

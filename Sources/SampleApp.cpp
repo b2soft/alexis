@@ -18,7 +18,7 @@ using namespace DirectX;
 
 //#define MULTITHREAD_CONTEXTS
 
-static const float k_cameraSpeed = 20.0f;
+static const float k_cameraSpeed = 10.0f;
 static const float k_cameraTurnSpeed = 0.1f;
 
 SampleApp::SampleApp() :
@@ -333,6 +333,7 @@ bool SampleApp::LoadContent()
 	auto* scene = Core::Get().GetScene();
 	//scene->LoadFromJson(L"Resources/Scenes/PBR_test.scene");
 	scene->LoadFromJson(L"Resources/Scenes/main.scene");
+	//scene->LoadFromJson(L"Resources/Scenes/sgc.scene");
 
 	auto& ecsWorld = Core::Get().GetECSWorld();
 	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();

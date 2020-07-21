@@ -1,4 +1,4 @@
-#include "../PBS_helpers.hlsli"
+#include "../utils/PBShelpers.hlsli"
 
 float VanDerCorpusSequence(uint bits)
 {
@@ -42,7 +42,7 @@ float2 IntegrateBRDF(float NdotV, float roughness)
 
 		if (NdotL > 0.0)
 		{
-			float G = G_Smith(N, V, L, roughness);
+			float G = G_Smith_IBL(N, V, L, roughness);
 			float G_Vis = (G * VdotH) / (NdotH * NdotV);
 			float Fc = pow(1.0 - VdotH, 5.0);
 

@@ -1,0 +1,7 @@
+{
+	"shaderVS": "FlatColor_vs",
+	"shaderPS": "FlatColor_ps",
+	"textures": [],
+	"rtv": "$GB",
+	"DepthEnable":true
+}
