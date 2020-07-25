@@ -83,11 +83,6 @@ namespace alexis
 			return *m_ecs;
 		}
 
-		inline Scene* GetScene()
-		{
-			return m_scene.get();
-		}
-
 		inline ResourceManager* GetResourceManager()
 		{
 			return m_resourceManager.get();
@@ -113,7 +108,6 @@ namespace alexis
 		void CreateRenderWindow();
 
 		std::unique_ptr<ecs::World> m_ecs;
-		std::unique_ptr<Scene> m_scene;
 		std::unique_ptr<ResourceManager> m_resourceManager;
 		std::unique_ptr<SystemsHolder> m_systemsHolder;
 		std::unique_ptr<FrameUpdateGraph> m_frameUpdateGraph;

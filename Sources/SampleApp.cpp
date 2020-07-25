@@ -2,7 +2,6 @@
 
 #include "SampleApp.h"
 
-#include <Scene.h>
 #include <Core/Core.h>
 #include <Render/Render.h>
 
@@ -10,6 +9,7 @@
 
 #include <ECS/ECS.h>
 #include <ECS/Systems/CameraSystem.h>
+#include <ECS/Systems/EditorSystem.h>
 #include <ECS/Components/CameraComponent.h>
 #include <ECS/Components/TransformComponent.h>
 
@@ -283,19 +283,19 @@ void SampleApp::UpdateGUI()
 		}
 
 		{
-			ImGui::Begin("BottomBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs |
-				ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-			auto cameraTransformComponent = Core::Get().GetECSWorld().GetComponent<ecs::TransformComponent>(m_sceneCamera);
-			sprintf_s(buffer, _countof(buffer), "Camera Pos{ X: %.2f Y: %.2f Z: %.2f }", XMVectorGetX(cameraTransformComponent.Position), XMVectorGetY(cameraTransformComponent.Position), XMVectorGetZ(cameraTransformComponent.Position));
-			ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), buffer);
-
-			auto posTextSize = ImGui::CalcTextSize(buffer);
-
-			ImGui::SetWindowSize(ImVec2(static_cast<float>(g_clientWidth), posTextSize.y));
-			ImGui::SetWindowPos(ImVec2(0, g_clientHeight - posTextSize.y - 10.0f));
-
-			ImGui::End();
+			//ImGui::Begin("BottomBar", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs |
+			//	ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoBringToFrontOnFocus);
+			//
+			//auto cameraTransformComponent = Core::Get().GetECSWorld().GetComponent<ecs::TransformComponent>(m_sceneCamera);
+			//sprintf_s(buffer, _countof(buffer), "Camera Pos{ X: %.2f Y: %.2f Z: %.2f }", XMVectorGetX(cameraTransformComponent.Position), XMVectorGetY(cameraTransformComponent.Position), XMVectorGetZ(cameraTransformComponent.Position));
+			//ImGui::TextColored(ImVec4(1.0, 1.0, 1.0, 1.0), buffer);
+			//
+			//auto posTextSize = ImGui::CalcTextSize(buffer);
+			//
+			//ImGui::SetWindowSize(ImVec2(static_cast<float>(g_clientWidth), posTextSize.y));
+			//ImGui::SetWindowPos(ImVec2(0, g_clientHeight - posTextSize.y - 10.0f));
+			//
+			//ImGui::End();
 		}
 
 		ImGui::EndMainMenuBar();
@@ -330,14 +330,11 @@ void SampleApp::ResetMousePos()
 
 bool SampleApp::LoadContent()
 {
-	auto* scene = Core::Get().GetScene();
-	//scene->LoadFromJson(L"Resources/Scenes/PBR_test.scene");
-	scene->LoadFromJson(L"Resources/Scenes/main.scene");
-	//scene->LoadFromJson(L"Resources/Scenes/sgc.scene");
-
 	auto& ecsWorld = Core::Get().GetECSWorld();
-	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
+	const auto& editorSystem = ecsWorld.GetSystem<alexis::ecs::EditorSystem>();
+	editorSystem->LoadScene(L"Resources/Scenes/main_test.scene");
 
+	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
 	m_sceneCamera = cameraSystem->GetActiveCamera();
 
 	return true;

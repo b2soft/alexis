@@ -24,17 +24,16 @@ namespace alexis
 	class Mesh
 	{
 	public:
-		Mesh() = default;
+		Mesh(std::wstring_view path = L"");
 		Mesh(const Mesh& copy) = delete;
 
 		void Draw(CommandContext* commandContext);
 
-		static std::unique_ptr<Mesh> LoadFBXFromFile(const std::wstring& path);
 		static std::unique_ptr<Mesh> FullScreenQuad(CommandContext* commandContext);
 
-	private:
-		friend struct std::default_delete<Mesh>;
+		const std::wstring& GetPath() const;
 
+	private:
 		friend class ResourceManager;
 
 		void Initialize(CommandContext* commandContext, VertexCollection& vertices, IndexCollection& indices);
@@ -42,5 +41,7 @@ namespace alexis
 		VertexBuffer m_vertexBuffer;
 		IndexBuffer m_indexBuffer;
 		UINT m_indexCount{ 0 };
+
+		std::wstring m_path; // Mesh source file path
 	};
 }

@@ -26,6 +26,11 @@ namespace alexis
 		{ "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0},
 	};
 
+	Mesh::Mesh(std::wstring_view path) :
+		m_path(path)
+	{
+	}
+
 	void Mesh::Draw(CommandContext* commandContext)
 	{
 		// todo: bundle it?
@@ -60,6 +65,11 @@ namespace alexis
 		fsQuad->Initialize(commandContext, vertices, indices);
 
 		return fsQuad;
+	}
+
+	const std::wstring& Mesh::GetPath() const
+	{
+		return m_path;
 	}
 
 	void Mesh::Initialize(CommandContext* commandContext, VertexCollection& vertices, IndexCollection& indices)

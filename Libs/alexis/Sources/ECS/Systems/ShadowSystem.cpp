@@ -14,6 +14,8 @@
 #include <ECS/Components/ModelComponent.h>
 #include <ECS/Components/TransformComponent.h>
 #include <ECS/Components/LightComponent.h>
+#include <ECS/Components/NameComponent.h>
+#include <ECS/Components/DoNotSerializeComponent.h>
 
 namespace alexis
 {
@@ -33,11 +35,13 @@ namespace alexis
 			auto& ecsWorld = Core::Get().GetECSWorld();
 			auto entity = ecsWorld.CreateEntity();
 			ecsWorld.AddComponent(entity, ecs::CameraComponent{ 0.1f, 1.0f, 0.01f, 100.f, true });
+			ecsWorld.AddComponent(entity, ecs::NameComponent{ "ShadowMap Phantom Camera" });
 			m_phantomCamera = entity;
 
 			auto lightingSystem = ecsWorld.GetSystem<LightingSystem>();
 			XMVECTOR rotation = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(90.f), 0.f, 0);
 			ecsWorld.AddComponent(entity, ecs::TransformComponent{ -lightingSystem->GetSunDirection(), rotation, {1.f} });
+			ecsWorld.AddComponent(entity, ecs::DoNotSerializeComponent{}); // Dynamic object, do not serialize
 			
 			//auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 			//cameraSystem->LookAt(m_phantomCamera, { 0.f, 0.f, 0.f }, { 0.f, 1.f, 0.f });

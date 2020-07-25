@@ -52,4 +52,6 @@
 namespace fs = std::filesystem;
 using namespace DirectX;
 
+using namespace std::string_literals;
+
 #include "CoreHelpers.h"

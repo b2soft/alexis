@@ -3,7 +3,6 @@
 #include "Core.h"
 
 #include <ECS/ECS.h>
-#include <Scene.h>
 #include <Core/ResourceManager.h>
 
 #include <string>
@@ -209,8 +208,6 @@ namespace alexis
 
 		m_systemsHolder = std::make_unique<SystemsHolder>();
 		m_systemsHolder->Init();
-
-		m_scene = std::make_unique<Scene>();
 
 		m_frameUpdateGraph = std::make_unique<FrameUpdateGraph>();
 	}

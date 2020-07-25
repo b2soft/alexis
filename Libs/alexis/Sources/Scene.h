@@ -4,10 +4,8 @@
 
 namespace alexis
 {
-	class Scene
+	struct Scene
 	{
-	public:
-		void LoadFromJson(const std::wstring& filename);
-
+		std::wstring Path;
 	};
 }

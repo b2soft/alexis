@@ -13,6 +13,7 @@ namespace alexis
 
 	struct MaterialLoadParams
 	{
+		std::wstring Path;
 		std::wstring VSPath;
 		std::wstring PSPath;
 
@@ -43,6 +44,8 @@ namespace alexis
 		}
 
 		void Set(CommandContext* context);
+		
+		const std::wstring& GetPath() const;
 
 	private:
 		ComPtr<ID3D12RootSignature> m_rootSignature;
@@ -53,5 +56,7 @@ namespace alexis
 
 		ComPtr<ID3DBlob> m_vertexShader;
 		ComPtr<ID3DBlob> m_pixelShader;
+
+		std::wstring m_path;
 	};
 }

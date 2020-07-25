@@ -9,6 +9,8 @@
 #include <ECS/Components/ModelComponent.h>
 #include <ECS/Components/TransformComponent.h>
 #include <ECS/Components/LightComponent.h>
+#include <ECS/Components/NameComponent.h>
+#include <ECS/Components/DoNotSerializeComponent.h>
 
 #include <ECS/Systems/ModelSystem.h>
 #include <ECS/Systems/ShadowSystem.h>
@@ -35,6 +37,8 @@ namespace alexis
 		ecsWorld.RegisterComponent<ecs::TransformComponent>();
 		ecsWorld.RegisterComponent<ecs::CameraComponent>();
 		ecsWorld.RegisterComponent<ecs::LightComponent>();
+		ecsWorld.RegisterComponent<ecs::NameComponent>();
+		ecsWorld.RegisterComponent<ecs::DoNotSerializeComponent>();
 
 		// Model System
 		m_modelSystem = ecsWorld.RegisterSystem<ecs::ModelSystem>();
@@ -67,7 +71,7 @@ namespace alexis
 
 		ecs::ComponentMask lightingSystemMask;
 		lightingSystemMask.set(ecsWorld.GetComponentType<ecs::LightComponent>());
-		//lightingSystemMask.set(ecsWorld.GetComponentType<ecs::TransformComponent>());
+		lightingSystemMask.set(ecsWorld.GetComponentType<ecs::TransformComponent>());
 		ecsWorld.SetSystemComponentMask<ecs::LightingSystem>(lightingSystemMask);
 
 		m_hdr2SdrSystem = ecsWorld.RegisterSystem<ecs::Hdr2SdrSystem>();
@@ -78,7 +82,6 @@ namespace alexis
 		m_editorSystem = ecsWorld.RegisterSystem<ecs::EditorSystem>();
 
 		ecs::ComponentMask editorSystemMask;
-		editorSystemMask.set(ecsWorld.GetComponentType<ecs::TransformComponent>());
 		ecsWorld.SetSystemComponentMask<ecs::EditorSystem>(editorSystemMask);
 	}
 

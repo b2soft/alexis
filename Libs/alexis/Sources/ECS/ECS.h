@@ -108,8 +108,6 @@ namespace alexis
 
 			void RemoveData(Entity entity)
 			{
-				assert(m_entityToIndexMap.find(entity) == m_entityToIndexMap.end() && "Removing non-existent component!");
-
 				// Copy last elem to deleted elem
 				std::size_t indexOfRemovedEntity = m_entityToIndexMap[entity];
 				std::size_t indexOfLastElement = m_size - 1;

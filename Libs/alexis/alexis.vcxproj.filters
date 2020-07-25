@@ -67,9 +67,6 @@
     <ClCompile Include="Sources\Render\FrameRenderGraph.cpp">
       <Filter>Sources\Render</Filter>
     </ClCompile>
-    <ClCompile Include="Sources\Scene.cpp">
-      <Filter>Sources</Filter>
-    </ClCompile>
     <ClCompile Include="Sources\Core\SystemsHolder.cpp">
       <Filter>Sources\Core</Filter>
     </ClCompile>
@@ -107,6 +104,9 @@
       <Filter>Sources\Render</Filter>
     </ClCompile>
     <ClCompile Include="Sources\ECS\Systems\EditorSystem.cpp">
+      <Filter>Sources\ECS\Systems</Filter>
+    </ClCompile>
+    <ClCompile Include="Sources\ECS\Systems\EditorSystemSerializer.cpp">
       <Filter>Sources\ECS\Systems</Filter>
     </ClCompile>
   </ItemGroup>
@@ -171,9 +171,6 @@
     <ClInclude Include="Sources\Render\FrameRenderGraph.h">
       <Filter>Sources\Render</Filter>
     </ClInclude>
-    <ClInclude Include="Sources\Scene.h">
-      <Filter>Sources</Filter>
-    </ClInclude>
     <ClInclude Include="Sources\Core\SystemsHolder.h">
       <Filter>Sources\Core</Filter>
     </ClInclude>
@@ -224,6 +221,18 @@
     </ClInclude>
     <ClInclude Include="Sources\ECS\Systems\EditorSystem.h">
       <Filter>Sources\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Components\NameComponent.h">
+      <Filter>Sources\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Components\DoNotSerializeComponent.h">
+      <Filter>Sources\ECS\Components</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\ECS\Systems\EditorSystemSerializer.h">
+      <Filter>Sources\ECS\Systems</Filter>
+    </ClInclude>
+    <ClInclude Include="Sources\Scene.h">
+      <Filter>Sources\Core</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -15,7 +15,6 @@ namespace alexis
 			};
 
 			LightType Type{ LightType::Point };
-			DirectX::XMVECTOR Position;
 			DirectX::XMVECTOR Color;
 		};
 	}

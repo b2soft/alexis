@@ -151,7 +151,6 @@ namespace alexis
 			aiProcess_RemoveRedundantMaterials |
 			aiProcess_CalcTangentSpace |
 			aiProcess_Triangulate |
-			//aiProcess_FlipUVs |
 			aiProcess_JoinIdenticalVertices |
 			aiProcess_ValidateDataStructure |
 			aiProcess_PreTransformVertices);
@@ -214,7 +213,7 @@ namespace alexis
 			offset += mesh->mNumVertices;
 		}
 
-		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>();
+		std::unique_ptr<Mesh> mesh = std::make_unique<Mesh>(path);
 		mesh->Initialize(m_copyContext, vertices, indices);
 
 		m_copyContext->Flush(true);
@@ -237,6 +236,7 @@ namespace alexis
 		json j = nlohmann::json::parse(ifs);
 
 		MaterialLoadParams params;
+		params.Path = path;
 		params.VSPath = ToWStr(j["shaderVS"]);
 		params.PSPath = ToWStr(j["shaderPS"]);
 

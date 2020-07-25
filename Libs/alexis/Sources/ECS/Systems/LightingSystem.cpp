@@ -181,10 +181,11 @@ namespace alexis
 				for (auto entity : Entities)
 				{
 					auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
+					auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 					if (lightComponent.Type == ecs::LightComponent::LightType::Point)
 					{
-						float scale = CalculatePointLightScale(lightComponent.Color, lightComponent.Position);
-						XMMATRIX wvpMatrix = XMMatrixIdentity() * XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(lightComponent.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
+						float scale = CalculatePointLightScale(lightComponent.Color, transformComponent.Position);
+						XMMATRIX wvpMatrix = XMMatrixIdentity() * XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(transformComponent.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
 
 						LightParams lightCB{ wvpMatrix };
 						context->SetDynamicCBV(0, sizeof(lightCB), &lightCB);
@@ -220,12 +221,13 @@ namespace alexis
 				for (auto entity : Entities)
 				{
 					auto& lightComponent = ecsWorld.GetComponent<LightComponent>(entity);
+					auto& transformComponent = ecsWorld.GetComponent<TransformComponent>(entity);
 					if (lightComponent.Type == ecs::LightComponent::LightType::Point)
 					{
-						float scale = CalculatePointLightScale(lightComponent.Color, lightComponent.Position);
-						XMMATRIX wvpMatrix = XMMatrixIdentity() * XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(lightComponent.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
+						float scale = CalculatePointLightScale(lightComponent.Color, transformComponent.Position);
+						XMMATRIX wvpMatrix = XMMatrixIdentity() * XMMatrixScaling(scale, scale, scale) * XMMatrixTranslationFromVector(transformComponent.Position) * cameraSystem->GetViewMatrix(activeCamera) * cameraSystem->GetProjMatrix(activeCamera);
 
-						PointLightParams pl{ lightComponent.Position, lightComponent.Color };
+						PointLightParams pl{ transformComponent.Position, lightComponent.Color };
 
 						context->SetDynamicCBV(1, sizeof(pl), &pl);
 

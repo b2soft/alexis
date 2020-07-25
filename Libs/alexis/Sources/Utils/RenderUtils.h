@@ -3,7 +3,16 @@
 #include <d3d12.h>
 #include <d3dx12.h>
 #include <tuple>
+#include <numbers>
 #include <Render/RenderTarget.h>
+
+namespace std
+{
+	namespace numbers
+	{
+		inline constexpr float pi_2 = pi / 2.0f;
+	}
+}
 
 namespace alexis
 {
@@ -63,7 +72,34 @@ namespace alexis
 			{
 				return { texturePath, RenderTarget::Slot::NumAttachmentPoints, false };
 			}
+		}
 
+		inline DirectX::XMFLOAT3 GetPitchYawRollFromQuaternion(DirectX::XMVECTOR rotation)
+		{
+			DirectX::XMFLOAT4 rotQ{};
+			DirectX::XMStoreFloat4(&rotQ, rotation);
+
+			float pitch = 0;
+			float yaw = 0;
+			float roll = 0;
+
+			float sp = -2.0f * (rotQ.y * rotQ.z - rotQ.w * rotQ.x);
+
+			if (std::abs(sp) > 0.9999f)
+			{
+				pitch = std::numbers::pi_2 * sp; // pi/2
+
+				yaw = std::atan2(-rotQ.x * rotQ.z + rotQ.w * rotQ.y, 0.5f - rotQ.y * rotQ.y - rotQ.z * rotQ.z);
+				roll = 0.f;
+			}
+			else
+			{
+				pitch = std::asin(sp);
+				yaw = std::atan2(rotQ.x * rotQ.z + rotQ.w * rotQ.y, 0.5f - rotQ.x * rotQ.x - rotQ.y * rotQ.y);
+				roll = std::atan2(rotQ.x * rotQ.y + rotQ.w * rotQ.z, 0.5f - rotQ.x * rotQ.x - rotQ.z * rotQ.z);
+			}
+
+			return { pitch, yaw, roll };
 		}
 	}
 }

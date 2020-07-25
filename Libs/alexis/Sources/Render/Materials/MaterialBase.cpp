@@ -11,7 +11,8 @@
 
 namespace alexis
 {
-	Material::Material(const MaterialLoadParams& params)
+	Material::Material(const MaterialLoadParams& params) :
+		m_path(params.Path)
 	{
 		ComPtr<ID3DBlob> vertexShaderBlob;
 		ComPtr<ID3DBlob> pixelShaderBlob;
@@ -189,6 +190,11 @@ namespace alexis
 
 			context->List->SetGraphicsRootDescriptorTable(m_srvStartIndex, gpuHandle);
 		}
+	}
+
+	const std::wstring& Material::GetPath() const
+	{
+		return m_path;
 	}
 
 }
