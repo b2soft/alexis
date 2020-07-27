@@ -206,8 +206,6 @@ namespace alexis
 				ImGui::TreePop();
 			}
 		}
-
-
 	}
 }
 

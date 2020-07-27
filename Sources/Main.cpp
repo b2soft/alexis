@@ -22,9 +22,6 @@ void ReportLiveObjects()
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE, LPSTR, int)
 {
-	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE | _CRTDBG_MODE_WNDW);
-	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-
 	// Set the working directory to the path of the executable
 	WCHAR path[MAX_PATH];
 	HMODULE hModule = GetModuleHandle(NULL);

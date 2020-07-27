@@ -33,6 +33,9 @@
     <ClInclude Include="imgui_impl_dx12.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="imconfig.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="imgui.cpp">

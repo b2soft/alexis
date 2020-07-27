@@ -205,6 +205,7 @@
       <AdditionalDependencies>imgui.lib;assimp-vc142-mt.lib;WinPixEventRuntime.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\imgui\Build\$(Configuration);..\assimp\lib\Release;..\WinPix\bin\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <TargetMachine>MachineX64</TargetMachine>
+      <SubSystem>Windows</SubSystem>
     </Lib>
     <ProjectReference />
   </ItemDefinitionGroup>

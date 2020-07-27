@@ -41,22 +41,23 @@ namespace alexis
 
 	void Core::CreateRenderWindow()
 	{
-		RECT windowRect = { 0, 0, static_cast<LONG>(g_clientWidth), static_cast<LONG>(g_clientHeight) };
-		AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
-
 		WNDCLASSEX windowClass = { 0 };
 		windowClass.cbSize = sizeof(WNDCLASSEX);
 		windowClass.style = CS_HREDRAW | CS_VREDRAW;
 		windowClass.lpfnWndProc = WindowProc;
-		windowClass.hInstance = s_hInstance;
+		windowClass.hInstance = GetModuleHandle(0);
 		windowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
 		windowClass.hIcon = ::LoadIconW(s_hInstance, MAKEINTRESOURCE(IDI_ICON1));
+		windowClass.lpszMenuName = nullptr;
 		windowClass.lpszClassName = k_windowClassName;
 
 		if (!RegisterClassExW(&windowClass))
 		{
 			MessageBoxA(NULL, "Unable to register window class!", "Error", MB_OK | MB_ICONERROR);
 		}
+
+		RECT windowRect = { 0, 0, static_cast<LONG>(g_clientWidth), static_cast<LONG>(g_clientHeight) };
+		AdjustWindowRect(&windowRect, WS_OVERLAPPEDWINDOW, FALSE);
 
 		Core::s_hwnd = CreateWindowW(
 			windowClass.lpszClassName,
@@ -68,8 +69,8 @@ namespace alexis
 			windowRect.bottom - windowRect.top,
 			nullptr, // no parent
 			nullptr, // nor menus
-			s_hInstance,
-			this);
+			GetModuleHandle(0),
+			nullptr);
 
 		if (!s_hwnd)
 		{
@@ -132,12 +133,30 @@ namespace alexis
 		}
 
 		MSG msg = { 0 };
-		while (msg.message != WM_QUIT)
+
+		while (true)
 		{
-			if (PeekMessage(&msg, 0, 0, 0, PM_REMOVE))
+			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
 			{
+				if (msg.message == WM_QUIT)
+				{
+					break;
+				}
+				else
+				{
+					++Core::s_frameCount;
+
+					Core::s_updateClock.Tick();
+
+					float dt = Core::s_updateClock.GetDeltaSeconds();
+
+					Core::Get().Update(dt);
+				}
+
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
+
+				InvalidateRect(Core::s_hwnd, nullptr, FALSE);
 			}
 		}
 
@@ -165,6 +184,10 @@ namespace alexis
 
 	void Core::Render()
 	{
+		if (!s_game)
+		{
+			return;
+		}
 		// Internal Render Graph
 		auto render = Render::GetInstance();
 		render->BeginRender();
@@ -190,7 +213,6 @@ namespace alexis
 	void Core::Initialize()
 	{
 		CreateRenderWindow();
-		ShowWindow(s_hwnd, TRUE);
 
 		// Check for DirectX Math lib support
 		if (!DirectX::XMVerifyCPUSupport())
@@ -210,6 +232,9 @@ namespace alexis
 		m_systemsHolder->Init();
 
 		m_frameUpdateGraph = std::make_unique<FrameUpdateGraph>();
+
+		ShowWindow(s_hwnd, SW_SHOWDEFAULT);
+		UpdateWindow(s_hwnd);
 	}
 
 	static LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -228,15 +253,10 @@ namespace alexis
 		{
 		case WM_PAINT:
 		{
-			++Core::s_frameCount;
-
-			Core::s_updateClock.Tick();
-
-			float dt = Core::s_updateClock.GetDeltaSeconds();
-
-			Core::Get().Update(dt);
-
+			PAINTSTRUCT ps;
+			HDC hdc = BeginPaint(Core::s_hwnd, &ps);
 			Core::Get().Render();
+			EndPaint(Core::s_hwnd, &ps);
 		}
 		break;
 
