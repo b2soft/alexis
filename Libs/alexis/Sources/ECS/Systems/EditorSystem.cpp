@@ -55,6 +55,17 @@ namespace alexis
 		EditorSystemSerializer::Save(m_loadedScene->Path);
 	}
 
+	void ecs::EditorSystem::Init()
+	{
+		auto& ecsWorld = Core::Get().GetECSWorld();
+		auto entity = ecsWorld.CreateEntity();
+		ecsWorld.AddComponent(entity, ecs::CameraComponent{ 45.0f, 1.777778f, 0.01f, 100.f, false });
+		ecsWorld.AddComponent(entity, ecs::TransformComponent{});
+		ecsWorld.AddComponent(entity, ecs::NameComponent{ "Editor Camera" });
+		ecsWorld.AddComponent(entity, ecs::DoNotSerializeComponent{});
+		m_editorCamera = entity;
+	}
+
 	void ecs::EditorSystem::Update(float dt)
 	{
 		if (ImGui::BeginMainMenuBar())
@@ -206,6 +217,16 @@ namespace alexis
 				ImGui::TreePop();
 			}
 		}
+	}
+
+	ecs::Entity ecs::EditorSystem::GetActiveCamera() const
+	{
+		return m_editorCamera;
+	}
+
+	void ecs::EditorSystem::OnResize(int width, int height)
+	{
+
 	}
 }
 

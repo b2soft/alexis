@@ -330,12 +330,12 @@ void SampleApp::ResetMousePos()
 
 bool SampleApp::LoadContent()
 {
-	auto& ecsWorld = Core::Get().GetECSWorld();
-	const auto& editorSystem = ecsWorld.GetSystem<alexis::ecs::EditorSystem>();
-	editorSystem->LoadScene(L"Resources/Scenes/main_test.scene");
-
-	auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
-	m_sceneCamera = cameraSystem->GetActiveCamera();
+	//auto& ecsWorld = Core::Get().GetECSWorld();
+	//const auto& editorSystem = ecsWorld.GetSystem<alexis::ecs::EditorSystem>();
+	//editorSystem->LoadScene(L"Resources/Scenes/main_test.scene");
+	//
+	//auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
+	//m_sceneCamera = cameraSystem->GetActiveCamera();
 
 	return true;
 }

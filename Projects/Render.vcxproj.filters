@@ -28,6 +28,9 @@
     <ClCompile Include="..\Sources\SampleApp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\Sources\Editor.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Sources\Precompiled.h">
@@ -37,6 +40,9 @@
       <Filter>Resources</Filter>
     </ClInclude>
     <ClInclude Include="..\Sources\SampleApp.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Editor.h">
       <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>

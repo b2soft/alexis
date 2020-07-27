@@ -7,6 +7,7 @@
 #include <unordered_map>
 #include <memory>
 #include <set>
+#include <cassert>
 
 namespace alexis
 {

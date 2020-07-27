@@ -89,7 +89,7 @@ namespace alexis
 	{
 		//TODO: Temp solution: moved env system before Lighting. RT creating needs refactoring (create without order or cache names instead direct init)
 		m_environmentSystem->Init();
-
+		m_editorSystem->Init();
 		m_lightingSystem->Init();
 		m_shadowSystem->Init();
 		m_hdr2SdrSystem->Init();
