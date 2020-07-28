@@ -1,5 +1,7 @@
 #pragma once
 
+#include <d3dx12.h>
+
 #define D3D12_GPU_VIRTUAL_ADDRESS_UNKNOWN   ((D3D12_GPU_VIRTUAL_ADDRESS)-1)
 
 namespace alexis

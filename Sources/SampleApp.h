@@ -17,9 +17,6 @@ public:
 
 	virtual bool Initialize() override;
 
-	virtual bool LoadContent() override;
-	virtual void UnloadContent() override;
-
 	virtual void OnUpdate(float dt) override;
 	virtual void OnRender() override;
 	virtual void OnResize(int width, int height) override;

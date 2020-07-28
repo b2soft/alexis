@@ -30,12 +30,13 @@ namespace alexis
 	extern int g_clientHeight = 720;
 
 	static constexpr wchar_t k_windowClassName[] = L"AlexisWindowClass";
-	static constexpr wchar_t k_windowTitle[] = L"Alexis App";
+	static constexpr wchar_t k_windowTitle[] = L"Alexis Editor";
 
 	HWND Core::s_hwnd = nullptr;
 	uint64_t Core::s_frameCount = 0;
 	IGame* Core::s_game;
 	HighResolutionClock Core::s_updateClock;
+	HighResolutionClock Core::s_renderClock;
 
 	static LRESULT CALLBACK WindowProc(HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam);
 
@@ -127,11 +128,6 @@ namespace alexis
 			return 1;
 		}
 
-		if (!s_game->LoadContent())
-		{
-			return 2;
-		}
-
 		MSG msg = { 0 };
 
 		while (true)
@@ -161,7 +157,6 @@ namespace alexis
 		}
 
 		//Graphics Flush
-		s_game->UnloadContent();
 		s_game->Destroy();
 		s_game = nullptr;
 
@@ -182,7 +177,7 @@ namespace alexis
 		s_game->OnUpdate(dt);
 	}
 
-	void Core::Render()
+	void Core::Render(float frameTime)
 	{
 		if (!s_game)
 		{
@@ -193,7 +188,7 @@ namespace alexis
 		render->BeginRender();
 
 		// Game-specific Render
-		s_game->OnRender();
+		s_game->OnRender(frameTime);
 
 		// Present to screen
 		render->Present();
@@ -255,7 +250,10 @@ namespace alexis
 		{
 			PAINTSTRUCT ps;
 			HDC hdc = BeginPaint(Core::s_hwnd, &ps);
-			Core::Get().Render();
+			Core::s_renderClock.Tick();
+
+			float dt = Core::s_renderClock.GetDeltaSeconds();
+			Core::Get().Render(dt);
 			EndPaint(Core::s_hwnd, &ps);
 		}
 		break;

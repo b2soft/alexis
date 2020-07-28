@@ -2,19 +2,6 @@
 
 #include <Shlwapi.h>
 
-#if defined(_DEBUG) && defined(REPORT_LIVE_OBJECTS)
-#include <dxgidebug.h>
-#include <dxgi1_3.h>
-void ReportLiveObjects()
-{
-	IDXGIDebug1* dxgiDebug;
-	DXGIGetDebugInterface1(0, IID_PPV_ARGS(&dxgiDebug));
-
-	dxgiDebug->ReportLiveObjects(DXGI_DEBUG_ALL, DXGI_DEBUG_RLO_IGNORE_INTERNAL);
-	dxgiDebug->Release();
-}
-#endif
-
 #include "SampleApp.h"
 
 #include <Core/Core.h>

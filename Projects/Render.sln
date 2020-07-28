@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.28922.388
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Render", "Render.vcxproj", "{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}"
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTex", "..\Libs\DirectXTex\DirectXTex_Desktop_2019_Win10.vcxproj", "{371B9FA9-4C90-4AC6-A123-ACED756D6C77}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "imgui", "..\Libs\imgui\imgui.vcxproj", "{50698603-7722-47DD-8377-D05FF49122F3}"
@@ -12,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Thirdparty", "Thirdparty", "{D89B1830-32AD-4BA6-A449-17332BE973A2}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "alexis", "..\Libs\alexis\alexis.vcxproj", "{45DF3C3A-1FFA-477B-B6C2-CB60449ACC8A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Editor", "Editor.vcxproj", "{CE1C2598-5641-460F-AF45-1E775AE8F945}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,14 +21,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Debug|x64.ActiveCfg = Debug|x64
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Debug|x64.Build.0 = Debug|x64
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Debug|x86.ActiveCfg = Debug|Win32
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Debug|x86.Build.0 = Debug|Win32
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Release|x64.ActiveCfg = Release|x64
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Release|x64.Build.0 = Release|x64
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Release|x86.ActiveCfg = Release|Win32
-		{A06C1DE2-CF0D-4EEA-8CA5-CCB2EC06F3DD}.Release|x86.Build.0 = Release|Win32
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Debug|x64.ActiveCfg = Debug|x64
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Debug|x64.Build.0 = Debug|x64
 		{371B9FA9-4C90-4AC6-A123-ACED756D6C77}.Debug|x86.ActiveCfg = Debug|Win32
@@ -53,6 +45,14 @@ Global
 		{45DF3C3A-1FFA-477B-B6C2-CB60449ACC8A}.Release|x64.Build.0 = Release|x64
 		{45DF3C3A-1FFA-477B-B6C2-CB60449ACC8A}.Release|x86.ActiveCfg = Release|Win32
 		{45DF3C3A-1FFA-477B-B6C2-CB60449ACC8A}.Release|x86.Build.0 = Release|Win32
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Debug|x64.ActiveCfg = Debug|x64
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Debug|x64.Build.0 = Debug|x64
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Debug|x86.ActiveCfg = Debug|Win32
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Debug|x86.Build.0 = Debug|Win32
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Release|x64.ActiveCfg = Release|x64
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Release|x64.Build.0 = Release|x64
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Release|x86.ActiveCfg = Release|Win32
+		{CE1C2598-5641-460F-AF45-1E775AE8F945}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

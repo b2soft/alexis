@@ -15,6 +15,8 @@
 #include <json.hpp>
 #include <fstream>
 
+#include <DirectXTex.h>
+
 namespace alexis
 {
 
