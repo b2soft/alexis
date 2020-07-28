@@ -9,7 +9,6 @@
 
 #include <ECS/ECS.h>
 #include <ECS/Systems/CameraSystem.h>
-#include <ECS/Systems/EditorSystem.h>
 #include <ECS/Components/CameraComponent.h>
 #include <ECS/Components/TransformComponent.h>
 
@@ -326,21 +325,4 @@ void SampleApp::ResetMousePos()
 
 	ClientToScreen(Core::GetHwnd(), &p);
 	SetCursorPos(p.x, p.y);
-}
-
-bool SampleApp::LoadContent()
-{
-	//auto& ecsWorld = Core::Get().GetECSWorld();
-	//const auto& editorSystem = ecsWorld.GetSystem<alexis::ecs::EditorSystem>();
-	//editorSystem->LoadScene(L"Resources/Scenes/main_test.scene");
-	//
-	//auto cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
-	//m_sceneCamera = cameraSystem->GetActiveCamera();
-
-	return true;
-}
-
-void SampleApp::UnloadContent()
-{
-
 }

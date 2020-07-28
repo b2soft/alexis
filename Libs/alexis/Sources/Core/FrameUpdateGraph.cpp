@@ -6,7 +6,6 @@
 
 #include <ECS/Systems/ModelSystem.h>
 #include <ECS/Systems/ImguiSystem.h>
-#include <ECS/Systems/EditorSystem.h>
 
 namespace alexis
 {
@@ -16,6 +15,5 @@ namespace alexis
 
 		ecsWorld.GetSystem<ecs::ModelSystem>()->Update(dt);
 		ecsWorld.GetSystem<ecs::ImguiSystem>()->Update(dt);
-		ecsWorld.GetSystem<ecs::EditorSystem>()->Update(dt);
 	}
 }

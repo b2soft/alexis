@@ -11,7 +11,6 @@ namespace alexis
 		class Hdr2SdrSystem;
 		class ImguiSystem;
 		class EnvironmentSystem;
-		class EditorSystem;
 	}
 
 	class SystemsHolder
@@ -30,6 +29,5 @@ namespace alexis
 		std::shared_ptr<alexis::ecs::Hdr2SdrSystem> m_hdr2SdrSystem;
 		std::shared_ptr<alexis::ecs::ImguiSystem> m_imguiSystem;
 		std::shared_ptr<alexis::ecs::EnvironmentSystem> m_environmentSystem;
-		std::shared_ptr<alexis::ecs::EditorSystem> m_editorSystem;
 	};
 }

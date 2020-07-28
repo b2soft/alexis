@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Image Include="..\Resources\b2nder.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="ECS">
+      <UniqueIdentifier>{6596e913-cb82-4d82-a860-e3152034b5f3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\Sources\Editor\ECS\EditorSystem.cpp">
+      <Filter>ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Editor\ECS\EditorSystemSerializer.cpp">
+      <Filter>ECS</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Sources\Editor\EditorApp.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\Sources\Editor\ECS\EditorSystem.h">
+      <Filter>ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Editor\ECS\EditorSystemSerializer.h">
+      <Filter>ECS</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Sources\Editor\EditorApp.h" />
+  </ItemGroup>
+</Project>

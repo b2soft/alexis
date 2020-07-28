@@ -3,7 +3,6 @@
 #include "CameraSystem.h"
 
 #include <Core/Core.h>
-#include <ECS/Systems/EditorSystem.h>
 #include <ECS/Components/CameraComponent.h>
 #include <ECS/Components/TransformComponent.h>
 
@@ -14,10 +13,12 @@ namespace alexis
 
 		Entity CameraSystem::GetActiveCamera() const
 		{
-			auto& ecsWorld = Core::Get().GetECSWorld();
-			const auto& editorSystem = ecsWorld.GetSystem<EditorSystem>();
+			return m_activeCamera;
+		}
 
-			return editorSystem->GetActiveCamera();
+		void CameraSystem::SetActiveCamera(Entity cameraEntity)
+		{
+			m_activeCamera = cameraEntity;
 		}
 
 		void XM_CALLCONV CameraSystem::SetPosition(Entity entity, DirectX::FXMVECTOR position)

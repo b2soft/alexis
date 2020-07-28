@@ -22,11 +22,8 @@ namespace alexis
 		virtual bool Initialize() { return true; }
 		virtual void Destroy() { }
 
-		virtual bool LoadContent() = 0;
-		virtual void UnloadContent() = 0;
-
-		virtual void OnUpdate(float dt) = 0;
-		virtual void OnRender() = 0;
+		virtual void OnUpdate(float dt) {};
+		virtual void OnRender(float frameTime) {};
 
 		virtual void OnKeyPressed(KeyEventArgs& e) {};
 		virtual void OnKeyReleased(KeyEventArgs& e) {};
@@ -36,7 +33,6 @@ namespace alexis
 		virtual void OnMouseWheel(MouseWheelEventArgs& e) {};
 
 		virtual void OnResize(int width, int height) {};
-		//virtual void OnWindowDestroy();
 	};
 
 	namespace ecs
@@ -44,7 +40,7 @@ namespace alexis
 		class World;
 	}
 
-	class Scene;
+	struct Scene;
 	class ResourceManager;
 	class SystemsHolder;
 	class FrameUpdateGraph;
@@ -92,7 +88,7 @@ namespace alexis
 		void Update(float dt);
 
 		// Global Core Render
-		void Render();
+		void Render(float frameTime);
 
 	protected:
 		// Create app instance
@@ -113,6 +109,7 @@ namespace alexis
 		std::unique_ptr<FrameUpdateGraph> m_frameUpdateGraph;
 
 		static HighResolutionClock s_updateClock;
+		static HighResolutionClock s_renderClock;
 
 		static HWND s_hwnd;
 		static uint64_t s_frameCount;

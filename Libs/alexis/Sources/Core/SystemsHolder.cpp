@@ -19,7 +19,6 @@
 #include <ECS/Systems/Hdr2SdrSystem.h>
 #include <ECS/Systems/ImguiSystem.h>
 #include <ECS/Systems/EnvironmentSystem.h>
-#include <ECS/Systems/EditorSystem.h>
 
 namespace alexis
 {
@@ -33,6 +32,7 @@ namespace alexis
 	{
 		auto& ecsWorld = Core::Get().GetECSWorld();
 
+		// Register all components
 		ecsWorld.RegisterComponent<ecs::ModelComponent>();
 		ecsWorld.RegisterComponent<ecs::TransformComponent>();
 		ecsWorld.RegisterComponent<ecs::CameraComponent>();
@@ -77,19 +77,12 @@ namespace alexis
 		m_hdr2SdrSystem = ecsWorld.RegisterSystem<ecs::Hdr2SdrSystem>();
 
 		m_imguiSystem = ecsWorld.RegisterSystem<ecs::ImguiSystem>();
-
-
-		m_editorSystem = ecsWorld.RegisterSystem<ecs::EditorSystem>();
-
-		ecs::ComponentMask editorSystemMask;
-		ecsWorld.SetSystemComponentMask<ecs::EditorSystem>(editorSystemMask);
 	}
 
 	void SystemsHolder::InitInternal()
 	{
 		//TODO: Temp solution: moved env system before Lighting. RT creating needs refactoring (create without order or cache names instead direct init)
 		m_environmentSystem->Init();
-		m_editorSystem->Init();
 		m_lightingSystem->Init();
 		m_shadowSystem->Init();
 		m_hdr2SdrSystem->Init();
