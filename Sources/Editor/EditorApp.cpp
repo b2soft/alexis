@@ -1,16 +1,24 @@
 #include "EditorApp.h"
 
 #include <filesystem>
-#include <DirectXMath.h>
+#include <fstream>
 
+#include <DirectXMath.h>
+#include <json.hpp>
+
+#include <CoreHelpers.h>
 #include <ECS/ECS.h>
 #include <ECS/Systems/CameraSystem.h>
 #include <ECS/Components/DoNotSerializeComponent.h>
+#include <ECS/Components/TransformComponent.h>
+#include <ECS/Components/CameraComponent.h>
 #include <Core/KeyCodes.h>
 #include <Render/Render.h>
+#include <utils/RenderUtils.h>
 
-#include "ECS/EditorSystem.h"
 #include "ECS/EditorSystemSerializer.h"
+
+static constexpr auto s_configPath = L"EditorConfig.json";
 
 bool EditorApp::Initialize()
 {
@@ -22,7 +30,14 @@ bool EditorApp::Initialize()
 
 	m_editorSystem->Init();
 
+	LoadEditorConfig();
+
 	return true;
+}
+
+void EditorApp::Destroy()
+{
+	SaveEditorConfig();
 }
 
 void EditorApp::OnResize(int width, int height)
@@ -274,6 +289,79 @@ void EditorApp::ToggleFixedCamera()
 	ShowCursor(m_editorSystem->IsCameraFixed());
 }
 
+void EditorApp::LoadEditorConfig()
+{
+	if (!std::filesystem::exists(s_configPath))
+	{
+		return;
+	}
+
+	using namespace DirectX;
+	using json = nlohmann::json;
+
+	std::ifstream ifs(s_configPath);
+	json j = json::parse(ifs);
+
+	auto& ecsWorld = alexis::Core::Get().GetECSWorld();
+	auto activeCamera = m_editorSystem->GetActiveCamera();
+
+	const auto& cameraSystem = alexis::Core::Get().GetECSWorld().GetSystem<alexis::ecs::CameraSystem>();
+	cameraSystem->SetPosition(activeCamera, { j["camera"]["position"]["x"], j["camera"]["position"]["y"], j["camera"]["position"]["z"] });
+	//	XMQuaternionRotationRollPitchYaw(XMConvertToRadians(j["camera"]["rotation"]["pitch"]), XMConvertToRadians(j["camera"]["rotation"]["yaw"]), j["camera"]["rotation"]["z"])));
+
+	m_editorSystem->m_pitch = j["camera"]["rotation"]["pitch"];
+	m_editorSystem->m_yaw = j["camera"]["rotation"]["yaw"];
+
+	// TODO: remove dirty flags from CameraComponent and TransformComponent.
+	// At least, for now it's more straighforward to recalc matrices every update
+
+	if (j["lastScene"] != "null")
+	{
+		LoadScene(ToWStr(j["lastScene"]));
+	}
+}
+
+void EditorApp::SaveEditorConfig()
+{
+	using namespace DirectX;
+	using json = nlohmann::json;
+
+	auto& ecsWorld = alexis::Core::Get().GetECSWorld();
+	//TransformComponent
+	const auto& transformComponent = ecsWorld.GetComponent<alexis::ecs::TransformComponent>(m_editorSystem->GetActiveCamera());
+	json j;
+
+	// Position
+	{
+		XMFLOAT4 position{};
+		XMStoreFloat4(&position, transformComponent.Position);
+		j["camera"]["position"]["x"] = position.x;
+		j["camera"]["position"]["y"] = position.y;
+		j["camera"]["position"]["z"] = position.z;
+	}
+
+	//Temporary
+	{
+		j["camera"]["rotation"]["pitch"] = m_editorSystem->m_pitch;
+		j["camera"]["rotation"]["yaw"] = m_editorSystem->m_yaw;
+	}
+
+	////Rotation Euler
+	//{
+	//	XMFLOAT3 rotation = alexis::utils::GetPitchYawRollFromQuaternion(transformComponent.Rotation);
+	//	j["camera"]["rotation"]["x"] = XMConvertToDegrees(rotation.x);
+	//	j["camera"]["rotation"]["y"] = XMConvertToDegrees(rotation.y);
+	//	j["camera"]["rotation"]["z"] = XMConvertToDegrees(rotation.z);
+	//}
+
+	std::string lastScene = m_loadedScene.has_value() ? std::string(m_loadedScene->Path.cbegin(), m_loadedScene->Path.cend()) : "null";
+	j["lastScene"] = lastScene;
+
+	std::ofstream ofs(s_configPath);
+	ofs << j << std::endl;
+	ofs.close();
+}
+
 void EditorApp::LoadScene(std::wstring_view path)
 {
 	UnloadScene();
@@ -282,6 +370,7 @@ void EditorApp::LoadScene(std::wstring_view path)
 
 	const auto& cameraSystem = alexis::Core::Get().GetECSWorld().GetSystem<alexis::ecs::CameraSystem>();
 	cameraSystem->SetActiveCamera(m_editorSystem->GetActiveCamera());
+	m_editorSystem->UpdateCameraTransform(0.f);
 }
 
 void EditorApp::UnloadScene()

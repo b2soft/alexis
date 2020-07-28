@@ -78,18 +78,7 @@ namespace editor
 			m_deltaMouseX = 0;
 			m_deltaMouseY = 0;
 
-			auto& ecsWorld = Core::Get().GetECSWorld();
-
-			XMVECTOR posOffset = XMVectorSet(m_movement[3] - m_movement[2], /*up-down*/ 0.0f, m_movement[0] - m_movement[1], 1.0f) * k_cameraSpeed * static_cast<float>(dt);
-			auto& cameraTransformComponent = ecsWorld.GetComponent<ecs::TransformComponent>(m_editorCamera);
-			XMVECTOR newPos = cameraTransformComponent.Position + XMVector3Rotate(posOffset, cameraTransformComponent.Rotation);
-			newPos = XMVectorSetW(newPos, 1.0f);
-
-			const auto& cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
-			cameraSystem->SetPosition(m_editorCamera, newPos);
-
-			XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
-			cameraSystem->SetRotation(m_editorCamera, cameraRotationQuat);
+			UpdateCameraTransform(dt);
 		}
 	}
 
@@ -215,6 +204,22 @@ namespace editor
 				ImGui::TreePop();
 			}
 		}
+	}
+
+	void EditorSystem::UpdateCameraTransform(float dt)
+	{
+		auto& ecsWorld = Core::Get().GetECSWorld();
+
+		XMVECTOR posOffset = XMVectorSet(m_movement[3] - m_movement[2], /*up-down*/ 0.0f, m_movement[0] - m_movement[1], 1.0f) * k_cameraSpeed * static_cast<float>(dt);
+		auto& cameraTransformComponent = ecsWorld.GetComponent<ecs::TransformComponent>(m_editorCamera);
+		XMVECTOR newPos = cameraTransformComponent.Position + XMVector3Rotate(posOffset, cameraTransformComponent.Rotation);
+		newPos = XMVectorSetW(newPos, 1.0f);
+
+		const auto& cameraSystem = ecsWorld.GetSystem<alexis::ecs::CameraSystem>();
+		cameraSystem->SetPosition(m_editorCamera, newPos);
+
+		XMVECTOR cameraRotationQuat = XMQuaternionRotationRollPitchYaw(XMConvertToRadians(m_pitch), XMConvertToRadians(m_yaw), 0.0f);
+		cameraSystem->SetRotation(m_editorCamera, cameraRotationQuat);
 	}
 
 	void EditorSystem::OnResize(int width, int height)

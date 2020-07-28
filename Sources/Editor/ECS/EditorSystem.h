@@ -20,6 +20,11 @@ namespace editor
 		bool IsCameraFixed() const;
 		void ToggleFixedCamera();
 
+		// TODO: redo this using quat from TransformComponent (and use relative pitch yaw)
+		float m_pitch{ 0.0f };
+		float m_yaw{ 0.0 };
+		void UpdateCameraTransform(float dt);
+
 	private:
 		void UpdateEditorCamera(float dt);
 		void UpdateECSGUI();
@@ -27,9 +32,6 @@ namespace editor
 		alexis::ecs::Entity m_editorCamera{ 0 };
 
 		std::array<float, 4> m_movement{ 0.f, 0.f, 0.f, 0.f };
-
-		float m_pitch{ 0.0f };
-		float m_yaw{ 0.0 };
 
 		int m_deltaMouseX{ 0 };
 		int m_deltaMouseY{ 0 };

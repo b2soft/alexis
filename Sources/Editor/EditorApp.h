@@ -11,6 +11,8 @@ class EditorApp : public alexis::IGame
 {
 public:
 	bool Initialize() override;
+	void Destroy() override;
+
 	void OnResize(int width, int height) override;
 	void OnUpdate(float dt) override;
 	void OnRender(float frameTime) override;
@@ -28,6 +30,9 @@ private:
 	void ResetMousePos();
 	void ToggleFixedCamera();
 
+	void LoadEditorConfig();
+	void SaveEditorConfig();
+
 	std::shared_ptr<editor::EditorSystem> m_editorSystem;
 
 	std::optional<alexis::Scene> m_loadedScene;
@@ -40,7 +45,6 @@ private:
 	float m_updateTimeCount{ 0.f };
 	int m_updateCount{ 0 };
 	float m_ups{ 0.f };
-	
-	
+
 	std::array<float, 4> m_movement{ 0.f, 0.f, 0.f, 0.f }; // fwd aft left right
 };
