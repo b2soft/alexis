@@ -152,6 +152,8 @@ namespace alexis
 
 	void ecs::EnvironmentSystem::CaptureCubemap(CommandContext* context)
 	{
+		PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "EnvSystem: Capture Cubemap");
+
 		if (m_irradianceCalculated)
 		{
 			return;
@@ -194,6 +196,8 @@ namespace alexis
 
 	void ecs::EnvironmentSystem::ConvoluteCubemap(CommandContext* context)
 	{
+		PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "EnvSystem: Convolute Cubemap");
+
 		if (m_irradianceCalculated)
 		{
 			return;
@@ -241,6 +245,8 @@ namespace alexis
 
 	void ecs::EnvironmentSystem::CapturePreFilteredTexture(CommandContext* context)
 	{
+		PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "EnvSystem: Capture Prefiltered Texture");
+
 		if (m_irradianceCalculated)
 		{
 			return;
