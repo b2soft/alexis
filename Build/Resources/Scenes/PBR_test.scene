@@ -1,7 +1,7 @@
 {
     "entities":[
 	{
-          "components":[
+          "components":
              {
                 "CameraComponent":{
                    "fov":45.0,
@@ -9,9 +9,9 @@
                    "nearZ":0.01,
                    "farZ":100.0,
 				   "isOrtho":0
-                }
-             },
-             {
+                },
+             
+             
                 "TransformComponent":{
                    "position":{
                       "x":6,
@@ -26,17 +26,17 @@
 				   "scale":1.0
                 }
              }
-          ]
+          
        },
       {
-         "components":[
+         "components":
             {
                "ModelComponent":{
                   "mesh":"Resources/Models/PBS_Spheres.DAE",
 				  "material":"Resources/Materials/system/PBS_Test.material"
-               }
-            },
-            {
+               },
+            
+            
                "TransformComponent":{
                   "position":{
                      "x":0.0,
@@ -51,10 +51,10 @@
 				  "scale":1.0
                }
             }
-         ]
+         
       },
 	  {
-		"components":[
+		"components":
 			{
 				"LightComponent":{
 					"type":"Directional",
@@ -70,7 +70,7 @@
 					}
 				}
 			}
-		]
+		
 	  }
     ]
  }
