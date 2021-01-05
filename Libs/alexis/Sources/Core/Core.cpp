@@ -129,7 +129,6 @@ namespace alexis
 		}
 
 		MSG msg = { 0 };
-
 		while (true)
 		{
 			if (PeekMessage(&msg, nullptr, 0, 0, PM_REMOVE))
@@ -138,19 +137,18 @@ namespace alexis
 				{
 					break;
 				}
-				else
-				{
-					++Core::s_frameCount;
-
-					Core::s_updateClock.Tick();
-
-					float dt = Core::s_updateClock.GetDeltaSeconds();
-
-					Core::Get().Update(dt);
-				}
-
 				TranslateMessage(&msg);
 				DispatchMessage(&msg);
+			}
+			else
+			{
+				++Core::s_frameCount;
+
+				Core::s_updateClock.Tick();
+
+				float dt = Core::s_updateClock.GetDeltaSeconds();
+
+				Core::Get().Update(dt);
 
 				InvalidateRect(Core::s_hwnd, nullptr, FALSE);
 			}

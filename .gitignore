@@ -341,3 +341,5 @@ healthchecksdb
 Libs/b2nder/Resources/Generated/
 Build/Render_d.exe
 Build/EditorConfig.json
+Build/Editor.exe
+Build/imgui.ini
