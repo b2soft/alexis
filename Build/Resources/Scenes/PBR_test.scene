@@ -32,7 +32,7 @@
          "components":
             {
                "ModelComponent":{
-                  "mesh":"Resources/Models/PBS_Spheres.DAE",
+                  "mesh":"Resources/Models/PBR_Test.DAE",
 				  "material":"Resources/Materials/system/PBS_Test.material"
                },
             
@@ -40,7 +40,7 @@
                "TransformComponent":{
                   "position":{
                      "x":0.0,
-                     "y":1,
+                     "y":3,
                      "z":0.0
                   },
                   "rotation":{
@@ -71,6 +71,134 @@
 				}
 			}
 		
-	  }
+	  },
+	  {
+      "components": {
+        "LightComponent": {
+          "color": {
+            "b": 20.79,
+            "g": 21.31,
+            "r": 23.47
+          },
+          "type": "Point"
+        },
+        "ModelComponent": {
+          "material": "Resources/Materials/FlatColor.material",
+          "mesh": "Resources/Models/Sphere.DAE"
+        },
+        "NameComponent": {
+          "name": "Light1"
+        },
+        "TransformComponent": {
+          "position": {
+            "x": 8,
+            "y": 10.0,
+            "z": 8
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 0.10000000149011612
+        }
+      }
+    },
+	{
+      "components": {
+        "LightComponent": {
+          "color": {
+            "b": 20.79,
+            "g": 21.31,
+            "r": 23.47
+          },
+          "type": "Point"
+        },
+        "ModelComponent": {
+          "material": "Resources/Materials/FlatColor.material",
+          "mesh": "Resources/Models/Sphere.DAE"
+        },
+        "NameComponent": {
+          "name": "Light2"
+        },
+        "TransformComponent": {
+          "position": {
+            "x": 8,
+            "y": 10.0,
+            "z": -8
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 0.10000000149011612
+        }
+      }
+    },
+	{
+      "components": {
+        "LightComponent": {
+          "color": {
+            "b": 20.79,
+            "g": 21.31,
+            "r": 23.47
+          },
+          "type": "Point"
+        },
+        "ModelComponent": {
+          "material": "Resources/Materials/FlatColor.material",
+          "mesh": "Resources/Models/Sphere.DAE"
+        },
+        "NameComponent": {
+          "name": "Light3"
+        },
+        "TransformComponent": {
+          "position": {
+            "x": -8,
+            "y": 10.0,
+            "z": -8
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 0.10000000149011612
+        }
+      }
+    },
+	{
+      "components": {
+        "LightComponent": {
+          "color": {
+            "b": 20.79,
+            "g": 21.31,
+            "r": 23.47
+          },
+          "type": "Point"
+        },
+        "ModelComponent": {
+          "material": "Resources/Materials/FlatColor.material",
+          "mesh": "Resources/Models/Sphere.DAE"
+        },
+        "NameComponent": {
+          "name": "Light4"
+        },
+        "TransformComponent": {
+          "position": {
+            "x": -8,
+            "y": 10.0,
+            "z": 8
+          },
+          "rotation": {
+            "x": 0,
+            "y": 0,
+            "z": 0
+          },
+          "scale": 0.10000000149011612
+        }
+      }
+    }
     ]
  }

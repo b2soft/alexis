@@ -9,11 +9,11 @@ float D_TrowbridgeReitz(float3 N, float3 H, float roughness)
 	float NdotH = max(dot(N, H), 0.0f);
 	float NdotH2 = NdotH * NdotH;
 
-	float nom = a2;
+	float num = a2;
 	float denom = (NdotH2 * (a2 - 1.0f) + 1.0f);
 	denom = k_pi * denom * denom;
 
-	return nom / denom;
+	return num / denom;
 }
 
 float G_SchlickGGX_IBL(float NdotV, float roughness)
@@ -60,7 +60,7 @@ float G_Smith(float3 N, float3 V, float3 L, float roughnesss)
 
 float3 F_Schlick(float VdotH, float3 F0)
 {
-	return F0 + (1.0f - F0) * pow((1.0f - VdotH), 5.0);
+	return F0 + (1.0f - F0) * pow(max(1.0f - VdotH, 0.0), 5.0);
 }
 
 float3 F_SchlickRoughness(float VdotH, float3 F0, float roughness)
@@ -116,13 +116,13 @@ BRDFOutput BRDF(BRDFInput input)
 	// Cook-Torrance BRDF
 	float NDF = D_TrowbridgeReitz(input.N, H, input.Roughness);
 	float G = G_Smith(input.N, input.V, input.L, input.Roughness);
-	float3 F = F_Schlick(dot(input.V, H), F0);
+	float3 F = F_Schlick(max(dot(H, input.V), 0.0), F0);
 
 	float NdotL = max(dot(input.N, input.L), 0.0f);
 
 	float3 nom = NDF * G * F;
-	float denom = 4.0f * max(dot(input.N, input.V), 0.0f) * NdotL + 0.001f;
-	float3 specular = nom / denom;
+	float denom = 4.0f * max(dot(input.N, input.V), 0.0f) * NdotL;
+	float3 specular = nom / max(denom, 0.001f);
 
 	// Energy conservation kS + kD = 1.0
 	float3 kS = F;

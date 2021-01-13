@@ -37,7 +37,7 @@ float4 main(float4 screenPos : SV_Position) : SV_TARGET
 	float3 normal = gb1.Sample(AnisoSampler, uv).xyz;
 	float3 metalRoughness = gb2.Sample(AnisoSampler, uv).rgb;
 	float metallic = metalRoughness.r;
-	float roughness = metalRoughness.g;
+	float roughness = max(metalRoughness.g, 0.05);
 	float ao = metalRoughness.b;
 
 	float depth = depthTexture.Sample(AnisoSampler, uv).r;
@@ -62,7 +62,7 @@ float4 main(float4 screenPos : SV_Position) : SV_TARGET
 	brdfInput.Roughness = roughness;
 
 	float distance = length(PointLightCB.Position.xyz - worldPos);
-	float attenuation = 1 / (distance * distance);
+	float attenuation = 1.0 / (distance * distance);
 	float3 radiance = PointLightCB.Color.rgb * attenuation;
 
 	BRDFOutput brdf = BRDF(brdfInput);

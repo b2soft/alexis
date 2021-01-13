@@ -4,7 +4,7 @@
 "CBV(b2, flags = DATA_STATIC)," \
 "CBV(b3, flags = DATA_STATIC)," \
 "DescriptorTable(SRV(t0, numDescriptors = 4),visibility=SHADER_VISIBILITY_PIXEL)," \
-"StaticSampler(s0, filter = FILTER_ANISOTROPIC, addressU = TEXTURE_ADDRESS_CLAMP, addressV = TEXTURE_ADDRESS_CLAMP, addressW = TEXTURE_ADDRESS_CLAMP)"
+"StaticSampler(s0, filter = FILTER_MIN_MAG_MIP_POINT, addressU = TEXTURE_ADDRESS_CLAMP, addressV = TEXTURE_ADDRESS_CLAMP, addressW = TEXTURE_ADDRESS_CLAMP)"
 
 struct LightParams
 {

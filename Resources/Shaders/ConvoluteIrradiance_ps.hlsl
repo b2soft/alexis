@@ -30,7 +30,7 @@ float4 main(PSInput input) : SV_TARGET
 			// Tangent To World
 			float3 sampleVec = tangentSample.x * right + tangentSample.y * up + tangentSample.z * normal;
 
-			irradiance += envMap.Sample(CubeSampler, sampleVec).rgb * cos(theta) * sin(theta);
+			irradiance += envMap.SampleLevel(CubeSampler, sampleVec, 0).rgb * cos(theta) * sin(theta);
 			nrSamples++;
 		}
 	}

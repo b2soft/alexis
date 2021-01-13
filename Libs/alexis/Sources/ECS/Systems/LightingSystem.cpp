@@ -2,7 +2,6 @@
 
 #include "LightingSystem.h"
 
-#include <ECS/ECS.h>
 #include <ECS/Systems/CameraSystem.h>
 #include <ECS/Systems/ShadowSystem.h>
 #include <ECS/Components/TransformComponent.h>
@@ -24,20 +23,9 @@ namespace alexis
 			XMMATRIX InvProjMatrix;
 		};
 
-		__declspec(align(16)) struct DirectionalLight
-		{
-			XMVECTOR Direction;
-			XMVECTOR Color;
-		};
-
-		__declspec(align(16)) struct ShadowMapParams
-		{
-			XMMATRIX LightSpaceMatrix;
-		};
-
 		__declspec(align(16)) struct LightParams
 		{
-			XMMATRIX WVPMatriX;
+			XMMATRIX WVPMatrix;
 		};
 
 		__declspec(align(16)) struct ScreenParams
@@ -153,6 +141,7 @@ namespace alexis
 
 		void LightingSystem::PointLights(CommandContext* context)
 		{
+			PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "LightingSystem: Point Lights");
 			auto* render = Render::GetInstance();
 			auto* rtManager = render->GetRTManager();
 			auto* gbuffer = rtManager->GetRenderTarget(L"GB");
@@ -174,7 +163,7 @@ namespace alexis
 
 			// Point Lights
 			{
-				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "Point Light Stencil");
+				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "LightingSystem: Stencil Pass");
 
 				m_pointLightStencil->Set(context);
 
@@ -196,7 +185,7 @@ namespace alexis
 			}
 
 			{
-				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "Point Light Shading");
+				PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "LightingSystem: Shading");
 				auto barrierStencil = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE, 0);
 				auto barrierStencil2 = CD3DX12_RESOURCE_BARRIER::Transition(depth.GetResource(), D3D12_RESOURCE_STATE_DEPTH_WRITE, D3D12_RESOURCE_STATE_DEPTH_READ, 1);
 				D3D12_RESOURCE_BARRIER barriers[] = { barrierStencil , barrierStencil2 };
@@ -239,6 +228,8 @@ namespace alexis
 
 		void LightingSystem::AmbientLight(CommandContext* context)
 		{
+			PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "LightingSystem: Ambient Lights");
+
 			auto* render = Render::GetInstance();
 			auto* rtManager = render->GetRTManager();
 			auto* gbuffer = rtManager->GetRenderTarget(L"GB");

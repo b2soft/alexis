@@ -306,6 +306,8 @@ namespace alexis
 			return;
 		}
 
+		PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 255, 0), "EnvSystem: Convolute BRDF");
+
 		auto* render = alexis::Render::GetInstance();
 		auto* rtManager = render->GetRTManager();
 		auto* rt = rtManager->GetRenderTarget(L"ConvolutedBRDF");
@@ -324,6 +326,8 @@ namespace alexis
 
 	void ecs::EnvironmentSystem::RenderSkybox(CommandContext* context)
 	{
+		PIXScopedEvent(context->List.Get(), PIX_COLOR(0, 0, 255), "EnvironmentSystem: Skybox");
+
 		auto& ecsWorld = Core::Get().GetECSWorld();
 		auto cameraSystem = ecsWorld.GetSystem<CameraSystem>();
 		auto activeCamera = cameraSystem->GetActiveCamera();

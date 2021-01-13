@@ -30,7 +30,7 @@ namespace editor
 	{
 		auto& ecsWorld = alexis::Core::Get().GetECSWorld();
 		auto entity = ecsWorld.CreateEntity();
-		ecsWorld.AddComponent(entity, ecs::CameraComponent{ 45.0f, 1.777778f, 0.01f, 100.f, false });
+		ecsWorld.AddComponent(entity, ecs::CameraComponent{ 45.0f, 1.777778f, 0.01f, 500.f, false });
 		ecsWorld.AddComponent(entity, ecs::TransformComponent{});
 		ecsWorld.AddComponent(entity, ecs::NameComponent{ "Editor Camera" });
 		ecsWorld.AddComponent(entity, ecs::DoNotSerializeComponent{});
